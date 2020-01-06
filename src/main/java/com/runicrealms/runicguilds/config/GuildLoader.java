@@ -18,83 +18,60 @@ import com.runicrealms.runicguilds.guilds.GuildRank;
 
 public class GuildLoader {
 
-	private static Map<File, FileConfiguration> configs = new HashMap<File, FileConfiguration>();
+	private static Map<Guild, DataFileConfiguration> configs = new HashMap<Guild, DataFileConfiguration>();
 	private static Map<String, Guild> cachedGuilds = new HashMap<String, Guild>();
+
+	public static List<Guild> getAllGuilds() {
+		List<Guild> guilds = new ArrayList<Guild>();
+		for (File file : configs.keySet()) {
+			String prefix = file.getName().replaceAll(".yml", "");
+			guilds.add(loadGuild(prefix));
+		}
+		return guilds;
+	}
 
 	public static void loadConfigs() {
 		File folder = ConfigLoader.getSubFolder(Plugin.getInstance().getDataFolder(), "guilds");
 		for (File file : folder.listFiles()) {
 			if (!file.isDirectory()) {
-				configs.put(new File(folder, file.getName()), ConfigLoader.getYamlConfigFile(file.getName(), folder);
+				configs.put(new File(folder, file.getName()), ConfigLoader.getYamlConfigFile(file.getName(), folder));
 			}
 		}
 	}
 
-	private void saveToFile() {
-		try {
-			this.config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public static void createGuild(UUID owner, String name, String prefix) {
+		File folder = ConfigLoader.getSubFolder(Plugin.getInstance().getDataFolder(), "guilds");
+		FileConfiguration fileConfig = ConfigLoader.getYamlConfigFile(prefix + ".yml", folder);
+		configs.put(new File(folder, prefix + ".yml"), fileConfig);
+		Plugin.getGuilds().add(loadGuild(prefix));
 	}
 
-	public static Guild loadGuild(String guildName) {
+	public static Guild loadGuild(String guildPrefix) {
+		File folder = ConfigLoader.getSubFolder(Plugin.getInstance().getDataFolder(), "guilds");
 		boolean contains = false;
 		for (File file : configs.keySet()) {
-			if (file.getName().substring(0, file.getName().length() - 5).equalsIgnoreCase(guildName)) {
+			if (file.getName().equalsIgnoreCase(guildPrefix + ".yml")) {
 				contains = true;
 				break;
 			}
 		}
 		if (contains == false) {
-			
+			FileConfiguration fileConfig = ConfigLoader.getYamlConfigFile(guildPrefix + ".yml", folder);
+			configs.put(new File(folder, guildPrefix + ".yml"), fileConfig);
 		}
-		if (!cachedGuilds.contains)
-			ConfigurationSection guildMasterSec = config.getConfigurationSection("guild_master");
+		if (!cachedGuilds.containsKey(guildPrefix)) {
+			FileConfiguration config = ConfigLoader.getYamlConfigFile(guildPrefix + ".yml", folder);
+			ConfigurationSection guildMasterSec = config.getConfigurationSection("owner");
 			UUID guildMasterUUID = UUID.fromString((String) guildMasterSec.getKeys(false).toArray()[0]);
 			GuildMember owner = new GuildMember(guildMasterUUID, GuildRank.OWNER, guildMasterSec.getInt(guildMasterUUID + ".score"));
 			List<GuildMember> members = new ArrayList<GuildMember>();
-			ConfigurationSection membersSec = config.getConfigurationSection("members_list");
+			ConfigurationSection membersSec = config.getConfigurationSection("members");
 			for (String key : membersSec.getKeys(false)) {
 				members.add(new GuildMember(UUID.fromString(key), GuildRank.getByName(membersSec.getString(key + ".rank")), membersSec.getInt(key + ".score")));
 			}
-			return new Guild(members, owner);
-	}
-
-	public static void saveToConfig(Guild guild) {
-		File folder = ConfigLoader.getSubFolder(Plugin.getInstance().getDataFolder(), "guilds");
-		ConfigurationSection config = ConfigLoader.getYamlConfigFile(guild, folder)
-		this.config.set("guild_master." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
-		for (GuildMember member : guild.getMembers()) {
-			this.config.set("members_list." + member.getUUID().toString() + ".rank", member.getRank().getName());
-			this.config.set("members_list." + member.getUUID().toString() + ".score", member.getScore());
+			return new Guild(members, owner, config.getString("name"), config.getString("prefix"));
 		}
-		this.saveToFile();
-	}
-
-	public FileConfiguration getConfig() {
-		return this.config;
-	}
-
-	public File getFile() {
-		return this.file;
-	}
-
-	public static GuildLoader getFile(String fileName) {
-		File folder = ConfigLoader.getSubFolder(Plugin.getInstance().getDataFolder(), "users");
-		for (File file : folder.listFiles()) {
-			if (file.getName().equalsIgnoreCase(fileName)) {
-				return new GuildLoader(ConfigLoader.getYamlConfigFile(file.getName(), folder), file);
-			}
-		}
-		File file = new File(folder, fileName);
-		try {
-			file.createNewFile();
-			return new GuildLoader(ConfigLoader.getYamlConfigFile(file.getName(), folder), file);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}	
+		return cachedGuilds.get(guildPrefix);
 	}
 
 }

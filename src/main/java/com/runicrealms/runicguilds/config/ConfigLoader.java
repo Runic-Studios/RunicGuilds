@@ -44,5 +44,9 @@ public class ConfigLoader {
 			folder.mkdir();
 		}
 	}
+
+	public static File getGuildsFolder() {
+		return ConfigLoader.getSubFolder(Plugin.getInstance().getDataFolder(), "guilds");
+	}
 	
 }
