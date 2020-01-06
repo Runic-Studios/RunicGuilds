@@ -1,0 +1,6 @@
+name: RunicGuilds
+description: Runic Realms Guilds Plugin, by Excel
+version: 1.0
+main: com.runicrealms.runicguilds.Plugin
+depend: [RunicChat]
+api-version: 1.13
