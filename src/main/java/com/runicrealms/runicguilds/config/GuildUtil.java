@@ -16,6 +16,7 @@ import com.runicrealms.runicguilds.result.GuildCreationResult;
 public class GuildUtil {
 
 	private static Map<String, DataFileConfiguration> guilds = new HashMap<String, DataFileConfiguration>();
+	private static Map<UUID, String> players = new HashMap<UUID, String>();
 	
 	public static List<Guild> getAllGuilds() {
 		List<Guild> allGuilds = new ArrayList<Guild>();
@@ -32,7 +33,27 @@ public class GuildUtil {
 			}
 		}
 	}
-
+	
+	public static Guild getGuild(UUID player) {
+		for (String key : guilds.keySet()) {
+			for (GuildMember member : guilds.get(key).getGuild().getMembers()) {
+				if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
+					return guilds.get(key).getGuild();
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static Guild getGuild(String prefix) {
+		for (String key : guilds.keySet()) {
+			if (guilds.get(key).getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
+				return guilds.get(key).getGuild();
+			}
+		}
+		return null;
+	}
+	
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix) {
 		if (guilds.containsKey(prefix)) {
 			return GuildCreationResult.PREFIX_NOT_UNIQUE;
@@ -56,6 +77,14 @@ public class GuildUtil {
 		config.set("name", name);
 		guilds.put(prefix, new DataFileConfiguration(prefix + ".yml"));
 		return GuildCreationResult.SUCCESSFUL;
+	}
+	
+	public static Map<UUID, String> getPlayerCache() {
+		return players;
+	}
+	
+	public static Map<String, DataFileConfiguration> getGuildFiles() {
+		return guilds;
 	}
 
 }

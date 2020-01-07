@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.runicrealms.runicguilds.config.ConfigLoader;
 import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
 
 public class Plugin extends JavaPlugin {
 	
@@ -18,6 +19,8 @@ public class Plugin extends JavaPlugin {
 		ConfigLoader.initDirs();
 		GuildUtil.loadGuilds();
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
+		EventPlayerJoinQuit.initializePlayerCache();
+		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
 	}
 
 	public static Plugin getInstance() {

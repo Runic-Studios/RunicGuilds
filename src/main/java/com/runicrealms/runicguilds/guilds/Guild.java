@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.guilds;
 
 import java.util.Set;
+import java.util.UUID;
 
 import com.runicrealms.runicguilds.result.GuildPromotionResult;
 
@@ -51,6 +52,21 @@ public class Guild {
 	public void transferOwnership(GuildMember member) {
 		this.owner = member;
 		this.members.remove(member);
+	}
+	
+	public boolean hasMinRank(UUID player, Integer rank) {
+		if (this.owner.getUUID().toString().equalsIgnoreCase(player.toString())) {
+			return true;
+		}
+		for (GuildMember member : this.members) {
+			if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
+				if (member.getRank().getRankNumber() <= rank) {
+					return true;
+				}
+				break;
+			}
+		}
+		return false;
 	}
 	
 }
