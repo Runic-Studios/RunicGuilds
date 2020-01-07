@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.guilds;
 
 public enum GuildRank {
 	
-	MEMBER("Member", 3), OFFICER("Officer", 2), OWNER("Owner", 1);
+	MEMBER("Member", 4), RECRUITER("Recruiter", 3), OFFICER("Officer", 2), OWNER("Owner", 1);
 	
 	private String name;
 	private Integer rank;

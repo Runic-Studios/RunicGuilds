@@ -14,14 +14,6 @@ public class GuildMember {
 		this.score = score;
 	}
 	
-	public boolean promote() {
-		if (this.rank.getRankNumber() != 1) {
-			this.rank.setRankNumber(this.rank.getRankNumber() + 1);
-			return true;
-		}
-		return false;
-	}
-	
 	public UUID getUUID() {
 		return this.uuid;
 	}
