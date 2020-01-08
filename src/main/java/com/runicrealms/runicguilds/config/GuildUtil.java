@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import com.runicrealms.runicguilds.guilds.Guild;
@@ -85,6 +87,15 @@ public class GuildUtil {
 	
 	public static Map<String, DataFileConfiguration> getGuildFiles() {
 		return guilds;
+	}
+	
+	public static UUID getOfflinePlayerUUID(String playerName) {
+		@SuppressWarnings("deprecation")
+		OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
+		if (player.hasPlayedBefore()) {
+			return player.getUniqueId();
+		}
+		return null;
 	}
 
 }
