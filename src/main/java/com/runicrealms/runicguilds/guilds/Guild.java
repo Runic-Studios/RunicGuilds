@@ -12,6 +12,7 @@ public class Guild {
 	private GuildMember owner;
 	private String guildName;
 	private String guildPrefix;
+	private Integer score;
 
 	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix) {
 		this.members = members;
@@ -81,6 +82,29 @@ public class Guild {
 				break;
 			}
 		}
+	}
+
+	public Integer getScore() {
+		return this.score;
+	}
+
+	private void recalculateScore() {
+		this.score = 0;
+		for (GuildMember member : members) {
+			score += member.getScore();
+		}
+	}
+
+	public void setPlayerScore(UUID player, Integer score) {
+		GuildMember member = getMember(player);
+		member.setScore(score);
+		this.recalculateScore();
+	}
+
+	public void increasePlayerScore(UUID player, Integer score) {
+		GuildMember member = getMember(player);
+		member.setScore(member.getScore() + score);
+		this.recalculateScore();
 	}
 
 }

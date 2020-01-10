@@ -30,8 +30,8 @@ public class GuildMember {
 		this.rank = rank;
 	}
 
-	public void addToScore(Integer score) {
-		this.score += score;
+	public void setScore(Integer score) {
+		this.score = score;
 	}
 	
 }

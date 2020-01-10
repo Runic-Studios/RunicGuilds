@@ -36,7 +36,7 @@ public class RunicGuildsAPI {
     public static boolean addPlayerScore(UUID player, Integer score) {
         if (isInGuild(player)) {
             Guild guild = GuildUtil.getGuild(player);
-            guild.getMember(player).addToScore(score);
+            guild.increasePlayerScore(player, score);
             GuildUtil.saveGuild(guild);
             return true;
         }
