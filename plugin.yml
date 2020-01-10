@@ -4,3 +4,8 @@ version: 1.0
 main: com.runicrealms.runicguilds.Plugin
 depend: [RunicChat]
 api-version: 1.13
+commands:
+  guild:
+    description: Command for guild operations
+  guildmod:
+    description: Command for guild moderator operations

@@ -11,13 +11,15 @@ public class GuildMemberKickedEvent extends Event {
     private Guild guild;
     private UUID kicked;
     private UUID kicker;
+    private boolean modKicked;
 
     private static final HandlerList handlers = new HandlerList();
 
-    public GuildMemberKickedEvent(Guild guild, UUID kicked, UUID kicker) {
+    public GuildMemberKickedEvent(Guild guild, UUID kicked, UUID kicker, boolean modKicked) {
         this.guild = guild;
         this.kicked = kicked;
         this.kicker = kicker;
+        this.modKicked = modKicked;
     }
 
     public HandlerList getHandlers() {
@@ -38,6 +40,10 @@ public class GuildMemberKickedEvent extends Event {
 
     public UUID getKicker() {
         return this.kicker;
+    }
+
+    public boolean didModKick() {
+        return this.modKicked;
     }
 
 }

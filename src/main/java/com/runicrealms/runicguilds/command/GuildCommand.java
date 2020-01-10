@@ -63,7 +63,7 @@ public class GuildCommand implements CommandExecutor {
 											guild.removeMember(otherPlayer.getUniqueId());
 											sendMessage(player, "&eRemoved player from the guild!");
 											GuildUtil.saveGuild(guild);
-											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
+											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId(), false));
 										} else {
 											sendMessage(player, "&eYou can only kick players that are of lower rank than you.");
 										}
@@ -160,7 +160,7 @@ public class GuildCommand implements CommandExecutor {
 							Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, transferOwnership.get(player.getUniqueId()), player.getUniqueId()));
 							transferOwnership.remove(player.getUniqueId());
 						} else if (disbanding.contains(player.getUniqueId())) {
-							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, player.getUniqueId()));
+							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, player.getUniqueId(), false));
 							GuildUtil.getGuildFiles().get(guild.getGuildPrefix()).deleteFile();
 							GuildUtil.removeGuild(guild);
 							sendMessage(player, "&eSuccessfully disbanded guild.");
@@ -218,10 +218,10 @@ public class GuildCommand implements CommandExecutor {
 	private static void sendHelpMessage(Player player) {
 		sendMessage(player, "&6Guild Commands:");
 		sendMessage(player, "&e/guild invite &6[player] &r- invites a player to the guild.");
-		sendMessage(player, "&e/guild kick [player] &r- kicks a player from the guild.");
-		sendMessage(player, "&e/guild promote&6/&edemote [player] &r- promotes/demotes a guild member.");
+		sendMessage(player, "&e/guild kick &6[player] &r- kicks a player from the guild.");
+		sendMessage(player, "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.");
 		sendMessage(player, "&e/guild disband &r- disbands your guild.");
-		sendMessage(player, "&e/guild transfer [player] &r- transfers the guild ownership to another member.");
+		sendMessage(player, "&e/guild transfer &6[player] &r- transfers the guild ownership to another member.");
 		sendMessage(player, "&e/guild leave &r- removes you from your guild.");
 		sendMessage(player, "&e/guild accept&6/&edecline &r- accepts/declines an invitation to join a guild.");
 		sendMessage(player, "&e/guild confirm &r- for confirming certain actions.");

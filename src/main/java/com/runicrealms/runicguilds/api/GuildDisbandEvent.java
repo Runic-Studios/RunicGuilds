@@ -12,12 +12,14 @@ public class GuildDisbandEvent extends Event {
 
     private Guild guild;
     private UUID disbander;
+    private boolean modDisbanded;
 
     private static final HandlerList handlers = new HandlerList();
 
-    public GuildDisbandEvent(Guild guild, UUID disbander) {
+    public GuildDisbandEvent(Guild guild, UUID disbander, boolean modDisbanded) {
         this.guild = guild;
         this.disbander = disbander;
+        this.modDisbanded = modDisbanded;
     }
 
     public HandlerList getHandlers() {
@@ -34,6 +36,10 @@ public class GuildDisbandEvent extends Event {
 
     public UUID getDisbander() {
         return this.disbander;
+    }
+
+    public boolean didModDisband() {
+        return this.modDisbanded;
     }
 
 }

@@ -1,0 +1,4 @@
+permissions:
+  guildmod-disband: 'runicadmin.guilds.disband'
+  guildmod-kick: 'runicadmin.guilds.kick'
+  guildmod-reset: 'runicadmin.guilds.reset'
