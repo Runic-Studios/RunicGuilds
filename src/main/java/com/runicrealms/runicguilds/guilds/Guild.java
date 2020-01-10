@@ -90,4 +90,13 @@ public class Guild {
 		return false;
 	}
 
+	public void removeMember(UUID uuid) {
+		for (GuildMember member : members) {
+			if (member.getUUID().toString().equalsIgnoreCase(uuid.toString())) {
+				members.remove(member);
+				break;
+			}
+		}
+	}
+
 }

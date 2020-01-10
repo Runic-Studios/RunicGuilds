@@ -20,18 +20,28 @@ public enum GuildRank {
 		return this.rank;
 	}
 	
-	public void setRankNumber(Integer rank) {
-		this.rank = rank;
-	}
-	
 	public static GuildRank getByName(String name) {
 		switch (name) {
-		case "Member":
-			return GuildRank.MEMBER;
-		case "Officer":
-			return GuildRank.OFFICER;
-		case "Owner":
-			return GuildRank.OWNER;
+			case "Member":
+				return GuildRank.MEMBER;
+			case "Officer":
+				return GuildRank.OFFICER;
+			case "Owner":
+				return GuildRank.OWNER;
+		}
+		return GuildRank.MEMBER;
+	}
+
+	public static GuildRank getByNumber(Integer number) {
+		switch (number) {
+			case 1:
+				return GuildRank.OWNER;
+			case 2:
+				return GuildRank.OFFICER;
+			case 3:
+				return GuildRank.RECRUITER;
+			case 4:
+				return GuildRank.MEMBER;
 		}
 		return GuildRank.MEMBER;
 	}

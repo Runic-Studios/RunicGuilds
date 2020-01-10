@@ -13,7 +13,7 @@ public class GuildMember {
 		this.rank = rank;
 		this.score = score;
 	}
-	
+
 	public UUID getUUID() {
 		return this.uuid;
 	}
@@ -24,6 +24,10 @@ public class GuildMember {
 	
 	public Integer getScore() {
 		return this.score;
+	}
+
+	public void setRank(GuildRank rank) {
+		this.rank = rank;
 	}
 	
 }
