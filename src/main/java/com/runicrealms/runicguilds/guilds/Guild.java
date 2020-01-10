@@ -6,8 +6,6 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
-import com.runicrealms.runicguilds.result.GuildPromotionResult;
-
 public class Guild {
 
 	private Set<GuildMember> members;
@@ -36,20 +34,6 @@ public class Guild {
 
 	public String getGuildPrefix() {
 		return this.guildPrefix;
-	}
-
-	public GuildPromotionResult promoteMember(GuildMember member) {
-		if (member.getRank() == GuildRank.OWNER) {
-			return GuildPromotionResult.MEMBER_IS_OWNER;
-		}
-		if (member.getRank() == GuildRank.OFFICER) {
-			return GuildPromotionResult.MEMBER_IS_OFFICER;
-		}
-
-		if (member.getRank().getRankNumber() < 2) {
-			member.getRank().setRankNumber(member.getRank().getRankNumber() + 1);
-		}
-		return GuildPromotionResult.SUCCESSFUL;
 	}
 
 	public void transferOwnership(GuildMember member) {

@@ -98,4 +98,13 @@ public class GuildUtil {
 		return null;
 	}
 
+	public static void saveGuild(Guild guild) {
+		guilds.get(guild.getGuildPrefix()).save(guild);
+	}
+
+	public static void removeGuild(Guild guild) {
+		guilds.remove(guild.getGuildPrefix());
+
+	}
+
 }

@@ -43,6 +43,10 @@ public class DataFileConfiguration {
 		this.saveToFile();
 	}
 
+	public void deleteFile() {
+		file.delete();
+	}
+
 	public Guild getGuild() {
 		if (this.cache == null) {
 			ConfigurationSection guildMasterSec = this.config.getConfigurationSection("owner");

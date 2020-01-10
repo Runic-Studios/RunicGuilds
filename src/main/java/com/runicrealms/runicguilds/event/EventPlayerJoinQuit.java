@@ -24,6 +24,9 @@ public class EventPlayerJoinQuit implements Listener {
 		if (GuildCommand.getTransferOwnership().containsKey(event.getPlayer().getUniqueId())) {
 			GuildCommand.getTransferOwnership().remove(event.getPlayer().getUniqueId());
 		}
+		if (GuildCommand.getDisbanding().contains(event.getPlayer().getUniqueId())) {
+			GuildCommand.getDisbanding().remove(event.getPlayer().getUniqueId());
+		}
 	}
 	
 	public static void initializePlayerCache() {
