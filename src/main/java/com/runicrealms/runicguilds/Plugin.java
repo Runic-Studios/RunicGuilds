@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds;
 import java.util.logging.Level;
 
 import com.runicrealms.runicguilds.command.GuildCommand;
+import com.runicrealms.runicguilds.command.GuildModCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -28,6 +29,7 @@ public class Plugin extends JavaPlugin {
 		EventPlayerJoinQuit.initializePlayerCache();
 		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
+		this.getCommand("guildmod").setExecutor(new GuildModCommand());
 
 	}
 
