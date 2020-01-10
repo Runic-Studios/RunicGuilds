@@ -24,7 +24,7 @@ public class DataFileConfiguration {
 		this.config = ConfigLoader.getYamlConfigFile(fileName, ConfigLoader.getGuildsFolder());
 	}
 
-	private void saveToFile() {
+	public void saveToFile() {
 		try {
 			this.config.save(this.file);
 		} catch (IOException e) {

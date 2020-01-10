@@ -77,7 +77,9 @@ public class GuildUtil {
 		config.set("owner." + owner.toString() + ".score", 0);
 		config.set("prefix", prefix);
 		config.set("name", name);
-		guilds.put(prefix, new DataFileConfiguration(prefix + ".yml"));
+		DataFileConfiguration fileConfig = new DataFileConfiguration(prefix + ".yml");
+		guilds.put(prefix, fileConfig);
+		fileConfig.saveToFile();
 		return GuildCreationResult.SUCCESSFUL;
 	}
 	

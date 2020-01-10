@@ -29,5 +29,9 @@ public class GuildMember {
 	public void setRank(GuildRank rank) {
 		this.rank = rank;
 	}
+
+	public void addToScore(Integer score) {
+		this.score += score;
+	}
 	
 }

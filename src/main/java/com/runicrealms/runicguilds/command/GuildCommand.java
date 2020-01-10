@@ -104,7 +104,7 @@ public class GuildCommand implements CommandExecutor {
 											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
 											sendMessage(player, "&eMember has been demoted.");
 											GuildUtil.saveGuild(guild);
-											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()))
+											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
 										} else {
 											if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.MEMBER) {
 												sendMessage(player, "&eYou cannot demote players of the lowest guild rank.");
