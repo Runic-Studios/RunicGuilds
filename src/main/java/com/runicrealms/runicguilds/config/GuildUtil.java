@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -57,6 +59,14 @@ public class GuildUtil {
 	}
 	
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix) {
+		if (prefix.length() != 3) {
+			return GuildCreationResult.BAD_PREFIX;
+		}
+		Pattern pattern = Pattern.compile("[a-zA-Z]");
+		Matcher matcher = pattern.matcher(prefix);
+		if (matcher.find() == false) {
+			return GuildCreationResult.BAD_PREFIX;
+		}
 		if (guilds.containsKey(prefix)) {
 			return GuildCreationResult.PREFIX_NOT_UNIQUE;
 		}
