@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.result;
+package com.runicrealms.runicguilds.api;
 
 public enum GuildCreationResult {
 	

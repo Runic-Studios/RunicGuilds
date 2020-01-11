@@ -8,8 +8,6 @@ import java.util.UUID;
 import com.runicrealms.runicguilds.config.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
-import com.runicrealms.runicguilds.result.GuildCreationResult;
-import org.bukkit.entity.Player;
 
 public class RunicGuildsAPI {
 
