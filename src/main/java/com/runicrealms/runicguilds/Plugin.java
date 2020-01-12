@@ -2,13 +2,12 @@ package com.runicrealms.runicguilds;
 
 import java.util.logging.Level;
 
-import com.runicrealms.runicguilds.command.GuildCommand;
-import com.runicrealms.runicguilds.command.GuildModCommand;
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.runicrealms.runicguilds.command.GuildCommand;
+import com.runicrealms.runicguilds.command.GuildModCommand;
 import com.runicrealms.runicguilds.config.ConfigLoader;
 import com.runicrealms.runicguilds.config.GuildUtil;
 import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;

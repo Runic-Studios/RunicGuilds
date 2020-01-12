@@ -1,16 +1,16 @@
 package com.runicrealms.runicguilds.command;
 
-import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.api.GuildDisbandEvent;
-import com.runicrealms.runicguilds.api.GuildMemberKickedEvent;
-import com.runicrealms.runicguilds.config.GuildUtil;
-import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+
+import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.api.GuildDisbandEvent;
+import com.runicrealms.runicguilds.api.GuildMemberKickedEvent;
+import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.guilds.Guild;
 
 public class GuildModCommand implements CommandExecutor {
 

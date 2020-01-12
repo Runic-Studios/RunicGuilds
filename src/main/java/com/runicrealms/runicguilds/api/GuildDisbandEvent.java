@@ -1,12 +1,11 @@
 package com.runicrealms.runicguilds.api;
 
-import com.runicrealms.runicguilds.guilds.Guild;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import java.util.UUID;
+
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import java.util.UUID;
+import com.runicrealms.runicguilds.guilds.Guild;
 
 public class GuildDisbandEvent extends Event {
 
