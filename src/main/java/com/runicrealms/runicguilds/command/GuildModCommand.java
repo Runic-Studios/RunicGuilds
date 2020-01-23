@@ -7,6 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.api.GuildCreationEvent;
+import com.runicrealms.runicguilds.api.GuildCreationResult;
 import com.runicrealms.runicguilds.api.GuildDisbandEvent;
 import com.runicrealms.runicguilds.api.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.config.GuildUtil;
@@ -21,7 +23,11 @@ public class GuildModCommand implements CommandExecutor {
 				if (sender.isOp()) {
 					if (args.length == 4) {
 						if (GuildUtil.getOfflinePlayerUUID(args[1]) != null) {
-							sendMessage(sender, "&e" + GuildUtil.createGuild(GuildUtil.getOfflinePlayerUUID(args[1]), args[2], args[3]).getMessage());
+							GuildCreationResult result = GuildUtil.createGuild(GuildUtil.getOfflinePlayerUUID(args[1]), args[2], args[3]);
+							sendMessage(sender, "&e" + result.getMessage());
+							if (result == GuildCreationResult.SUCCESSFUL) {
+								Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuild(args[3]), true));
+							}
 						} else {
 							sendMessage(sender, "&eThat player is not online.");
 						}
