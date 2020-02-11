@@ -49,12 +49,16 @@ public class GuildBankUtil implements Listener {
     	viewers.remove(player.getUniqueId());
     }
 
-    private void saveToBank(Inventory inventory, Integer page, UUID uuid) {
+    private static void saveToBank(Inventory inventory, Integer page, UUID uuid) {
         List<ItemStack> bank = new ArrayList<ItemStack>(GuildUtil.getGuild(uuid).getBank());
         for (int i = page * 54; i < (page + 1) * 54; i++) {
             bank.set(i, inventory.getItem(i - page * 54));
         }
         GuildUtil.getGuild(uuid).setBank(bank);
+    }
+    
+    public static boolean isViewingBank(UUID uuid) {
+    	return viewers.containsKey(uuid);
     }
 
     @EventHandler

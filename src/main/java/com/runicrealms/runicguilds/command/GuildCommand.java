@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 
 import com.runicrealms.runicguilds.config.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
+import com.runicrealms.runicguilds.guilds.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.GuildRank;
 
 public class GuildCommand implements CommandExecutor {
@@ -53,17 +54,22 @@ public class GuildCommand implements CommandExecutor {
 						} else {
 							sendMessage(player, "&eYou must be of rank recruiter or higher to invite other players.");
 						}
+					} else if (args[0].equalsIgnoreCase("bank")) {
+						GuildBankUtil.open(player, 1);
 					} else if (args[0].equalsIgnoreCase("kick")) {
 						if (guild.hasMinRank(player.getUniqueId(), 2)) {
 							if (args.length == 2) {
-								Player otherPlayer = Bukkit.getPlayerExact(args[1]);
-								if (!otherPlayer.getUniqueId().toString().equalsIgnoreCase(player.getUniqueId().toString())) {
+								UUID otherPlayer = GuildUtil.getOfflinePlayerUUID(args[1]);
+								if (!otherPlayer.toString().equalsIgnoreCase(player.getUniqueId().toString())) {
 									if (guild.isInGuild(args[1])) {
-										if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() > guild.getMember(otherPlayer.getUniqueId()).getRank().getRankNumber()) {
-											guild.removeMember(otherPlayer.getUniqueId());
+										if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() > guild.getMember(otherPlayer).getRank().getRankNumber()) {
+											guild.removeMember(otherPlayer);
 											sendMessage(player, "&eRemoved player from the guild!");
 											GuildUtil.saveGuild(guild);
 											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId(), false));
+											if (GuildBankUtil.isViewingBank(otherPlayer) && Bukkit.getPlayerExact(args[1]) != null) {
+												GuildBankUtil.close(Bukkit.getPlayerExact(args[1]));
+											}
 										} else {
 											sendMessage(player, "&eYou can only kick players that are of lower rank than you.");
 										}
@@ -151,6 +157,9 @@ public class GuildCommand implements CommandExecutor {
 						if (disbanding.contains(player.getUniqueId())) {
 							disbanding.remove(player.getUniqueId());
 						}
+						if (GuildBankUtil.isViewingBank(player.getUniqueId())) {
+							GuildBankUtil.close(player);
+						}
 					} else if (args[0].equalsIgnoreCase("confirm")) {
 						if (transferOwnership.containsKey(player.getUniqueId())) {
 							guild.transferOwnership(guild.getMember(transferOwnership.get(player.getUniqueId())));
@@ -160,6 +169,11 @@ public class GuildCommand implements CommandExecutor {
 							Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, transferOwnership.get(player.getUniqueId()), player.getUniqueId()));
 							transferOwnership.remove(player.getUniqueId());
 						} else if (disbanding.contains(player.getUniqueId())) {
+							for (GuildMember member : guild.getMembers()) {
+								if (GuildBankUtil.isViewingBank(member.getUUID())) {
+									GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
+								}
+							}
 							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, player.getUniqueId(), false));
 							GuildUtil.getGuildFiles().get(guild.getGuildPrefix()).deleteFile();
 							GuildUtil.removeGuild(guild);
@@ -218,6 +232,7 @@ public class GuildCommand implements CommandExecutor {
 	private static void sendHelpMessage(Player player) {
 		sendMessage(player, "&6Guild Commands:");
 		sendMessage(player, "&e/guild invite &6[player] &r- invites a player to the guild.");
+		sendMessage(player, "&e/guild bank &r- opens your guild bank.");
 		sendMessage(player, "&e/guild kick &6[player] &r- kicks a player from the guild.");
 		sendMessage(player, "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.");
 		sendMessage(player, "&e/guild disband &r- disbands your guild.");

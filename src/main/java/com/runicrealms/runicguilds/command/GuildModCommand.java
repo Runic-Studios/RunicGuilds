@@ -1,5 +1,7 @@
 package com.runicrealms.runicguilds.command;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -13,6 +15,8 @@ import com.runicrealms.runicguilds.api.GuildDisbandEvent;
 import com.runicrealms.runicguilds.api.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.config.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
+import com.runicrealms.runicguilds.guilds.GuildBankUtil;
+import com.runicrealms.runicguilds.guilds.GuildMember;
 
 public class GuildModCommand implements CommandExecutor {
 
@@ -48,6 +52,11 @@ public class GuildModCommand implements CommandExecutor {
 							if (GuildCommand.getDisbanding().contains(guild.getOwner().getUUID())) {
 								GuildCommand.getDisbanding().remove(guild.getOwner().getUUID());
 							}
+							for (GuildMember member : guild.getMembers()) {
+								if (GuildBankUtil.isViewingBank(member.getUUID())) {
+									GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
+								}
+							}
 							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, null, true));
 							GuildUtil.getGuildFiles().get(args[1]).deleteFile();
 							GuildUtil.removeGuild(GuildUtil.getGuild(args[1]));
@@ -67,7 +76,11 @@ public class GuildModCommand implements CommandExecutor {
 						if (GuildUtil.getGuild(args[1]) != null) {
 							Guild guild = GuildUtil.getGuild(args[1]);
 							if (!guild.getOwner().getUUID().toString().equalsIgnoreCase(GuildUtil.getOfflinePlayerUUID(args[1]).toString())) {
-								guild.removeMember(GuildUtil.getOfflinePlayerUUID(args[1]));
+								UUID uuid = GuildUtil.getOfflinePlayerUUID(args[1]);
+								if (GuildBankUtil.isViewingBank(uuid)) {
+									GuildBankUtil.close(Bukkit.getPlayer(args[1]));
+								}
+								guild.removeMember(uuid);
 								GuildUtil.saveGuild(guild);
 								Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, GuildUtil.getOfflinePlayerUUID(args[1]), null, true));
 								sendMessage(sender, "&eSuccessfully kicked guild member.");
@@ -101,6 +114,20 @@ public class GuildModCommand implements CommandExecutor {
 				} else {
 					sendMessage(sender, "&eYou do not have permission to do this.");
 				}
+			} else if (args[0].equalsIgnoreCase("bank")){
+				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-bank"))) {
+					if (args.length == 2) {
+						if (GuildUtil.getGuild(args[1]) != null) {
+							
+						} else {
+							sendMessage(sender, "&eThat player is no")
+						}
+					} else {
+						sendHelpMessage(sender);
+					}
+				} else {
+					sendMessage(sender, "&eYou do not have permission to do this.");
+				}
 			} else {
 				sendHelpMessage(sender);
 			}
@@ -124,6 +151,7 @@ public class GuildModCommand implements CommandExecutor {
 		sendMessage(sender, "&e/guildmod kick &6[player] &r- force kicks a player from their guild.");
 		sendMessage(sender, "&e/guildmod reset &6[player] &r- resets a player's guild score.");
 		sendMessage(sender, "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.");
+		sendMessage(sender, "&e/guildmod bank &6[prefix] &r- views another guild's bank");
 	}
 
 }
