@@ -1,10 +1,12 @@
 package com.runicrealms.runicguilds.guilds;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.ItemStack;
 
 public class Guild {
 
@@ -13,12 +15,16 @@ public class Guild {
 	private String guildName;
 	private String guildPrefix;
 	private Integer score;
+	private List<ItemStack> bank;
+	private Integer bankSize;
 
-	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix) {
+	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize) {
 		this.members = members;
 		this.owner = owner;
 		this.guildName = guildName;
 		this.guildPrefix = guildPrefix;
+		this.bank = bank;
+		this.bankSize = bankSize;
 	}
 
 	public Set<GuildMember> getMembers() {
@@ -35,6 +41,18 @@ public class Guild {
 
 	public String getGuildPrefix() {
 		return this.guildPrefix;
+	}
+
+	public Integer getBankSize() {
+		return this.bankSize;
+	}
+
+	public List<ItemStack> getBank() {
+		return this.bank;
+	}
+
+	public void setBank(List<ItemStack> bank) {
+		this.bank = bank;
 	}
 
 	public void transferOwnership(GuildMember member) {

@@ -2,9 +2,7 @@ package com.runicrealms.runicguilds.config;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -12,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.guilds.GuildRank;
+import org.bukkit.inventory.ItemStack;
 
 public class DataFileConfiguration {
 
@@ -40,6 +39,12 @@ public class DataFileConfiguration {
 		}
 		this.config.set("prefix", guild.getGuildPrefix());
 		this.config.set("name", guild.getGuildName());
+		this.config.set("bank-size", guild.getBankSize());
+		for (int i = 0; i < guild.getBankSize(); i++) {
+			if (guild.getBank().get(i) != null) {
+				this.config.set("bank." + i, guild.getBank().get(i));
+			}
+		}
 		this.saveToFile();
 	}
 
@@ -59,7 +64,22 @@ public class DataFileConfiguration {
 					members.add(new GuildMember(UUID.fromString(key), GuildRank.getByName(membersSec.getString(key + ".rank")), membersSec.getInt(key + ".score")));
 				}
 			}
-			this.cache = new Guild(members, owner, this.config.getString("name"), this.config.getString("prefix"));
+			List<ItemStack> items = new ArrayList<ItemStack>();
+			if (config.contains("bank")) {
+				int current = 0;
+				for (int i = 0; i < config.getInt("bank-size"); i++) {
+					if (items.contains(config.getItemStack("bank." + i))) {
+						items.add(config.getItemStack("bank." + i));
+					} else {
+						items.add(null);
+					}
+				}
+			} else {
+				for (int i = 0; i < config.getInt("bank-size"); i++) {
+					items.add(null);
+				}
+			}
+			this.cache = new Guild(members, owner, this.config.getString("name"), this.config.getString("prefix"), items, config.getInt("bank-size"));
 		}
 		return this.cache;
 	}

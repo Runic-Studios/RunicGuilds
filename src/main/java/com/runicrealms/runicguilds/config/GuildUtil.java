@@ -87,6 +87,7 @@ public class GuildUtil {
 		config.set("owner." + owner.toString() + ".score", 0);
 		config.set("prefix", prefix);
 		config.set("name", name);
+		config.set("bank-size", 54);
 		DataFileConfiguration fileConfig = new DataFileConfiguration(prefix + ".yml");
 		guilds.put(prefix, fileConfig);
 		fileConfig.saveToFile();
