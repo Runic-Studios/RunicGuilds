@@ -2,15 +2,19 @@ package com.runicrealms.runicguilds.config;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.guilds.GuildRank;
-import org.bukkit.inventory.ItemStack;
 
 public class DataFileConfiguration {
 
@@ -66,7 +70,6 @@ public class DataFileConfiguration {
 			}
 			List<ItemStack> items = new ArrayList<ItemStack>();
 			if (config.contains("bank")) {
-				int current = 0;
 				for (int i = 0; i < config.getInt("bank-size"); i++) {
 					if (items.contains(config.getItemStack("bank." + i))) {
 						items.add(config.getItemStack("bank." + i));

@@ -11,6 +11,7 @@ import com.runicrealms.runicguilds.command.GuildModCommand;
 import com.runicrealms.runicguilds.config.ConfigLoader;
 import com.runicrealms.runicguilds.config.GuildUtil;
 import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
+import com.runicrealms.runicguilds.guilds.GuildBankUtil;
 
 public class Plugin extends JavaPlugin {
 	
@@ -27,6 +28,7 @@ public class Plugin extends JavaPlugin {
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
 		EventPlayerJoinQuit.initializePlayerCache();
 		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
+		this.getServer().getPluginManager().registerEvents(new GuildBankUtil(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
 
