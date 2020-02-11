@@ -8,3 +8,12 @@ commands:
     description: Command for guild operations
   guildmod:
     description: Command for guild moderator operations
+Permissions:
+  permissions.guild-mod-disband:
+    description: Allows a moderator to force disband guilds
+  permissions.guild-mod-kick:
+    description: Allows a moderator to force kick players from guilds
+  permissions.guild-mod-reset:
+    description: Allows a moderator to reset guild scores
+  permissions.guild-mod-bank:
+     description: Allows a moderator to access a guild's bank

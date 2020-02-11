@@ -12,8 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.GuildRank;
 
 public class GuildCommand implements CommandExecutor {

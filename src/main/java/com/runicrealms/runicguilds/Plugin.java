@@ -11,7 +11,7 @@ import com.runicrealms.runicguilds.command.GuildModCommand;
 import com.runicrealms.runicguilds.config.ConfigLoader;
 import com.runicrealms.runicguilds.config.GuildUtil;
 import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
-import com.runicrealms.runicguilds.guilds.GuildBankUtil;
+import com.runicrealms.runicguilds.gui.GuildBankUtil;
 
 public class Plugin extends JavaPlugin {
 	

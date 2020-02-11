@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.guilds;
+package com.runicrealms.runicguilds.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,16 +20,20 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.runicrealms.runicguilds.config.GuildUtil;
-import com.runicrealms.runicguilds.gui.ItemBuilder;
+import com.runicrealms.runicguilds.guilds.Guild;
 
 import net.md_5.bungee.api.ChatColor;
 
 public class GuildBankUtil implements Listener {
 
     private static Map<UUID, ViewerInfo> viewers = new HashMap<UUID, ViewerInfo>();
-
+    
     public static void open(Player player, Integer page) {
-    	Guild guild = GuildUtil.getGuild(player.getUniqueId());
+    	open(player, page, GuildUtil.getGuild(player.getUniqueId()).getGuildPrefix());
+    }
+    
+    public static void open(Player player, Integer page, String prefix) {
+    	Guild guild = GuildUtil.getGuild(prefix);
     	Inventory inventory = Bukkit.createInventory(null, 63, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
     	if (guild.getBankSize() > 1 && page != guild.getBankSize()) {
     		inventory.setItem(8, new ItemBuilder(Material.ARROW, 1, "&6Next Page").getItem());

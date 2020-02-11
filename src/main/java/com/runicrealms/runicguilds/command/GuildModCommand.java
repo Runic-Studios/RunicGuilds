@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.GuildCreationEvent;
@@ -14,8 +15,8 @@ import com.runicrealms.runicguilds.api.GuildCreationResult;
 import com.runicrealms.runicguilds.api.GuildDisbandEvent;
 import com.runicrealms.runicguilds.api.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 
 public class GuildModCommand implements CommandExecutor {
@@ -73,8 +74,8 @@ public class GuildModCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("kick")) {
 				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-kick"))) {
 					if (args.length == 2) {
-						if (GuildUtil.getGuild(args[1]) != null) {
-							Guild guild = GuildUtil.getGuild(args[1]);
+						if (GuildUtil.getGuild(GuildUtil.getOfflinePlayerUUID(args[1])) != null) {
+							Guild guild = GuildUtil.getGuild(GuildUtil.getOfflinePlayerUUID(args[1]));
 							if (!guild.getOwner().getUUID().toString().equalsIgnoreCase(GuildUtil.getOfflinePlayerUUID(args[1]).toString())) {
 								UUID uuid = GuildUtil.getOfflinePlayerUUID(args[1]);
 								if (GuildBankUtil.isViewingBank(uuid)) {
@@ -116,14 +117,19 @@ public class GuildModCommand implements CommandExecutor {
 				}
 			} else if (args[0].equalsIgnoreCase("bank")){
 				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-bank"))) {
-					if (args.length == 2) {
-						if (GuildUtil.getGuild(args[1]) != null) {
-							
+					if (sender instanceof Player) {
+						Player player = (Player) sender;
+						if (args.length == 2) {
+							if (GuildUtil.getGuild(args[1]) != null) {
+								GuildBankUtil.open(player, 1, args[1]);
+							} else {
+								sendMessage(sender, "&eThat guild does not exist");
+							}
 						} else {
-							sendMessage(sender, "&eThat player is no")
+							sendHelpMessage(sender);
 						}
 					} else {
-						sendHelpMessage(sender);
+						sendMessage(sender, "&eYou must be a player to use this command!");
 					}
 				} else {
 					sendMessage(sender, "&eYou do not have permission to do this.");
