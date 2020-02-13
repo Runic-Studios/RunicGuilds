@@ -6,7 +6,8 @@ public enum GuildCreationResult {
 	PREFIX_NOT_UNIQUE("There is already a guild with that prefix! Try using a different prefix."),
 	NAME_NOT_UNIQUE("There is already a guild with that name! Try using a different name."),
 	BAD_PREFIX("The guild prefix must be composed of three english characters only."),
-	SUCCESSFUL("You have successfully created your guild.");
+	SUCCESSFUL("You have successfully created your guild."),
+	INTERNAL_ERROR("There was an internal error with creating your guild.");
 	
 	private String message;
 	

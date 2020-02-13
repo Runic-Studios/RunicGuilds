@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,16 +34,20 @@ public class GuildUtil {
 	public static void loadGuilds() {
 		for (File file : ConfigLoader.getGuildsFolder().listFiles()) {
 			if (!file.isDirectory()) {
-				guilds.put(file.getName().replace(".yml", ""), new DataFileConfiguration(file.getName().replace(".yml", "")));
+				guilds.put(file.getName().replace(".yml", ""), new DataFileConfiguration(file.getName()));
 			}
 		}
 	}
 	
 	public static Guild getGuild(UUID player) {
 		for (String key : guilds.keySet()) {
-			for (GuildMember member : guilds.get(key).getGuild().getMembers()) {
+			Guild guild = guilds.get(key).getGuild();
+			if (guild.getOwner().getUUID().toString().equalsIgnoreCase(player.toString())) {
+				return guild;
+			}
+			for (GuildMember member : guild.getMembers()) {
 				if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
-					return guilds.get(key).getGuild();
+					return guild;
 				}
 			}
 		}
@@ -88,9 +93,15 @@ public class GuildUtil {
 		config.set("prefix", prefix);
 		config.set("name", name);
 		config.set("bank-size", 54);
+		try {
+			config.save(new File(ConfigLoader.getGuildsFolder(), prefix + ".yml"));
+		} catch (IOException exception) {
+			exception.printStackTrace();
+			return GuildCreationResult.INTERNAL_ERROR;
+		}
 		DataFileConfiguration fileConfig = new DataFileConfiguration(prefix + ".yml");
 		guilds.put(prefix, fileConfig);
-		fileConfig.saveToFile();
+		players.put(owner, prefix);
 		return GuildCreationResult.SUCCESSFUL;
 	}
 	

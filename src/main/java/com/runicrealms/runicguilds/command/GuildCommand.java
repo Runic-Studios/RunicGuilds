@@ -17,7 +17,7 @@ import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildRank;
 
 public class GuildCommand implements CommandExecutor {
-	
+
 	private static Map<UUID, UUID> transferOwnership = new HashMap<UUID, UUID>();
 	private static Map<UUID, UUID> invites = new HashMap<UUID, UUID>();
 	private static Set<UUID> disbanding = new HashSet<UUID>();
@@ -202,28 +202,32 @@ public class GuildCommand implements CommandExecutor {
 						sendHelpMessage(player);
 					}
 				}
-			} else if (args[0].equalsIgnoreCase("accept")) {
-				if (invites.containsKey(player.getUniqueId())) {
-					Guild guild = GuildUtil.getGuild(invites.get(player.getUniqueId()));
-					guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.MEMBER, 0));
-					sendMessage(player, "&eYou have accepted the guild invitation.");
-					GuildUtil.saveGuild(guild);
-					Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), invites.get(player.getUniqueId())));
-					invites.remove(player.getUniqueId());
-				} else {
-					sendMessage(player, "&eYou don't have any pending invitations.");
-				}
-			} else if (args[0].equalsIgnoreCase("decline")) {
-				if (invites.containsKey(player.getUniqueId())) {
-					sendMessage(player, "&eYou have decline the guild invitation.");
-					Guild guild = GuildUtil.getGuild(invites.get(player.getUniqueId()));
-					Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guild, player.getUniqueId(), invites.get(player.getUniqueId())));
-					invites.remove(player.getUniqueId());
-				} else {
-					sendMessage(player, "&eYou don't have any pending invitations.");
-				}
+			} else if (args.length == 0) {
+				sendHelpMessage(player);
 			} else {
-				sendMessage(player, "&eYou must be in a guild to use this command.");
+				if (args[0].equalsIgnoreCase("accept")) {
+					if (invites.containsKey(player.getUniqueId())) {
+						Guild guild = GuildUtil.getGuild(invites.get(player.getUniqueId()));
+						guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.MEMBER, 0));
+						sendMessage(player, "&eYou have accepted the guild invitation.");
+						GuildUtil.saveGuild(guild);
+						Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), invites.get(player.getUniqueId())));
+						invites.remove(player.getUniqueId());
+					} else {
+						sendMessage(player, "&eYou don't have any pending invitations.");
+					}
+				} else if (args[0].equalsIgnoreCase("decline")) {
+					if (invites.containsKey(player.getUniqueId())) {
+						sendMessage(player, "&eYou have decline the guild invitation.");
+						Guild guild = GuildUtil.getGuild(invites.get(player.getUniqueId()));
+						Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guild, player.getUniqueId(), invites.get(player.getUniqueId())));
+						invites.remove(player.getUniqueId());
+					} else {
+						sendMessage(player, "&eYou don't have any pending invitations.");
+					}
+				} else {
+					sendMessage(player, "&eYou must be in a guild to use this command.");
+				}
 			}
 		}
 		return true;
@@ -243,9 +247,9 @@ public class GuildCommand implements CommandExecutor {
 	}
 
 	private static void sendMessage(Player player, String message) {
-		player.sendMessage(ChatColor.translateAlternateColorCodes('&', ""));
+		player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
 	}
-	
+
 	public static Map<UUID, UUID> getTransferOwnership() {
 		return transferOwnership;
 	}

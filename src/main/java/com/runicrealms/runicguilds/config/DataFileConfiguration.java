@@ -59,7 +59,7 @@ public class DataFileConfiguration {
 	public Guild getGuild() {
 		if (this.cache == null) {
 			ConfigurationSection guildMasterSec = this.config.getConfigurationSection("owner");
-			UUID guildMasterUUID = UUID.fromString((String) guildMasterSec.getKeys(false).toArray()[0]);
+			UUID guildMasterUUID = UUID.fromString((String) (guildMasterSec.getKeys(false).toArray()[0]));
 			GuildMember owner = new GuildMember(guildMasterUUID, GuildRank.OWNER, guildMasterSec.getInt(guildMasterUUID + ".score"));
 			Set<GuildMember> members = new HashSet<GuildMember>();
 			if (config.contains("members")) {
@@ -71,7 +71,7 @@ public class DataFileConfiguration {
 			List<ItemStack> items = new ArrayList<ItemStack>();
 			if (config.contains("bank")) {
 				for (int i = 0; i < config.getInt("bank-size"); i++) {
-					if (items.contains(config.getItemStack("bank." + i))) {
+					if (config.contains("bank." + i)) {
 						items.add(config.getItemStack("bank." + i));
 					} else {
 						items.add(null);

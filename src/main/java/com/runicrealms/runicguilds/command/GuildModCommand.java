@@ -23,7 +23,7 @@ public class GuildModCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (args.length == 2) {
+		if (args.length >= 1) {
 			if (args[0].equalsIgnoreCase("create")) {
 				if (sender.isOp()) {
 					if (args.length == 4) {
@@ -148,7 +148,7 @@ public class GuildModCommand implements CommandExecutor {
 	}
 
 	private static void sendMessage(CommandSender sender, String message) {
-		sender.sendMessage(ChatColor.translateAlternateColorCodes('&', ""));
+		sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
 	}
 
 	private static void sendHelpMessage(CommandSender sender) {
