@@ -92,7 +92,7 @@ public class GuildUtil {
 		config.set("owner." + owner.toString() + ".score", 0);
 		config.set("prefix", prefix);
 		config.set("name", name);
-		config.set("bank-size", 54);
+		config.set("bank-size", 45);
 		try {
 			config.save(new File(ConfigLoader.getGuildsFolder(), prefix + ".yml"));
 		} catch (IOException exception) {
@@ -118,6 +118,15 @@ public class GuildUtil {
 		OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
 		if (player.hasPlayedBefore()) {
 			return player.getUniqueId();
+		}
+		return null;
+	}
+
+	public static String getOfflinePlayerName(UUID uuid) {
+		@SuppressWarnings("deprecation")
+		OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+		if (player.hasPlayedBefore()) {
+			return player.getName();
 		}
 		return null;
 	}

@@ -25,6 +25,7 @@ public class Guild {
 		this.guildPrefix = guildPrefix;
 		this.bank = bank;
 		this.bankSize = bankSize;
+		this.recalculateScore();
 	}
 
 	public Set<GuildMember> getMembers() {
@@ -76,6 +77,9 @@ public class Guild {
 	}
 
 	public GuildMember getMember(UUID player) {
+		if (this.owner.getUUID().toString().equalsIgnoreCase(player.toString())) {
+			return this.owner;
+		}
 		for (GuildMember member : this.members) {
 			if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
 				return member;

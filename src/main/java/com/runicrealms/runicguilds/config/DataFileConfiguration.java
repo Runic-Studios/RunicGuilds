@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.runicrealms.runicguilds.Plugin;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -36,20 +38,25 @@ public class DataFileConfiguration {
 	}
 
 	public void save(Guild guild) {
-		this.config.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
-		for (GuildMember member : guild.getMembers()) {
-			this.config.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
-			this.config.set("members." + member.getUUID().toString() + ".score", member.getScore());
-		}
-		this.config.set("prefix", guild.getGuildPrefix());
-		this.config.set("name", guild.getGuildName());
-		this.config.set("bank-size", guild.getBankSize());
-		for (int i = 0; i < guild.getBankSize(); i++) {
-			if (guild.getBank().get(i) != null) {
-				this.config.set("bank." + i, guild.getBank().get(i));
+		Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), new Runnable() {
+			@Override
+			public void run() {
+				config.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
+				for (GuildMember member : guild.getMembers()) {
+					config.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
+					config.set("members." + member.getUUID().toString() + ".score", member.getScore());
+				}
+				config.set("prefix", guild.getGuildPrefix());
+				config.set("name", guild.getGuildName());
+				config.set("bank-size", guild.getBankSize());
+				for (int i = 0; i < guild.getBankSize(); i++) {
+					if (guild.getBank().get(i) != null) {
+						config.set("bank." + i, guild.getBank().get(i));
+					}
+				}
+				saveToFile();
 			}
-		}
-		this.saveToFile();
+		});
 	}
 
 	public void deleteFile() {
@@ -60,12 +67,12 @@ public class DataFileConfiguration {
 		if (this.cache == null) {
 			ConfigurationSection guildMasterSec = this.config.getConfigurationSection("owner");
 			UUID guildMasterUUID = UUID.fromString((String) (guildMasterSec.getKeys(false).toArray()[0]));
-			GuildMember owner = new GuildMember(guildMasterUUID, GuildRank.OWNER, guildMasterSec.getInt(guildMasterUUID + ".score"));
+			GuildMember owner = new GuildMember(guildMasterUUID, GuildRank.OWNER, guildMasterSec.getInt(guildMasterUUID + ".score"), GuildUtil.getOfflinePlayerName(guildMasterUUID));
 			Set<GuildMember> members = new HashSet<GuildMember>();
 			if (config.contains("members")) {
 				ConfigurationSection membersSec = this.config.getConfigurationSection("members");
 				for (String key : membersSec.getKeys(false)) {
-					members.add(new GuildMember(UUID.fromString(key), GuildRank.getByName(membersSec.getString(key + ".rank")), membersSec.getInt(key + ".score")));
+					members.add(new GuildMember(UUID.fromString(key), GuildRank.getByName(membersSec.getString(key + ".rank")), membersSec.getInt(key + ".score"), GuildUtil.getOfflinePlayerName(UUID.fromString(key))));
 				}
 			}
 			List<ItemStack> items = new ArrayList<ItemStack>();

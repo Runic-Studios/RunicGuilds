@@ -152,7 +152,7 @@ public class GuildModCommand implements CommandExecutor {
 	}
 
 	private static void sendHelpMessage(CommandSender sender) {
-		sendMessage(sender, "&6Guild Commands:");
+		sendMessage(sender, "&6Guild Moderator Commands:");
 		sendMessage(sender, "&e/guildmod disband &6[prefix] &r- force disbands a guild.");
 		sendMessage(sender, "&e/guildmod kick &6[player] &r- force kicks a player from their guild.");
 		sendMessage(sender, "&e/guildmod reset &6[player] &r- resets a player's guild score.");

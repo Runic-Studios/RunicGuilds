@@ -7,11 +7,13 @@ public class GuildMember {
 	private UUID uuid;
 	private GuildRank rank;
 	private Integer score;
+	private String name;
 	
-	public GuildMember(UUID uuid, GuildRank rank, Integer score) {
+	public GuildMember(UUID uuid, GuildRank rank, Integer score, String name) {
 		this.uuid = uuid;
 		this.rank = rank;
 		this.score = score;
+		this.name = name;
 	}
 
 	public UUID getUUID() {
@@ -32,6 +34,10 @@ public class GuildMember {
 
 	public void setScore(Integer score) {
 		this.score = score;
+	}
+
+	public String getLastKnownName() {
+		return this.name;
 	}
 	
 }
