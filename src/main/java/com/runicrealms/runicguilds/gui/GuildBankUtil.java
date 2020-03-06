@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.logging.Level;
 
+import com.runicrealms.runiccharacters.api.events.CharacterInventoryCloseEvent;
+import com.runicrealms.runiccharacters.api.events.CharacterQuitEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -69,7 +70,7 @@ public class GuildBankUtil implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerQuit(PlayerQuitEvent event) {
+	public void onPlayerQuit(CharacterQuitEvent event) {
 		if (viewers.containsKey(event.getPlayer().getUniqueId())) {
 			viewers.remove(event.getPlayer().getUniqueId());
 		}
@@ -84,11 +85,11 @@ public class GuildBankUtil implements Listener {
 					if (viewers.containsKey(player.getUniqueId())) {
 						ItemStack clickedItem = event.getCurrentItem().clone();
 						Guild guild = GuildUtil.getGuild(player.getUniqueId());
-						Inventory bankInventory = Bukkit.createInventory(null, 54, "");
+						Inventory bankInventory = Bukkit.createInventory(null, 45, "");
 						Integer currentPage = viewers.get(player.getUniqueId()).getPage();
 						for (int i = 0; i < 45; i++) {
-							if (guild.getBank().get((currentPage - 1) * 54 + i) != null) {
-								bankInventory.setItem(i, guild.getBank().get((currentPage - 1) * 54 + i));
+							if (guild.getBank().get((currentPage - 1) * 45 + i) != null) {
+								bankInventory.setItem(i, guild.getBank().get((currentPage - 1) * 45 + i));
 							}
 						}
 						ViewerInfo viewer = viewers.get(player.getUniqueId());
@@ -101,28 +102,32 @@ public class GuildBankUtil implements Listener {
 								open(player, viewer.getPage() + 1);
 							}
 						} else if (event.getRawSlot() < event.getInventory().getSize()) {
-							player.getInventory().addItem(event.getCurrentItem());
-							bankInventory.setItem(event.getSlot(), new ItemStack(Material.AIR));
-							//bankInventory.remove(event.getCurrentItem());
+							if (!stackItemsIntoInventory(player.getInventory(), event.getCurrentItem(), 36)) {
+								player.getWorld().dropItem(player.getLocation(), event.getCurrentItem());
+							}
+							player.updateInventory();
+							bankInventory.setItem(event.getSlot() - 9, new ItemStack(Material.AIR));
 							saveToBank(bankInventory, viewer.getPage(), player.getUniqueId());
 						} else {
-							player.getInventory().setItem(event.getSlot(), new ItemStack(Material.AIR));
-							//player.getInventory().remove(event.getCurrentItem());
-							for (int i = 0; i < 45; i++) {
-								if (bankInventory.getItem(i) == null) {
-									bankInventory.setItem(i, clickedItem);
-									break;
-								}
+							if (!stackItemsIntoInventory(bankInventory, clickedItem, 45)) {
+								event.setCancelled(true);
+								return;
 							}
+							player.getInventory().setItem(event.getSlot(), new ItemStack(Material.AIR));
 							saveToBank(bankInventory, viewer.getPage(), player.getUniqueId());
 						}
+						Map<UUID, Integer> playersToRefresh = new HashMap<UUID, Integer>();
 						for (Entry<UUID, ViewerInfo> entry : viewers.entrySet()) {
 							if (entry.getValue().getGuildPrefix().equalsIgnoreCase(viewer.getGuildPrefix())) {
-								Player otherPlayer = Bukkit.getPlayer(entry.getKey());
-								close(otherPlayer);
-								open(otherPlayer, viewer.getPage());
+								playersToRefresh.put(entry.getKey(), viewer.getPage());
 							}
 						}
+						for (Entry<UUID, Integer> playerToRefresh : playersToRefresh.entrySet()) {
+							Player otherPlayer = Bukkit.getPlayer(playerToRefresh.getKey());
+							close(otherPlayer);
+							open(otherPlayer, playerToRefresh.getValue());
+						}
+						event.setCancelled(true);
 					}
 				}
 			}
@@ -130,7 +135,7 @@ public class GuildBankUtil implements Listener {
 	}
 
 	@EventHandler
-	public void onInventoryClose(InventoryCloseEvent event) {
+	public void onInventoryClose(CharacterInventoryCloseEvent event) {
 		if (viewers.containsKey(event.getPlayer().getUniqueId())) {
 			viewers.remove(event.getPlayer().getUniqueId());
 		}
@@ -141,6 +146,42 @@ public class GuildBankUtil implements Listener {
 		if (viewers.containsKey(event.getPlayer().getUniqueId())) {
 			event.setCancelled(true);
 		}
+	}
+
+	private static boolean stackItemsIntoInventory(Inventory inventory, ItemStack item, int limit) {
+		int itemsLeft = item.getAmount();
+		ItemStack currentItem;
+		int freeSpot = -1;
+		for (int i = 0; i < limit; i++) {
+			currentItem = inventory.getContents()[i];
+			if (currentItem != null) {
+				if (currentItem.getType() != Material.AIR) {
+					if (currentItem.isSimilar(item)) {
+						if (currentItem.getMaxStackSize() > currentItem.getAmount()) {
+							while (itemsLeft > 0) {
+								currentItem.setAmount(currentItem.getAmount() + 1);
+								itemsLeft--;
+								if (currentItem.getMaxStackSize() <= currentItem.getAmount()) {
+									break;
+								}
+							}
+						}
+					}
+				} else if (freeSpot == -1){
+					freeSpot = i;
+				}
+			} else if (freeSpot == -1) {
+				freeSpot = i;
+			}
+		}
+		if (itemsLeft == 0) {
+			return true;
+		}
+		if (freeSpot == -1) {
+			return false;
+		}
+		inventory.setItem(freeSpot, item);
+		return true;
 	}
 
 	private static class ViewerInfo {
