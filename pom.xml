@@ -71,12 +71,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- RunicCharacters -->
-		<dependency>
-			<groupId>com.runicrealms.runiccharacters</groupId>
-			<artifactId>RunicCharacters</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicCharacters.jar</systemPath>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.runicrealms.runiccharacters</groupId>-->
+<!--			<artifactId>RunicCharacters</artifactId>-->
+<!--			<version>1.0</version>-->
+<!--			<scope>system</scope>-->
+<!--			<systemPath>${project.basedir}/lib/RunicCharacters.jar</systemPath>-->
+<!--		</dependency>-->
 	</dependencies>
 </project>

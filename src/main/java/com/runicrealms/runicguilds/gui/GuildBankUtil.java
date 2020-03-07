@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import com.runicrealms.runiccharacters.api.events.CharacterInventoryCloseEvent;
-import com.runicrealms.runiccharacters.api.events.CharacterQuitEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -70,7 +68,7 @@ public class GuildBankUtil implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerQuit(CharacterQuitEvent event) {
+	public void onPlayerQuit(PlayerQuitEvent event) {
 		if (viewers.containsKey(event.getPlayer().getUniqueId())) {
 			viewers.remove(event.getPlayer().getUniqueId());
 		}
@@ -135,7 +133,7 @@ public class GuildBankUtil implements Listener {
 	}
 
 	@EventHandler
-	public void onInventoryClose(CharacterInventoryCloseEvent event) {
+	public void onInventoryClose(InventoryCloseEvent event) {
 		if (viewers.containsKey(event.getPlayer().getUniqueId())) {
 			viewers.remove(event.getPlayer().getUniqueId());
 		}

@@ -61,13 +61,13 @@ public class Guild {
 		this.members.remove(member);
 	}
 
-	public boolean hasMinRank(UUID player, Integer rank) {
+	public boolean hasMinRank(UUID player, GuildRank rank) {
 		if (this.owner.getUUID().toString().equalsIgnoreCase(player.toString())) {
 			return true;
 		}
 		for (GuildMember member : this.members) {
 			if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
-				if (member.getRank().getRankNumber() <= rank) {
+				if (member.getRank().getRankNumber() >= rank.getRankNumber()) {
 					return true;
 				}
 				break;

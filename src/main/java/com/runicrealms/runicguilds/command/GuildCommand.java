@@ -33,7 +33,7 @@ public class GuildCommand implements CommandExecutor {
 					sendHelpMessage(player);
 				} else {
 					if (args[0].equalsIgnoreCase("invite")) {
-						if (guild.hasMinRank(player.getUniqueId(), 3)) {
+						if (guild.hasMinRank(player.getUniqueId(), GuildRank.RECRUITER)) {
 							if (args.length == 2) {
 								if (Bukkit.getPlayerExact(args[1]) != null) {
 									if (GuildUtil.getPlayerCache().get(Bukkit.getPlayer(args[1]).getUniqueId()) == null) {
@@ -57,12 +57,12 @@ public class GuildCommand implements CommandExecutor {
 					} else if (args[0].equalsIgnoreCase("bank")) {
 						GuildBankUtil.open(player, 1);
 					} else if (args[0].equalsIgnoreCase("kick")) {
-						if (guild.hasMinRank(player.getUniqueId(), 2)) {
+						if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
 							if (args.length == 2) {
 								UUID otherPlayer = GuildUtil.getOfflinePlayerUUID(args[1]);
 								if (!otherPlayer.toString().equalsIgnoreCase(player.getUniqueId().toString())) {
 									if (guild.isInGuild(args[1])) {
-										if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() > guild.getMember(otherPlayer).getRank().getRankNumber()) {
+										if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() < guild.getMember(otherPlayer).getRank().getRankNumber()) {
 											guild.removeMember(otherPlayer);
 											sendMessage(player, "&eRemoved player from the guild!");
 											if (GuildUtil.getPlayerCache().containsKey(otherPlayer)) {
@@ -101,33 +101,33 @@ public class GuildCommand implements CommandExecutor {
 						}
 						sendMessage(player, memberList.toString());
 					} else if (args[0].equalsIgnoreCase("promote") || args[0].equalsIgnoreCase("demote")) {
-						if (guild.hasMinRank(player.getUniqueId(), 2)) {
+						if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
 							if (args.length == 2) {
 								if (guild.isInGuild(args[1])) {
 									GuildMember member = guild.getMember(Bukkit.getPlayerExact(args[1]).getUniqueId());
 									if (args[0].equalsIgnoreCase("promote")) {
-										if (member.getRank().getRankNumber() < guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
-												guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
+										if (member.getRank().getRankNumber() > guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
+												member.getRank() != GuildRank.OFFICER) {
+											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
 											sendMessage(player, "&eMember has been promoted.");
 											GuildUtil.saveGuild(guild);
 											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
 										} else {
-											if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
+											if (member.getRank() == GuildRank.OFFICER) {
 												sendMessage(player, "&eYou cannot promote another player to owner. To transfer guild ownership, use /guild transfer.");
 											} else {
 												sendMessage(player, "&eYou can only promote members that are under your rank.");
 											}
 										}
 									} else {
-										if (member.getRank().getRankNumber() < guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
-												guild.getMember(player.getUniqueId()).getRank() != GuildRank.MEMBER) {
-											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
+										if (member.getRank().getRankNumber() > guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
+												member.getRank() != GuildRank.MEMBER) {
+											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
 											sendMessage(player, "&eMember has been demoted.");
 											GuildUtil.saveGuild(guild);
 											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
 										} else {
-											if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.MEMBER) {
+											if (member.getRank() == GuildRank.MEMBER) {
 												sendMessage(player, "&eYou cannot demote players of the lowest guild rank.");
 											} else {
 												sendMessage(player, "&eYou can only demote players that are under your rank.");

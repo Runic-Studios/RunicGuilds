@@ -54,9 +54,15 @@ public class GuildModCommand implements CommandExecutor {
 								GuildCommand.getDisbanding().remove(guild.getOwner().getUUID());
 							}
 							for (GuildMember member : guild.getMembers()) {
+								if (GuildUtil.getPlayerCache().containsKey(member.getUUID())) {
+									GuildUtil.getPlayerCache().put(member.getUUID(), null);
+								}
 								if (GuildBankUtil.isViewingBank(member.getUUID())) {
 									GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
 								}
+							}
+							if (GuildUtil.getPlayerCache().containsKey(guild.getOwner().getUUID())) {
+								GuildUtil.getPlayerCache().put(guild.getOwner().getUUID(), null);
 							}
 							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, null, true));
 							GuildUtil.getGuildFiles().get(args[1]).deleteFile();
@@ -81,6 +87,9 @@ public class GuildModCommand implements CommandExecutor {
 								if (GuildBankUtil.isViewingBank(uuid)) {
 									GuildBankUtil.close(Bukkit.getPlayer(args[1]));
 								}
+								if (GuildUtil.getPlayerCache().containsKey(uuid)) {
+									GuildUtil.getPlayerCache().put(uuid, null);
+								}
 								guild.removeMember(uuid);
 								GuildUtil.saveGuild(guild);
 								Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, GuildUtil.getOfflinePlayerUUID(args[1]), null, true));
@@ -101,8 +110,9 @@ public class GuildModCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("reset")) {
 				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-reset"))) {
 					if (args.length == 2) {
-						if (GuildUtil.getGuild(args[1]) != null) {
-							Guild guild = GuildUtil.getGuild(args[1]);
+						UUID playerUUID = Bukkit.getPlayerExact(args[1]).getUniqueId();
+						if (GuildUtil.getPlayerCache().get(playerUUID) != null) {
+							Guild guild = GuildUtil.getGuild(GuildUtil.getPlayerCache().get(playerUUID));
 							guild.setPlayerScore(GuildUtil.getOfflinePlayerUUID(args[1]), 0);
 							GuildUtil.saveGuild(guild);
 							sendMessage(sender, "&eSuccessfully reset guild member score.");

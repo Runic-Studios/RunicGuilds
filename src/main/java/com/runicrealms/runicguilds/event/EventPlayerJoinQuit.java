@@ -1,7 +1,5 @@
 package com.runicrealms.runicguilds.event;
 
-import com.runicrealms.runiccharacters.api.events.CharacterLoadEvent;
-import com.runicrealms.runiccharacters.api.events.CharacterQuitEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,13 +13,13 @@ import com.runicrealms.runicguilds.config.GuildUtil;
 public class EventPlayerJoinQuit implements Listener {
 	
 	@EventHandler
-	public void onJoin(CharacterLoadEvent event) {
+	public void onJoin(PlayerJoinEvent event) {
 		String prefix = GuildUtil.getGuild(event.getPlayer().getUniqueId()) == null ? null : GuildUtil.getGuild(event.getPlayer().getUniqueId()).getGuildPrefix();
 		GuildUtil.getPlayerCache().put(event.getPlayer().getUniqueId(), prefix);
 	}
 	
 	@EventHandler
-	public void onQuit(CharacterQuitEvent event) {
+	public void onQuit(PlayerQuitEvent event) {
 		GuildUtil.getPlayerCache().remove(event.getPlayer().getUniqueId());
 		if (GuildCommand.getTransferOwnership().containsKey(event.getPlayer().getUniqueId())) {
 			GuildCommand.getTransferOwnership().remove(event.getPlayer().getUniqueId());
