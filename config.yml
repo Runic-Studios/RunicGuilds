@@ -3,3 +3,4 @@ permissions:
   guildmod-kick: 'runicadmin.guilds.kick'
   guildmod-reset: 'runicadmin.guilds.reset'
   guildmod-bank: 'runicadmin.guilds.bank'
+max-bank-pages: 10

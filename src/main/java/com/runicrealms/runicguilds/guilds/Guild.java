@@ -52,6 +52,10 @@ public class Guild {
 		return this.bank;
 	}
 
+	public void setBankSize(Integer size) {
+		this.bankSize = size;
+	}
+
 	public void setBank(List<ItemStack> bank) {
 		this.bank = bank;
 	}

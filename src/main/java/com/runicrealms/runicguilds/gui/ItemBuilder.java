@@ -25,6 +25,7 @@ public class ItemBuilder {
 			for (String line : lore) {
 				lines.add(ChatColor.translateAlternateColorCodes('&', line));
 			}
+			meta.setLore(lines);
 			this.item.setItemMeta(meta);
 		}
 	}
