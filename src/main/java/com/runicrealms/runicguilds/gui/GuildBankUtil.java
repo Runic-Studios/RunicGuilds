@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.guilds.GuildRank;
@@ -107,11 +106,9 @@ public class GuildBankUtil implements Listener {
 						if (event.getRawSlot() < event.getInventory().getSize() && event.getRawSlot() < 9) {
 							if (event.getRawSlot() == 0 && event.getCurrentItem().getType() == Material.ARROW) {
 								close(player);
-								Bukkit.getLogger().log(Level.INFO, "PAGE:" + (currentPage - 1));
 								open(player, currentPage - 1);
 							} else if (event.getRawSlot() == 8 && event.getCurrentItem().getType() == Material.ARROW) {
 								close(player);
-								Bukkit.getLogger().log(Level.INFO, "PAGE:" + (currentPage + 1));
 								open(player, currentPage + 1);
 							} else if (event.getRawSlot() == 4 && event.getCurrentItem().getType() == Material.GOLD_INGOT) {
 								if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
@@ -172,7 +169,7 @@ public class GuildBankUtil implements Listener {
 		Map<UUID, Integer> playersToRefresh = new HashMap<UUID, Integer>();
 		for (Entry<UUID, ViewerInfo> entry : viewers.entrySet()) {
 			if (entry.getValue().getGuildPrefix().equalsIgnoreCase(viewer.getGuildPrefix())) {
-				playersToRefresh.put(entry.getKey(), viewer.getPage());
+				playersToRefresh.put(entry.getKey(), entry.getValue().getPage());
 			}
 		}
 		for (Entry<UUID, Integer> playerToRefresh : playersToRefresh.entrySet()) {

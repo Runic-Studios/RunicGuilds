@@ -71,7 +71,7 @@ public class Guild {
 		}
 		for (GuildMember member : this.members) {
 			if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
-				if (member.getRank().getRankNumber() >= rank.getRankNumber()) {
+				if (member.getRank().getRankNumber() <= rank.getRankNumber()) {
 					return true;
 				}
 				break;

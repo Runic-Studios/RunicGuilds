@@ -167,7 +167,7 @@ public class GuildModCommand implements CommandExecutor {
 		sendMessage(sender, "&e/guildmod kick &6[player] &r- force kicks a player from their guild.");
 		sendMessage(sender, "&e/guildmod reset &6[player] &r- resets a player's guild score.");
 		sendMessage(sender, "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.");
-		sendMessage(sender, "&e/guildmod bank &6[prefix] &r- views another guild's bank");
+		sendMessage(sender, "&e/guildmod bank &6[prefi x] &r- views another guild's bank");
 	}
 
 }
