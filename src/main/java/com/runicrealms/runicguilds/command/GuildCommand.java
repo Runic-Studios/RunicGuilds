@@ -273,6 +273,7 @@ public class GuildCommand implements CommandExecutor {
 
 	private static void sendHelpMessage(Player player) {
 		sendMessage(player, "&6Guild Commands:");
+		sendMessage(player, "&e/guild info &r- gets guild members and score.");
 		sendMessage(player, "&e/guild invite &6[player] &r- invites a player to the guild.");
 		sendMessage(player, "&e/guild bank &r- opens your guild bank.");
 		sendMessage(player, "&e/guild kick &6[player] &r- kicks a player from the guild.");
@@ -281,7 +282,7 @@ public class GuildCommand implements CommandExecutor {
 		sendMessage(player, "&e/guild transfer &6[player] &r- transfers the guild ownership to another member.");
 		sendMessage(player, "&e/guild leave &r- removes you from your guild.");
 		sendMessage(player, "&e/guild accept&6/&edecline &r- accepts/declines an invitation to join a guild.");
-		sendMessage(player, "&e/guild confirm &r- for confirming certain actions.");
+		sendMessage(player, "&e/guild confirm&6/&ecancel &r- for confirming/canceling certain actions.");
 	}
 
 	private static void sendMessage(Player player, String message) {
