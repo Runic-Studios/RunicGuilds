@@ -59,6 +59,11 @@
 			<id>everything</id>
 			<url>http://repo.citizensnpcs.co/</url>
 		</repository>
+		<!-- PlaceholderAPI Repo -->
+		<repository>
+			<id>placeholderapi</id>
+			<url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<!-- Spigot API -->
@@ -81,7 +86,14 @@
 			<artifactId>RunicCore</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicCore.jar</systemPath>
+			<systemPath>${project.basedir}/lib/RunicCore-1.0-SNAPSHOT.jar</systemPath>
+		</dependency>
+		<!-- Placeholder API -->
+		<dependency>
+			<groupId>me.clip</groupId>
+			<artifactId>placeholderapi</artifactId>
+			<version>2.9.2</version>
+			<scope>provided</scope>
 		</dependency>
 		<!-- CitizensAPI -->
 		<dependency>

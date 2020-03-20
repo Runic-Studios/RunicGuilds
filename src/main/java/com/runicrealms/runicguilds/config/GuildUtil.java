@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.api.GuildCreationResult;
+import org.bukkit.entity.Player;
 
 public class GuildUtil {
 
@@ -61,6 +62,16 @@ public class GuildUtil {
 			}
 		}
 		return null;
+	}
+
+	public static List<GuildMember> getOnlineMembersWithOwner(Guild guild) {
+		List<GuildMember> online = new ArrayList<>();
+		for (Player pl : Bukkit.getOnlinePlayers()) {
+			if (guild.getMember(pl.getUniqueId()) != null) {
+				online.add(guild.getMember(pl.getUniqueId()));
+			}
+		}
+		return online;
 	}
 	
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix) {

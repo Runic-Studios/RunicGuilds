@@ -52,7 +52,7 @@ public class Guild {
 	public List<ItemStack> getBank() {
 		return this.bank;
 	}
-g
+
 	public List<GuildMember> getMembersWithOwner() {
 		List<GuildMember> membersWithOwner = new ArrayList<GuildMember>(this.members);
 		membersWithOwner.add(this.owner);
