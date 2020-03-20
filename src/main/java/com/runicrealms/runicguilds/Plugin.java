@@ -1,7 +1,9 @@
 package com.runicrealms.runicguilds;
 
+import java.util.*;
 import java.util.logging.Level;
 
+import com.runicrealms.runicguilds.event.EventClickNpc;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +18,10 @@ import com.runicrealms.runicguilds.gui.GuildBankUtil;
 public class Plugin extends JavaPlugin {
 	
 	private static Plugin instance;
+	private static Set<UUID> playersCreatingGuild = new HashSet<UUID>();
+
+	public static List<Integer> GUILD_HERALDS;
+	public static int GUILD_COST;
 	
 	@Override
 	public void onEnable() {
@@ -26,12 +32,18 @@ public class Plugin extends JavaPlugin {
 		ConfigLoader.initDirs();
 		GuildUtil.loadGuilds();
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
+		GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
+		GUILD_COST = this.getConfig().getInt("guild-cost");
 		EventPlayerJoinQuit.initializePlayerCache();
 		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBankUtil(), this);
+		this.getServer().getPluginManager().registerEvents(new EventClickNpc(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
+	}
 
+	public static Set<UUID> getPlayersCreatingGuild() {
+		return playersCreatingGuild;
 	}
 
 	public static Plugin getInstance() {

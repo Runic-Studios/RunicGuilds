@@ -2,10 +2,13 @@ package com.runicrealms.runicguilds.command;
 
 import java.util.*;
 
+import com.runicrealms.plugin.item.util.ItemRemover;
+import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.*;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,7 +29,17 @@ public class GuildCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
-			if (GuildUtil.getPlayerCache().get(player.getUniqueId()) != null) {
+			boolean isConfirming = false;
+			if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
+				if (args.length > 0) {
+					if (args[0].equalsIgnoreCase("confirm") || args[0].equalsIgnoreCase("cancel")) {
+						if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+							isConfirming = true;
+						}
+					}
+				}
+			}
+			if (GuildUtil.getPlayerCache().get(player.getUniqueId()) != null || isConfirming) {
 				String prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
 				Guild guild = GuildUtil.getGuild(prefix);
 				if (args.length == 0) {
@@ -185,7 +198,25 @@ public class GuildCommand implements CommandExecutor {
 							sendMessage(player, "&eYou cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands.");
 						}
 					} else if (args[0].equalsIgnoreCase("confirm")) {
-						if (transferOwnership.containsKey(player.getUniqueId())) {
+						if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+							if (args.length >= 3) {
+								if (player.getInventory().contains(Material.GOLD_NUGGET, Plugin.GUILD_COST)) {
+									GuildCreationResult result = RunicGuildsAPI.createGuild(player.getUniqueId(), combineArgs(args, 2), args[1], false);
+									if (result == GuildCreationResult.SUCCESSFUL) {
+										ItemRemover.takeItem(player, Material.GOLD_NUGGET, Plugin.GUILD_COST);
+										Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+										sendMessage(player, "&e" + result.getMessage());
+									} else {
+										sendMessage(player, "&e"+ result.getMessage() + " Try again, or type &6/guild cancel&e.");
+									}
+								} else {
+									sendMessage(player, "&ePut " + Plugin.GUILD_COST + " coins in your inventory, and speak with the guild herald again.");
+									Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+								}
+ 							} else {
+								sendMessage(player, "&eTo confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of three letters.");
+							}
+						} else if (transferOwnership.containsKey(player.getUniqueId())) {
 							guild.transferOwnership(guild.getMember(transferOwnership.get(player.getUniqueId())));
 							GuildUtil.saveGuild(guild);
 							sendMessage(player, "&eSuccessfully transferred guild ownership. You have been removed from your guild.");
@@ -212,7 +243,10 @@ public class GuildCommand implements CommandExecutor {
 							sendMessage(player, "&eYou have nothing to confirm.");
 						}
 					} else if (args[0].equalsIgnoreCase("cancel")) {
-						if (transferOwnership.containsKey(player.getUniqueId())) {
+						if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+							sendMessage(player, "&eCanceled creating guild.");
+							Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+						} else if (transferOwnership.containsKey(player.getUniqueId())) {
 							sendMessage(player, "&eCanceled owner transfership.");
 							transferOwnership.remove(player.getUniqueId());
 						} else if (disbanding.contains(player.getUniqueId())) {
@@ -244,6 +278,9 @@ public class GuildCommand implements CommandExecutor {
 			} else {
 				if (args[0].equalsIgnoreCase("accept")) {
 					if (invites.containsKey(player.getUniqueId())) {
+						if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+							Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+						}
 						Guild guild = GuildUtil.getGuild(invites.get(player.getUniqueId()));
 						guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.MEMBER, 0, player.getName()));
 						sendMessage(player, "&eYou have accepted the guild invitation.");
@@ -299,6 +336,17 @@ public class GuildCommand implements CommandExecutor {
 
 	public static Set<UUID> getDisbanding() {
 		return disbanding;
+	}
+
+	private static String combineArgs(String[] args, int start) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = start; i < args.length; i++) {
+			builder.append(args[i]);
+			if (i != args.length - 1) {
+				builder.append(" ");
+			}
+		}
+		return builder.toString();
 	}
 
 }

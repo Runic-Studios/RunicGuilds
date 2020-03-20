@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.event;
 
+import com.runicrealms.runicguilds.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,6 +27,9 @@ public class EventPlayerJoinQuit implements Listener {
 		}
 		if (GuildCommand.getDisbanding().contains(event.getPlayer().getUniqueId())) {
 			GuildCommand.getDisbanding().remove(event.getPlayer().getUniqueId());
+		}
+		if (Plugin.getPlayersCreatingGuild().contains(event.getPlayer().getUniqueId())) {
+			Plugin.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
 		}
 	}
 	

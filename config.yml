@@ -4,3 +4,6 @@ permissions:
   guildmod-reset: 'runicadmin.guilds.reset'
   guildmod-bank: 'runicadmin.guilds.bank'
 max-bank-pages: 10
+guild-heralds:
+  - 477 # dmr
+guild-cost: 64

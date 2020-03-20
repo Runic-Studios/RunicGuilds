@@ -75,6 +75,9 @@ public class GuildUtil {
 		if (guilds.containsKey(prefix)) {
 			return GuildCreationResult.PREFIX_NOT_UNIQUE;
 		}
+		if (name.length() > 16) {
+			return GuildCreationResult.NAME_TOO_LONG;
+		}
 		for (String guild : guilds.keySet()) {
 			if (guilds.get(guild).getGuild().getGuildName().equalsIgnoreCase(name)) {
 				return GuildCreationResult.NAME_NOT_UNIQUE;

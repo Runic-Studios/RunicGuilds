@@ -54,6 +54,11 @@
 			<id>papermc</id>
 			<url>https://papermc.io/repo/repository/maven-public/</url>
 		</repository>
+		<!-- Citizens Repo -->
+		<repository>
+			<id>everything</id>
+			<url>http://repo.citizensnpcs.co/</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<!-- Spigot API -->
@@ -70,13 +75,21 @@
 			<version>1.13.2-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- RunicCharacters -->
-<!--		<dependency>-->
-<!--			<groupId>com.runicrealms.runiccharacters</groupId>-->
-<!--			<artifactId>RunicCharacters</artifactId>-->
-<!--			<version>1.0</version>-->
-<!--			<scope>system</scope>-->
-<!--			<systemPath>${project.basedir}/lib/RunicCharacters.jar</systemPath>-->
-<!--		</dependency>-->
+		<!-- RunicCore -->
+		<dependency>
+			<groupId>com.runicrealms.plugin</groupId>
+			<artifactId>RunicCore</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/RunicCore.jar</systemPath>
+		</dependency>
+		<!-- CitizensAPI -->
+		<dependency>
+			<groupId>net.citizensnpcs</groupId>
+			<artifactId>citizens</artifactId>
+			<version>2.0.25-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 </project>
