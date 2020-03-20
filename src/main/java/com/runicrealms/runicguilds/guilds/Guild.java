@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.guilds;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -50,6 +51,12 @@ public class Guild {
 
 	public List<ItemStack> getBank() {
 		return this.bank;
+	}
+g
+	public List<GuildMember> getMembersWithOwner() {
+		List<GuildMember> membersWithOwner = new ArrayList<GuildMember>(this.members);
+		membersWithOwner.add(this.owner);
+		return membersWithOwner;
 	}
 
 	public void setBankSize(Integer size) {
