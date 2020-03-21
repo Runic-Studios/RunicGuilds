@@ -42,6 +42,7 @@ public class DataFileConfiguration {
 			@Override
 			public void run() {
 				config.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
+				config.set("members", null);
 				for (GuildMember member : guild.getMembers()) {
 					config.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
 					config.set("members." + member.getUUID().toString() + ".score", member.getScore());
