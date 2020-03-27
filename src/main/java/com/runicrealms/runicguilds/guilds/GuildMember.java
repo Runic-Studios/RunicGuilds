@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.guilds;
 
 import java.util.UUID;
 
-public class GuildMember {
+public class GuildMember implements Cloneable {
 	
 	private UUID uuid;
 	private GuildRank rank;
@@ -38,6 +38,11 @@ public class GuildMember {
 
 	public String getLastKnownName() {
 		return this.name;
+	}
+
+	@Override
+	public GuildMember clone() {
+		return new GuildMember(this.uuid, this.rank, this.score, this.name);
 	}
 	
 }

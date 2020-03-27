@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -22,6 +23,16 @@ public class EventClickNpc implements Listener {
                     }
                 } else {
                     event.getClicker().sendMessage(ChatColor.YELLOW + "You cannot create a guild because you are already in one!");
+                }
+                return;
+            }
+        }
+        for (Integer bankerId : Plugin.GUILD_BANKERS) {
+            if (bankerId == event.getNPC().getId()) {
+                if (GuildUtil.getPlayerCache().get(event.getClicker().getUniqueId()) != null) {
+                   // GuildBankUtil.open(event.getClicker(), 1);
+                } else {
+                    event.getClicker().sendMessage(ChatColor.YELLOW + "You have to be in a guild to use the guild bank.");
                 }
                 return;
             }

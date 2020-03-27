@@ -68,7 +68,11 @@ public class GuildCommand implements CommandExecutor {
 							sendMessage(player, "&eYou must be of rank recruiter or higher to invite other players.");
 						}
 					} else if (args[0].equalsIgnoreCase("bank")) {
-						GuildBankUtil.open(player, 1);
+						if (player.isOp()) {
+							GuildBankUtil.open(player, 1);
+						} else {
+							sendMessage(player , "&eYou do not have permission to use this command.");
+						}
 					} else if (args[0].equalsIgnoreCase("kick")) {
 						if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
 							if (args.length == 2) {
@@ -177,6 +181,30 @@ public class GuildCommand implements CommandExecutor {
 							}
 						} else {
 							sendMessage(player, "&eYou must be the guild owner to use this command.");
+						}
+					} else if (args[0].equalsIgnoreCase("set")) {
+						if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
+							if (args.length >= 2) {
+								if (args[1].equalsIgnoreCase("name")) {
+									if (args.length >= 3) {
+										sendMessage(player, "&e" + GuildUtil.renameGuild(guild, combineArgs(args, 2)).getMessage());
+									} else {
+										sendMessage(player, "&eType &6/guild set name &e<name>.");
+									}
+								} else if (args[1].equalsIgnoreCase("prefix")) {
+									if (args.length == 3) {
+										sendMessage(player, "&e" + GuildUtil.reprefixGuild(guild, args[2], guild.getGuildPrefix()).getMessage());
+									} else {
+										sendMessage(player, "&eType &6/guild set prefix &e<prefix>.");
+									}
+								} else {
+									sendMessage(player, "&eType &6/guild set name&e/&6prefix&e.");
+								}
+							} else {
+								sendMessage(player, "&eType &6/guild set name&e/&6prefix&e.");
+							}
+						} else {
+							sendMessage(player, "&eYou must be guild owner to use that command!");
 						}
 					} else if (args[0].equalsIgnoreCase("leave")) {
 						if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
@@ -313,6 +341,7 @@ public class GuildCommand implements CommandExecutor {
 		sendMessage(player, "&e/guild info &r- gets guild members and score.");
 		sendMessage(player, "&e/guild invite &6[player] &r- invites a player to the guild.");
 		sendMessage(player, "&e/guild bank &r- opens your guild bank.");
+		sendMessage(player, "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.");
 		sendMessage(player, "&e/guild kick &6[player] &r- kicks a player from the guild.");
 		sendMessage(player, "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.");
 		sendMessage(player, "&e/guild disband &r- disbands your guild.");

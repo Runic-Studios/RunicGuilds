@@ -64,6 +64,10 @@ public class DataFileConfiguration {
 		file.delete();
 	}
 
+	public File getFile() {
+		return this.file;
+	}
+
 	public Guild getGuild() {
 		if (this.cache == null) {
 			ConfigurationSection guildMasterSec = this.config.getConfigurationSection("owner");
@@ -93,6 +97,16 @@ public class DataFileConfiguration {
 			this.cache = new Guild(members, owner, this.config.getString("name"), this.config.getString("prefix"), items, config.getInt("bank-size"));
 		}
 		return this.cache;
+	}
+
+	public void setCache(Guild guild) {
+		this.cache = guild;
+	}
+
+	public DataFileConfiguration clone(String prefix) {
+		DataFileConfiguration newData = new DataFileConfiguration(prefix + ".yml");
+		newData.setCache(this.getGuild().clone());
+		return newData;
 	}
 
 }

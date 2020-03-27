@@ -3,7 +3,26 @@ permissions:
   guildmod-kick: 'runicadmin.guilds.kick'
   guildmod-reset: 'runicadmin.guilds.reset'
   guildmod-bank: 'runicadmin.guilds.bank'
-max-bank-pages: 10
+max-bank-pages: 5
 guild-heralds:
-  - 477 # dmr
-guild-cost: 64
+  - 313 # Azana
+  - 476 # Koldore
+  - 662 # Hilstead
+  - 478 # Wintervale
+  - 477 # DMR
+  - 663 # Isfodar
+  - 479 # Zenyth
+  - 480 # Naheen
+  - 481 # Naz'mora
+guild-bankers:
+  - 714 # Azana
+  - 715 # Azana
+  - 716 # Koldore
+  - 717 # Hilstead
+  - 718 # Wintervale
+  - 719 # DMR
+  - 720 # Isfodar
+  - 721 # Zenyth
+  - 722 # Naheen
+  - 723 # Naz'mora
+guild-cost: 1500

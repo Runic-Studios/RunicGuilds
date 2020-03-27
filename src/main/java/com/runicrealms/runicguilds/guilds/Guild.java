@@ -1,15 +1,12 @@
 package com.runicrealms.runicguilds.guilds;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
-public class Guild {
+public class Guild implements Cloneable {
 
 	private Set<GuildMember> members;
 	private GuildMember owner;
@@ -52,7 +49,7 @@ public class Guild {
 	public List<ItemStack> getBank() {
 		return this.bank;
 	}
-g
+
 	public List<GuildMember> getMembersWithOwner() {
 		List<GuildMember> membersWithOwner = new ArrayList<GuildMember>(this.members);
 		membersWithOwner.add(this.owner);
@@ -138,6 +135,31 @@ g
 		GuildMember member = getMember(player);
 		member.setScore(member.getScore() + score);
 		this.recalculateScore();
+	}
+
+	public void setGuildName(String name) {
+		this.guildName = name;
+	}
+
+	public void setGuildPrefix(String prefix) {
+		this.guildPrefix = prefix;
+	}
+
+	@Override
+	public Guild clone() {
+		List<ItemStack> newItems = new ArrayList<ItemStack>();
+		for (ItemStack item : this.bank) {
+			if (item != null) {
+				newItems.add(item.clone());
+			} else {
+				newItems.add(null);
+			}
+		}
+		Set<GuildMember> newMembers = new HashSet<GuildMember>();
+		for (GuildMember member : this.members) {
+			newMembers.add(member.clone());
+		}
+		return new Guild(newMembers, this.owner.clone(), new String(this.guildName), new String(this.guildPrefix), newItems, new Integer(this.bankSize));
 	}
 
 }

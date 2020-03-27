@@ -22,6 +22,8 @@ public class Plugin extends JavaPlugin {
 
 	public static List<Integer> GUILD_HERALDS;
 	public static int GUILD_COST;
+	public static List<Integer> GUILD_BANKERS;
+	public static int MAX_BANK_PAGES;
 	
 	@Override
 	public void onEnable() {
@@ -34,6 +36,8 @@ public class Plugin extends JavaPlugin {
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
 		GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
 		GUILD_COST = this.getConfig().getInt("guild-cost");
+		GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
+		MAX_BANK_PAGES = this.getConfig().getInt("max-bank-pages");
 		EventPlayerJoinQuit.initializePlayerCache();
 		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBankUtil(), this);
