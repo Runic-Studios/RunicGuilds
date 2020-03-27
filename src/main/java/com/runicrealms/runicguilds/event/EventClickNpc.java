@@ -30,7 +30,7 @@ public class EventClickNpc implements Listener {
         for (Integer bankerId : Plugin.GUILD_BANKERS) {
             if (bankerId == event.getNPC().getId()) {
                 if (GuildUtil.getPlayerCache().get(event.getClicker().getUniqueId()) != null) {
-                   // GuildBankUtil.open(event.getClicker(), 1);
+                   GuildBankUtil.open(event.getClicker(), 1);
                 } else {
                     event.getClicker().sendMessage(ChatColor.YELLOW + "You have to be in a guild to use the guild bank.");
                 }
