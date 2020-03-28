@@ -56,7 +56,7 @@ public class GuildBankUtil implements Listener {
 		} else {
 			inventory.setItem(4, new ItemBuilder(Material.GOLD_INGOT, (int) (guild.getBankSize() / 45), "&6Purchase New Bank Page", "&cYou have reached the max amount of pages!").getItem());
 		}
-		for (int i = 0; i < 9; i++) {
+		for (int i = 1; i < 8; i++) {
 			if (i != 4) {
 				inventory.setItem(i, new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE, 1, " ").getItem());
 			}
@@ -143,9 +143,6 @@ public class GuildBankUtil implements Listener {
 								}
 							}
 						} else if (event.getRawSlot() < event.getInventory().getSize()) {
-//							if (!stackItemsIntoInventory(player.getInventory(), event.getCurrentItem(), 36)) {
-//								player.getWorld().dropItem(player.getLocation(), event.getCurrentItem());
-//							}
 							if (player.getInventory().firstEmpty() == -1) {
 								player.getWorld().dropItem(player.getLocation(), event.getCurrentItem());
 							} else {
@@ -155,10 +152,6 @@ public class GuildBankUtil implements Listener {
 							bankInventory.setItem(event.getSlot() - 9, new ItemStack(Material.AIR));
 							saveToBank(bankInventory, viewer.getPage(), player.getUniqueId());
 						} else {
-//							if (!stackItemsIntoInventory(bankInventory, clickedItem, 45)) {
-//								event.setCancelled(true);
-//								return;
-//							}
 							if (event.getCurrentItem().hasItemMeta()) {
 								if (event.getCurrentItem().getItemMeta().hasLore()) {
 									if (AttributeUtil.getCustomString(event.getCurrentItem(), "soulbound").equalsIgnoreCase("true")) {
@@ -226,42 +219,6 @@ public class GuildBankUtil implements Listener {
 			open(otherPlayer, playerToRefresh.getValue());
 		}
 	}
-
-//	private static boolean stackItemsIntoInventory(Inventory inventory, ItemStack item, int limit) {
-//		int itemsLeft = item.getAmount();
-//		ItemStack currentItem;
-//		int freeSpot = -1;
-//		for (int i = 0; i < limit; i++) {
-//			currentItem = inventory.getContents()[i];
-//			if (currentItem != null) {
-//				if (currentItem.getType() != Material.AIR) {
-//					if (currentItem.isSimilar(item)) {
-//						if (currentItem.getMaxStackSize() > currentItem.getAmount()) {
-//							while (itemsLeft > 0) {
-//								currentItem.setAmount(currentItem.getAmount() + 1);
-//								itemsLeft--;
-//								if (currentItem.getMaxStackSize() <= currentItem.getAmount()) {
-//									break;
-//								}
-//							}
-//						}
-//					}
-//				} else if (freeSpot == -1){
-//					freeSpot = i;
-//				}
-//			} else if (freeSpot == -1) {
-//				freeSpot = i;
-//			}
-//		}
-//		if (itemsLeft == 0) {
-//			return true;
-//		}
-//		if (freeSpot == -1) {
-//			return false;
-//		}
-//		inventory.setItem(freeSpot, item);
-//		return true;
-//	}
 
 	private static class ViewerInfo {
 
