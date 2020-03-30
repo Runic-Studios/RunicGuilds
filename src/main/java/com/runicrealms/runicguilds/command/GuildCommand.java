@@ -182,7 +182,7 @@ public class GuildCommand implements CommandExecutor {
 						} else {
 							sendMessage(player, "&eYou must be the guild owner to use this command.");
 						}
-					} else if (args[0].equalsIgnoreCase("set")) {
+					/*} else if (args[0].equalsIgnoreCase("set")) {
 						if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
 							if (args.length >= 2) {
 								if (args[1].equalsIgnoreCase("name")) {
@@ -205,7 +205,7 @@ public class GuildCommand implements CommandExecutor {
 							}
 						} else {
 							sendMessage(player, "&eYou must be guild owner to use that command!");
-						}
+						}*/
 					} else if (args[0].equalsIgnoreCase("leave")) {
 						if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
 							guild.removeMember(player.getUniqueId());
@@ -341,7 +341,7 @@ public class GuildCommand implements CommandExecutor {
 		sendMessage(player, "&e/guild info &r- gets guild members and score.");
 		sendMessage(player, "&e/guild invite &6[player] &r- invites a player to the guild.");
 		sendMessage(player, "&e/guild bank &r- opens your guild bank.");
-		sendMessage(player, "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.");
+		//sendMessage(player, "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.");
 		sendMessage(player, "&e/guild kick &6[player] &r- kicks a player from the guild.");
 		sendMessage(player, "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.");
 		sendMessage(player, "&e/guild disband &r- disbands your guild.");
