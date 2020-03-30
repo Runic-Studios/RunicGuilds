@@ -91,8 +91,6 @@ public class DataListener implements Listener {
         } else {
             RunicCore.getCacheManager().getPlayerCache(pl.getUniqueId()).setGuild("None");
         }
-        // update scoreboard
-        RunicCore.getScoreboardHandler().updateSideInfo(pl);
         // update tab
         RunicCore.getTabListManager().setupTab(pl);
     }

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.runicrealms.runicguilds.Plugin</groupId>
 	<artifactId>RunicGuilds</artifactId>
-	<version>1.0</version>
+	<version>1.15.2</version>
 	<name>RunicGuilds</name>
 	<description>Runic Realms Guilds Plugin</description>
 	<build>
@@ -70,23 +70,23 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.13.2-R0.1-SNAPSHOT</version>
+			<version>1.15.2-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Paper API -->
 		<dependency>
 			<groupId>com.destroystokyo.paper</groupId>
 			<artifactId>paper-api</artifactId>
-			<version>1.13.2-R0.1-SNAPSHOT</version>
+			<version>1.15.2-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- RunicCore -->
 		<dependency>
 			<groupId>com.runicrealms.plugin</groupId>
 			<artifactId>RunicCore</artifactId>
-			<version>1.0</version>
+			<version>1.15.2</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicCore-1.0-SNAPSHOT.jar</systemPath>
+			<systemPath>C:/Users/Owner/IdeaProjects/lib/RunicCore-1.15.2.jar</systemPath>
 		</dependency>
 		<!-- Placeholder API -->
 		<dependency>
@@ -99,7 +99,7 @@
 		<dependency>
 			<groupId>net.citizensnpcs</groupId>
 			<artifactId>citizens</artifactId>
-			<version>2.0.25-SNAPSHOT</version>
+			<version>2.0.26-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
