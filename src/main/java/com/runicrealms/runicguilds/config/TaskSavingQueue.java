@@ -26,8 +26,7 @@ public class TaskSavingQueue {
         Bukkit.getScheduler().runTaskTimerAsynchronously(Plugin.getInstance(), new Runnable() {
             @Override
             public void run() {
-                int max = (int) Math.ceil(queue.size() / 2);
-                for (int i = 0; i < max; i++) {
+                for (int i = 0; i < (int) Math.ceil(queue.size() * 0.50); i++) {
                     GuildUtil.saveGuildToFile(queue.pop());
                 }
             }

@@ -49,7 +49,7 @@ public class Plugin extends JavaPlugin {
 		this.getServer().getPluginManager().registerEvents(new DataListener(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
-
+		TaskSavingQueue.scheduleTask();
 		// register placeholder tags
 		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 			new PlaceholderAPI().register();
