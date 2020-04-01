@@ -86,7 +86,7 @@
 			<artifactId>RunicCore</artifactId>
 			<version>1.15.2</version>
 			<scope>system</scope>
-			<systemPath>C:/Users/Owner/IdeaProjects/lib/RunicCore-1.15.2.jar</systemPath>
+			<systemPath>${project.basedir}/lib/RunicCore-1.15.2.jar</systemPath>
 		</dependency>
 		<!-- Placeholder API -->
 		<dependency>
