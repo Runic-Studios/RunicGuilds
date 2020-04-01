@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds;
 import java.util.*;
 import java.util.logging.Level;
 
+import com.runicrealms.runicguilds.config.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.listeners.DataListener;
@@ -57,7 +58,7 @@ public class Plugin extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		// todo: save guilds data
+		TaskSavingQueue.emptyQueue();
 	}
 
 	public static Set<UUID> getPlayersCreatingGuild() {

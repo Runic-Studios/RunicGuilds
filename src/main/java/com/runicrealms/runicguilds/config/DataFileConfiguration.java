@@ -38,6 +38,10 @@ public class DataFileConfiguration {
 	}
 
 	public void save(Guild guild) {
+		TaskSavingQueue.add(guild);
+	}
+
+	public void saveGuildToFile(Guild guild) {
 		Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), new Runnable() {
 			@Override
 			public void run() {

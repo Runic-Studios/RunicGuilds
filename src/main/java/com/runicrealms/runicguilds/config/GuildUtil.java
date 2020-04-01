@@ -154,6 +154,10 @@ public class GuildUtil {
 		guilds.get(guild.getGuildPrefix()).save(guild);
 	}
 
+	public static void saveGuildToFile(Guild guild) {
+		guilds.get(guild.getGuildPrefix()).saveGuildToFile(guild);
+	}
+
 	public static void removeGuild(Guild guild) {
 		guilds.remove(guild.getGuildPrefix());
 	}
