@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import com.runicrealms.plugin.attributes.AttributeUtil;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.config.GuildData;
+import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.guilds.GuildRank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,7 +26,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 
 public class GuildBankUtil implements Listener {

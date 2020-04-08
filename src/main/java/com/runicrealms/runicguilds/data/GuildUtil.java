@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.config;
+package com.runicrealms.runicguilds.data;
 
 import java.util.*;
 import java.util.regex.Matcher;

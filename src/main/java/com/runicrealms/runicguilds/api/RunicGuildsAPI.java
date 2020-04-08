@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.runicrealms.runicguilds.config.GuildData;
+import com.runicrealms.runicguilds.data.GuildData;
 import org.bukkit.Bukkit;
 
-import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 

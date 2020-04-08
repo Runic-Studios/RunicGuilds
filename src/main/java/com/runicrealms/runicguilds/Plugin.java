@@ -3,7 +3,7 @@ package com.runicrealms.runicguilds;
 import java.util.*;
 import java.util.logging.Level;
 
-import com.runicrealms.runicguilds.config.TaskSavingQueue;
+import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
@@ -13,7 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.runicrealms.runicguilds.command.GuildCommand;
 import com.runicrealms.runicguilds.command.GuildModCommand;
-import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 

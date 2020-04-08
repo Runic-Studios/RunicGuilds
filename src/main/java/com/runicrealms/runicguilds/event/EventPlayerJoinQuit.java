@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.runicrealms.runicguilds.command.GuildCommand;
-import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.data.GuildUtil;
 
 public class EventPlayerJoinQuit implements Listener {
 	

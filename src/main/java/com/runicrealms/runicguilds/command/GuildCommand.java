@@ -5,7 +5,7 @@ import java.util.*;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.*;
-import com.runicrealms.runicguilds.config.GuildData;
+import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,7 +15,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildRank;

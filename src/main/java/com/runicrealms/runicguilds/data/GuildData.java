@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.config;
+package com.runicrealms.runicguilds.data;
 
 import com.mongodb.client.model.Filters;
 import com.runicrealms.plugin.RunicCore;

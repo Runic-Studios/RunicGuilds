@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.command;
 
 import java.util.UUID;
 
-import com.runicrealms.runicguilds.config.GuildData;
+import com.runicrealms.runicguilds.data.GuildData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -15,7 +15,7 @@ import com.runicrealms.runicguilds.api.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.GuildCreationResult;
 import com.runicrealms.runicguilds.api.GuildDisbandEvent;
 import com.runicrealms.runicguilds.api.GuildMemberKickedEvent;
-import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;

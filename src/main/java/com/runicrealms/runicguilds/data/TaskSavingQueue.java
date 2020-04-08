@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.config;
+package com.runicrealms.runicguilds.data;
 
 import com.runicrealms.runicguilds.Plugin;
 import org.bukkit.Bukkit;

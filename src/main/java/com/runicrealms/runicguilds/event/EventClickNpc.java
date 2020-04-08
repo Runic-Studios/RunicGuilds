@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.config.GuildUtil;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import org.bukkit.ChatColor;
