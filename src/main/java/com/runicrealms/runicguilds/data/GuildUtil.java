@@ -8,6 +8,7 @@ import com.mongodb.client.FindIterable;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.guilds.GuildRank;
+import com.runicrealms.runicrestart.api.RunicRestartApi;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -39,6 +40,7 @@ public class GuildUtil {
 				for (Document guildData : iterable) {
 					guilds.put(guildData.getString("prefix"), new GuildData(guildData.getString("prefix")));
 				}
+				RunicRestartApi.markPluginLoaded("guilds");
 			}
 		});
 	}

@@ -7,8 +7,11 @@ import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
+import com.runicrealms.runicrestart.api.ServerShutdownEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.runicrealms.runicguilds.command.GuildCommand;
@@ -17,7 +20,7 @@ import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 
-public class Plugin extends JavaPlugin {
+public class Plugin extends JavaPlugin implements Listener {
 	
 	private static Plugin instance;
 	private static Set<UUID> playersCreatingGuild = new HashSet<UUID>();
@@ -40,6 +43,7 @@ public class Plugin extends JavaPlugin {
 		GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
 		MAX_BANK_PAGES = this.getConfig().getInt("max-bank-pages");
 		EventPlayerJoinQuit.initializePlayerCache();
+		this.getServer().getPluginManager().registerEvents(this, this);
 		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBankUtil(), this);
 		this.getServer().getPluginManager().registerEvents(new EventClickNpc(), this);
@@ -53,8 +57,8 @@ public class Plugin extends JavaPlugin {
 		}
 	}
 
-	@Override
-	public void onDisable() {
+	@EventHandler
+	public void onShutdown(ServerShutdownEvent event) {
 		TaskSavingQueue.emptyQueue();
 	}
 

@@ -124,5 +124,13 @@
 			<version>2.9.2</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- Runic Restart -->
+		<dependency>
+			<groupId>com.runicrealms.runicrestart.Plugin</groupId>
+			<artifactId>RunicRestart</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/RunicRestart.jar</systemPath>
+		</dependency>
 	</dependencies>
 </project>
