@@ -1,25 +1,19 @@
 package com.runicrealms.runicguilds.config;
 
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.Bukkit;
 
 import java.util.*;
 
 public class TaskSavingQueue {
 
-    private volatile static LinkedList<Guild> queue = new LinkedList<Guild>();
+    private volatile static LinkedList<GuildData> queue = new LinkedList<GuildData>();
 
-    public static void add(Guild guild) {
-        if (queue.contains(guild)) {
+    public static void add(GuildData guildData) {
+        if (queue.contains(guildData)) {
             return;
         }
-        for (Guild queueGuild : queue) {
-            if (queueGuild.getGuildPrefix().equalsIgnoreCase(guild.getGuildPrefix())) {
-                return;
-            }
-        }
-        queue.add(guild);
+        queue.add(guildData);
     }
 
     public static void scheduleTask() {
@@ -27,7 +21,8 @@ public class TaskSavingQueue {
             @Override
             public void run() {
                 for (int i = 0; i < (int) Math.ceil(queue.size() * 0.50); i++) {
-                    GuildUtil.saveGuildToFile(queue.pop());
+                    GuildData data = queue.pop();
+                    data.save(data.getData());
                 }
             }
         }, 0L, 20L * 15L);
@@ -35,7 +30,8 @@ public class TaskSavingQueue {
 
     public static void emptyQueue() {
         for (int i = 0; i < queue.size(); i++) {
-            GuildUtil.saveGuildToFile(queue.pop());
+            GuildData data = queue.pop();
+            data.save(data.getData());
         }
     }
 

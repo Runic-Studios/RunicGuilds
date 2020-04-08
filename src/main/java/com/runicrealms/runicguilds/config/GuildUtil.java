@@ -1,68 +1,66 @@
 package com.runicrealms.runicguilds.config;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.runicrealms.runicguilds.api.GuildRenameResult;
-import com.runicrealms.runicguilds.api.GuildReprefixResult;
+import com.mongodb.client.FindIterable;
+import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.guilds.GuildRank;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.api.GuildCreationResult;
 import org.bukkit.entity.Player;
-
-import javax.xml.crypto.Data;
+import org.bukkit.inventory.ItemStack;
 
 public class GuildUtil {
 
-	private static Map<String, DataFileConfiguration> guilds = new HashMap<String, DataFileConfiguration>();
+	private static Map<String, GuildData> guilds = new HashMap<String, GuildData>();
 	private static Map<UUID, String> players = new HashMap<UUID, String>();
 
 	public static List<Guild> getAllGuilds() {
 		List<Guild> allGuilds = new ArrayList<Guild>();
 		for (String key : guilds.keySet()) {
-			allGuilds.add(guilds.get(key).getGuild());
+			allGuilds.add(guilds.get(key).getData());
 		}
 		return allGuilds;
 	}
 
 	public static void loadGuilds() {
-		for (File file : ConfigLoader.getGuildsFolder().listFiles()) {
-			if (!file.isDirectory()) {
-				guilds.put(file.getName().replace(".yml", ""), new DataFileConfiguration(file.getName()));
+		Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), new Runnable() {
+			@Override
+			public void run() {
+				FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildData().find();
+				for (Document guildData : iterable) {
+					guilds.put(guildData.getString("prefix"), new GuildData(guildData.getString("prefix")));
+				}
 			}
-		}
+		});
 	}
 
-	public static Guild getGuild(UUID player) {
-		for (String key : guilds.keySet()) {
-			Guild guild = guilds.get(key).getGuild();
-			if (guild.getOwner().getUUID().toString().equalsIgnoreCase(player.toString())) {
-				return guild;
+	public static GuildData getGuildData(UUID player) {
+		for (Map.Entry<String, GuildData> entry : guilds.entrySet()) {
+			if (entry.getValue().getData().getOwner().getUUID().toString().equalsIgnoreCase(player.toString())) {
+				return entry.getValue();
 			}
-			for (GuildMember member : guild.getMembers()) {
+			for (GuildMember member : entry.getValue().getData().getMembers()) {
 				if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
-					return guild;
+					return entry.getValue();
 				}
 			}
 		}
 		return null;
 	}
 
-	public static Guild getGuild(String prefix) {
-		for (String key : guilds.keySet()) {
-			if (guilds.get(key).getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
-				return guilds.get(key).getGuild();
+	public static GuildData getGuildData(String prefix) {
+		for (Map.Entry<String, GuildData> entry : guilds.entrySet()) {
+			if (entry.getValue().getData().getGuildPrefix().equalsIgnoreCase(prefix)) {
+				return entry.getValue();
 			}
 		}
 		return null;
@@ -92,13 +90,13 @@ public class GuildUtil {
 			return GuildCreationResult.NAME_TOO_LONG;
 		}
 		for (String guild : guilds.keySet()) {
-			if (guilds.get(guild).getGuild().getGuildName().equalsIgnoreCase(name)) {
+			if (guilds.get(guild).getData().getGuildName().equalsIgnoreCase(name)) {
 				return GuildCreationResult.NAME_NOT_UNIQUE;
 			}
-			if (guilds.get(guild).getGuild().getOwner().getUUID().toString().equalsIgnoreCase(owner.toString())) {
+			if (guilds.get(guild).getData().getOwner().getUUID().toString().equalsIgnoreCase(owner.toString())) {
 				return GuildCreationResult.CREATOR_IN_GUILD;
 			}
-			for (GuildMember member : guilds.get(guild).getGuild().getMembers()) {
+			for (GuildMember member : guilds.get(guild).getData().getMembers()) {
 				if (member.getUUID().toString().equalsIgnoreCase(owner.toString())) {
 					return GuildCreationResult.CREATOR_IN_GUILD;
 				}
@@ -107,19 +105,12 @@ public class GuildUtil {
 				return GuildCreationResult.PREFIX_NOT_UNIQUE;
 			}
 		}
-		FileConfiguration config = ConfigLoader.getYamlConfigFile(prefix + ".yml", ConfigLoader.getGuildsFolder());
-		config.set("owner." + owner.toString() + ".score", 0);
-		config.set("prefix", prefix);
-		config.set("name", name);
-		config.set("bank-size", 45);
-		try {
-			config.save(new File(ConfigLoader.getGuildsFolder(), prefix + ".yml"));
-		} catch (IOException exception) {
-			exception.printStackTrace();
-			return GuildCreationResult.INTERNAL_ERROR;
+		List<ItemStack> bank = new ArrayList<ItemStack>();
+		for (int i = 0; i < 45; i++) {
+			bank.add(null);
 		}
-		DataFileConfiguration fileConfig = new DataFileConfiguration(prefix + ".yml");
-		guilds.put(prefix, fileConfig);
+		GuildData data = new GuildData(new Guild(new HashSet<GuildMember>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45));
+		guilds.put(prefix, data);
 		players.put(owner, prefix);
 		return GuildCreationResult.SUCCESSFUL;
 	}
@@ -128,7 +119,7 @@ public class GuildUtil {
 		return players;
 	}
 
-	public static Map<String, DataFileConfiguration> getGuildFiles() {
+	public static Map<String, GuildData> getGuildDatas() {
 		return guilds;
 	}
 
@@ -150,75 +141,75 @@ public class GuildUtil {
 		return null;
 	}
 
-	public static void saveGuild(Guild guild) {
-		guilds.get(guild.getGuildPrefix()).save(guild);
-	}
+//	public static void saveGuild(Guild guild) {
+//		guilds.get(guild.getGuildPrefix()).save(guild);
+//	}
+//
+//	public static void saveGuildToFile(Guild guild) {
+//		guilds.get(guild.getGuildPrefix()).saveGuildToFile(guild);
+//	}
 
-	public static void saveGuildToFile(Guild guild) {
-		guilds.get(guild.getGuildPrefix()).saveGuildToFile(guild);
-	}
-
-	public static void removeGuild(Guild guild) {
+	public static void removeGuildFromCache(Guild guild) {
 		guilds.remove(guild.getGuildPrefix());
 	}
 
-	public static GuildRenameResult renameGuild(Guild guild, String name) {
-		if (name.length() > 16) {
-			return GuildRenameResult.NAME_NOT_UNIQUE;
-		}
-		for (String otherGuild : guilds.keySet()) {
-			if (guilds.get(otherGuild).getGuild().getGuildName().equalsIgnoreCase(name)) {
-				return GuildRenameResult.NAME_NOT_UNIQUE;
-			}
-		}
-		try {
-			guild.setGuildName(name);
-			saveGuild(guild);
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			return GuildRenameResult.INTERNAL_ERROR;
-		}
-		return GuildRenameResult.SUCCESSFUL;
-	}
-
-	public static GuildReprefixResult reprefixGuild(Guild guild, String prefix, String oldPrefix) {
-		Pattern pattern = Pattern.compile("[a-zA-Z]");
-		Matcher matcher = pattern.matcher(prefix);
-		if (matcher.find() == false) {
-			return GuildReprefixResult.BAD_PREFIX;
-		}
-		for (String otherGuild : guilds.keySet()) {
-			if (otherGuild.equalsIgnoreCase(prefix)) {
-				if (!guilds.get(otherGuild).getGuild().getGuildName().equalsIgnoreCase(guild.getGuildName())) {
-					return GuildReprefixResult.PREFIX_NOT_UNIQUE;
-				}
-			}
-		}
-		try {
-			Map<UUID, String> newPlayers = new HashMap<UUID, String>();
-			for (Map.Entry<UUID, String> player : players.entrySet()) {
-				if (!player.getValue().equalsIgnoreCase(oldPrefix)) {
-					newPlayers.put(player.getKey(), player.getValue());
-				} else {
-					newPlayers.put(player.getKey(), prefix);
-				}
-			}
-			players = newPlayers;
-			DataFileConfiguration data = guilds.get(oldPrefix);
-			File newFile = new File(data.getFile().getParent(), prefix + ".yml");
-			File oldFile = new File(data.getFile().getParent(), oldPrefix + ".yml");
-			data.getFile().renameTo(newFile);
-			DataFileConfiguration newData = data.clone(prefix);
-			Guild newGuild = newData.getGuild();
-			newGuild.setGuildPrefix(prefix);
-			newData.save(newGuild);
-			guilds.remove(oldPrefix);
-			guilds.put(prefix, newData);
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			return GuildReprefixResult.INTERNAL_ERROR;
-		}
-		return GuildReprefixResult.SUCCESSFUL;
-	}
+//	public static GuildRenameResult renameGuild(Guild guild, String name) {
+//		if (name.length() > 16) {
+//			return GuildRenameResult.NAME_NOT_UNIQUE;
+//		}
+//		for (String otherGuild : guilds.keySet()) {
+//			if (guilds.get(otherGuild).getGuild().getGuildName().equalsIgnoreCase(name)) {
+//				return GuildRenameResult.NAME_NOT_UNIQUE;
+//			}
+//		}
+//		try {
+//			guild.setGuildName(name);
+//			saveGuild(guild);
+//		} catch (Exception exception) {
+//			exception.printStackTrace();
+//			return GuildRenameResult.INTERNAL_ERROR;
+//		}
+//		return GuildRenameResult.SUCCESSFUL;
+//	}
+//
+//	public static GuildReprefixResult reprefixGuild(Guild guild, String prefix, String oldPrefix) {
+//		Pattern pattern = Pattern.compile("[a-zA-Z]");
+//		Matcher matcher = pattern.matcher(prefix);
+//		if (matcher.find() == false) {
+//			return GuildReprefixResult.BAD_PREFIX;
+//		}
+//		for (String otherGuild : guilds.keySet()) {
+//			if (otherGuild.equalsIgnoreCase(prefix)) {
+//				if (!guilds.get(otherGuild).getGuild().getGuildName().equalsIgnoreCase(guild.getGuildName())) {
+//					return GuildReprefixResult.PREFIX_NOT_UNIQUE;
+//				}
+//			}
+//		}
+//		try {
+//			Map<UUID, String> newPlayers = new HashMap<UUID, String>();
+//			for (Map.Entry<UUID, String> player : players.entrySet()) {
+//				if (!player.getValue().equalsIgnoreCase(oldPrefix)) {
+//					newPlayers.put(player.getKey(), player.getValue());
+//				} else {
+//					newPlayers.put(player.getKey(), prefix);
+//				}
+//			}
+//			players = newPlayers;
+//			DataFileConfiguration data = guilds.get(oldPrefix);
+//			File newFile = new File(data.getFile().getParent(), prefix + ".yml");
+//			File oldFile = new File(data.getFile().getParent(), oldPrefix + ".yml");
+//			data.getFile().renameTo(newFile);
+//			DataFileConfiguration newData = data.clone(prefix);
+//			Guild newGuild = newData.getGuild();
+//			newGuild.setGuildPrefix(prefix);
+//			newData.save(newGuild);
+//			guilds.remove(oldPrefix);
+//			guilds.put(prefix, newData);
+//		} catch (Exception exception) {
+//			exception.printStackTrace();
+//			return GuildReprefixResult.INTERNAL_ERROR;
+//		}
+//		return GuildReprefixResult.SUCCESSFUL;
+//	}
 
 }

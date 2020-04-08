@@ -5,6 +5,7 @@ import java.util.*;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.*;
+import com.runicrealms.runicguilds.config.GuildData;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -41,7 +42,8 @@ public class GuildCommand implements CommandExecutor {
 			}
 			if (GuildUtil.getPlayerCache().get(player.getUniqueId()) != null || isConfirming) {
 				String prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
-				Guild guild = GuildUtil.getGuild(prefix);
+				GuildData guildData = GuildUtil.getGuildData(prefix);
+				Guild guild = guildData.getData();
 				if (args.length == 0) {
 					sendHelpMessage(player);
 				} else {
@@ -53,7 +55,7 @@ public class GuildCommand implements CommandExecutor {
 										sendMessage(Bukkit.getPlayerExact(args[1]), "&eYou have been invited to join the guild " + guild.getGuildName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation.");
 										sendMessage(player, "&eYou have invited a player to the guild. An invitation has been sent.");
 										invites.put(Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId());
-										GuildUtil.saveGuild(guild);
+										guildData.queueToSave();
 										Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
 									} else {
 										sendMessage(player, "&eThat player is already in a guild.");
@@ -85,7 +87,7 @@ public class GuildCommand implements CommandExecutor {
 											if (GuildUtil.getPlayerCache().containsKey(otherPlayer)) {
 												GuildUtil.getPlayerCache().put(otherPlayer, null);
 											}
-											GuildUtil.saveGuild(guild);
+											guildData.queueToSave();
 											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId(), false));
 											if (GuildBankUtil.isViewingBank(otherPlayer) && Bukkit.getPlayerExact(args[1]) != null) {
 												GuildBankUtil.close(Bukkit.getPlayerExact(args[1]));
@@ -127,7 +129,7 @@ public class GuildCommand implements CommandExecutor {
 												member.getRank() != GuildRank.OFFICER) {
 											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
 											sendMessage(player, "&eMember has been promoted.");
-											GuildUtil.saveGuild(guild);
+											guildData.queueToSave();
 											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
 										} else {
 											if (member.getRank() == GuildRank.OFFICER) {
@@ -141,7 +143,7 @@ public class GuildCommand implements CommandExecutor {
 												member.getRank() != GuildRank.MEMBER) {
 											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
 											sendMessage(player, "&eMember has been demoted.");
-											GuildUtil.saveGuild(guild);
+											guildData.queueToSave();
 											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
 										} else {
 											if (member.getRank() == GuildRank.MEMBER) {
@@ -211,7 +213,7 @@ public class GuildCommand implements CommandExecutor {
 							guild.removeMember(player.getUniqueId());
 							sendMessage(player, "&eYou have left your guild.");
 							GuildUtil.getPlayerCache().put(player.getUniqueId(), null);
-							GuildUtil.saveGuild(guild);
+							guildData.queueToSave();
 							Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guild, player.getUniqueId()));
 							if (transferOwnership.containsKey(player.getUniqueId())) {
 								transferOwnership.remove(player.getUniqueId());
@@ -246,10 +248,9 @@ public class GuildCommand implements CommandExecutor {
 							}
 						} else if (transferOwnership.containsKey(player.getUniqueId())) {
 							guild.transferOwnership(guild.getMember(transferOwnership.get(player.getUniqueId())));
-							GuildUtil.saveGuild(guild);
 							sendMessage(player, "&eSuccessfully transferred guild ownership. You have been removed from your guild.");
 							GuildUtil.getPlayerCache().put(player.getUniqueId(), null);
-							GuildUtil.getGuildFiles().get(guild.getGuildPrefix()).save(guild);
+							guildData.queueToSave();
 							Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, transferOwnership.get(player.getUniqueId()), player.getUniqueId()));
 							transferOwnership.remove(player.getUniqueId());
 						} else if (disbanding.contains(player.getUniqueId())) {
@@ -263,8 +264,8 @@ public class GuildCommand implements CommandExecutor {
 							}
 							GuildUtil.getPlayerCache().put(guild.getOwner().getUUID(), null);
 							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, player.getUniqueId(), false));
-							GuildUtil.getGuildFiles().get(guild.getGuildPrefix()).deleteFile();
-							GuildUtil.removeGuild(guild);
+							guildData.deleteData();
+							GuildUtil.getGuildDatas().remove(guild.getGuildPrefix());
 							sendMessage(player, "&eSuccessfully disbanded guild.");
 							disbanding.remove(player.getUniqueId());
 						} else {
@@ -309,10 +310,11 @@ public class GuildCommand implements CommandExecutor {
 						if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
 							Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
 						}
-						Guild guild = GuildUtil.getGuild(invites.get(player.getUniqueId()));
+						GuildData guildData = GuildUtil.getGuildData(invites.get(player.getUniqueId()));
+						Guild guild = guildData.getData();
 						guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.MEMBER, 0, player.getName()));
 						sendMessage(player, "&eYou have accepted the guild invitation.");
-						GuildUtil.saveGuild(guild);
+						guildData.queueToSave();
 						GuildUtil.getPlayerCache().put(player.getUniqueId(), guild.getGuildPrefix());
 						Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), invites.get(player.getUniqueId())));
 						invites.remove(player.getUniqueId());
@@ -322,7 +324,7 @@ public class GuildCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("decline")) {
 					if (invites.containsKey(player.getUniqueId())) {
 						sendMessage(player, "&eYou have decline the guild invitation.");
-						Guild guild = GuildUtil.getGuild(invites.get(player.getUniqueId()));
+						Guild guild = GuildUtil.getGuildData(invites.get(player.getUniqueId())).getData();
 						Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guild, player.getUniqueId(), invites.get(player.getUniqueId())));
 						invites.remove(player.getUniqueId());
 					} else {

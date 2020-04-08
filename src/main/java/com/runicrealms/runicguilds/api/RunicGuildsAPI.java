@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.runicrealms.runicguilds.config.GuildData;
 import org.bukkit.Bukkit;
 
 import com.runicrealms.runicguilds.config.GuildUtil;
@@ -16,17 +17,17 @@ public class RunicGuildsAPI {
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix, boolean modCreated) {
 		GuildCreationResult result = GuildUtil.createGuild(owner, name, prefix);
 		if (result == GuildCreationResult.SUCCESSFUL) {
-			Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuild(prefix), modCreated));
+			Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(prefix).getData(), modCreated));
 		}
 		return result;
 	}
 
 	public static Guild getGuild(UUID uuid) {
-		return GuildUtil.getGuild(uuid);
+		return GuildUtil.getGuildData(uuid).getData();
 	}
 
 	public static Guild getGuild(String prefix) {
-		return GuildUtil.getGuild(prefix);
+		return GuildUtil.getGuildData(prefix).getData();
 	}
 
 	public static List<Guild> getAllGuilds() {
@@ -34,14 +35,14 @@ public class RunicGuildsAPI {
 	}
 
 	public static boolean isInGuild(UUID player) {
-		return GuildUtil.getGuild(player) != null;
+		return GuildUtil.getGuildData(player).getData() != null;
 	}
 
 	public static boolean addPlayerScore(UUID player, Integer score) {
 		if (isInGuild(player)) {
-			Guild guild = GuildUtil.getGuild(player);
-			guild.increasePlayerScore(player, score);
-			GuildUtil.saveGuild(guild);
+			GuildData guildData = GuildUtil.getGuildData(player);
+			guildData.getData().increasePlayerScore(player, score);
+			guildData.queueToSave();
 			return true;
 		}
 		return false;

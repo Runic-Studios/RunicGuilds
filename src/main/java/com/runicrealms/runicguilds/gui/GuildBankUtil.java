@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import com.runicrealms.plugin.attributes.AttributeUtil;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.config.GuildData;
 import com.runicrealms.runicguilds.guilds.GuildRank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -33,11 +34,11 @@ public class GuildBankUtil implements Listener {
 	private static Map<UUID, ViewerInfo> viewers = new HashMap<UUID, ViewerInfo>();
 
 	public static void open(Player player, Integer page) {
-		open(player, page, GuildUtil.getGuild(player.getUniqueId()).getGuildPrefix());
+		open(player, page, GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildPrefix());
 	}
 
 	public static void open(Player player, Integer page, String prefix) {
-		Guild guild = GuildUtil.getGuild(prefix);
+		Guild guild = GuildUtil.getGuildData(prefix).getData();
 		Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
 		if (guild.getBankSize() > 45 && page != guild.getBankSize() / 45) {
 			inventory.setItem(8, new ItemBuilder(Material.ARROW, 1, "&6Next Page").getItem());
@@ -74,13 +75,13 @@ public class GuildBankUtil implements Listener {
 	}
 
 	private static void saveToBank(Inventory inventory, Integer page, UUID uuid) {
-		List<ItemStack> bank = new ArrayList<ItemStack>(GuildUtil.getGuild(uuid).getBank());
+		GuildData guildData = GuildUtil.getGuildData(uuid);
+		List<ItemStack> bank = new ArrayList<ItemStack>(guildData.getData().getBank());
 		for (int i = (page - 1) * 45; i < page * 45; i++) {
 			bank.set(i, inventory.getItem(i - ((page - 1) * 45)));
 		}
-		Guild guild = GuildUtil.getGuild(uuid);
-		guild.setBank(bank);
-		GuildUtil.getGuildFiles().get(GuildUtil.getPlayerCache().get(uuid)).save(guild);
+		guildData.getData().setBank(bank);
+		guildData.queueToSave();
 	}
 
 	public static boolean isViewingBank(UUID uuid) {
@@ -102,7 +103,8 @@ public class GuildBankUtil implements Listener {
 					Player player = (Player) event.getWhoClicked();
 					if (viewers.containsKey(player.getUniqueId())) {
 						ItemStack clickedItem = event.getCurrentItem().clone();
-						Guild guild = GuildUtil.getGuild(player.getUniqueId());
+						GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
+						Guild guild = guildData.getData();
 						Inventory bankInventory = Bukkit.createInventory(null, 45, "");
 						Integer currentPage = new Integer(viewers.get(player.getUniqueId()).getPage());
 						for (int i = 0; i < 45; i++) {
@@ -127,7 +129,7 @@ public class GuildBankUtil implements Listener {
 											for (int i = 0; i < 45; i++) {
 												guild.getBank().add(null);
 											}
-											GuildUtil.saveGuild(guild);
+											guildData.queueToSave();
 											refreshViewers(viewer);
 										} else {
 											event.setCancelled(true);

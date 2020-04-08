@@ -15,8 +15,7 @@ public class EventPlayerJoinQuit implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
-		String prefix = GuildUtil.getGuild(event.getPlayer().getUniqueId()) == null ? null : GuildUtil.getGuild(event.getPlayer().getUniqueId()).getGuildPrefix();
-		GuildUtil.getPlayerCache().put(event.getPlayer().getUniqueId(), prefix);
+		GuildUtil.getPlayerCache().put(event.getPlayer().getUniqueId(), GuildUtil.getGuildData(event.getPlayer().getUniqueId()).getData().getGuildPrefix());
 	}
 	
 	@EventHandler
@@ -35,8 +34,7 @@ public class EventPlayerJoinQuit implements Listener {
 	
 	public static void initializePlayerCache() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			String prefix = GuildUtil.getGuild(player.getUniqueId()) == null ? null : GuildUtil.getGuild(player.getUniqueId()).getGuildPrefix();
-			GuildUtil.getPlayerCache().put(player.getUniqueId(), prefix);
+			GuildUtil.getPlayerCache().put(player.getUniqueId(), GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildPrefix());
 		}
 	}
 	

@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.command;
 
 import java.util.UUID;
 
+import com.runicrealms.runicguilds.config.GuildData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -31,7 +32,7 @@ public class GuildModCommand implements CommandExecutor {
 							GuildCreationResult result = GuildUtil.createGuild(GuildUtil.getOfflinePlayerUUID(args[1]), args[2], args[3]);
 							sendMessage(sender, "&e" + result.getMessage());
 							if (result == GuildCreationResult.SUCCESSFUL) {
-								Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuild(args[3]), true));
+								Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(args[3]).getData(), true));
 							}
 						} else {
 							sendMessage(sender, "&eThat player is not online.");
@@ -45,8 +46,8 @@ public class GuildModCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("disband")) {
 				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-disband"))) {
 					if (args.length == 2) {
-						if (GuildUtil.getGuildFiles().containsKey(args[1])) {
-							Guild guild = GuildUtil.getGuild(args[1]);
+						if (GuildUtil.getGuildDatas().containsKey(args[1])) {
+							Guild guild = GuildUtil.getGuildData(args[1]).getData();
 							if (GuildCommand.getTransferOwnership().containsKey(guild.getOwner().getUUID())) {
 								GuildCommand.getTransferOwnership().remove(guild.getOwner().getUUID());
 							}
@@ -65,8 +66,8 @@ public class GuildModCommand implements CommandExecutor {
 								GuildUtil.getPlayerCache().put(guild.getOwner().getUUID(), null);
 							}
 							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, null, true));
-							GuildUtil.getGuildFiles().get(args[1]).deleteFile();
-							GuildUtil.removeGuild(GuildUtil.getGuild(args[1]));
+							GuildUtil.getGuildDatas().get(args[1]).deleteData();
+							GuildUtil.removeGuildFromCache(GuildUtil.getGuildData(args[1]).getData());
 							sendMessage(sender, "&eSuccessfully disbanded guild.");
 						} else {
 							sendMessage(sender, "&eThat guild does not exist.");
@@ -80,8 +81,9 @@ public class GuildModCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("kick")) {
 				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-kick"))) {
 					if (args.length == 2) {
-						if (GuildUtil.getGuild(GuildUtil.getOfflinePlayerUUID(args[1])) != null) {
-							Guild guild = GuildUtil.getGuild(GuildUtil.getOfflinePlayerUUID(args[1]));
+						if (GuildUtil.getGuildData(GuildUtil.getOfflinePlayerUUID(args[1])).getData() != null) {
+							GuildData guildData = GuildUtil.getGuildData(GuildUtil.getOfflinePlayerUUID(args[1]));
+							Guild guild = guildData.getData();
 							if (!guild.getOwner().getUUID().toString().equalsIgnoreCase(GuildUtil.getOfflinePlayerUUID(args[1]).toString())) {
 								UUID uuid = GuildUtil.getOfflinePlayerUUID(args[1]);
 								if (GuildBankUtil.isViewingBank(uuid)) {
@@ -91,7 +93,7 @@ public class GuildModCommand implements CommandExecutor {
 									GuildUtil.getPlayerCache().put(uuid, null);
 								}
 								guild.removeMember(uuid);
-								GuildUtil.saveGuild(guild);
+								guildData.queueToSave();
 								Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, GuildUtil.getOfflinePlayerUUID(args[1]), null, true));
 								sendMessage(sender, "&eSuccessfully kicked guild member.");
 							} else {
@@ -112,9 +114,10 @@ public class GuildModCommand implements CommandExecutor {
 					if (args.length == 2) {
 						UUID playerUUID = Bukkit.getPlayerExact(args[1]).getUniqueId();
 						if (GuildUtil.getPlayerCache().get(playerUUID) != null) {
-							Guild guild = GuildUtil.getGuild(GuildUtil.getPlayerCache().get(playerUUID));
+							GuildData guildData = GuildUtil.getGuildData(GuildUtil.getPlayerCache().get(playerUUID));
+							Guild guild = guildData.getData();
 							guild.setPlayerScore(GuildUtil.getOfflinePlayerUUID(args[1]), 0);
-							GuildUtil.saveGuild(guild);
+							guildData.queueToSave();
 							sendMessage(sender, "&eSuccessfully reset guild member score.");
 						} else {
 							sendMessage(sender, "&eThat player is not in a guild.");
@@ -130,7 +133,7 @@ public class GuildModCommand implements CommandExecutor {
 					if (sender instanceof Player) {
 						Player player = (Player) sender;
 						if (args.length == 2) {
-							if (GuildUtil.getGuild(args[1]) != null) {
+							if (GuildUtil.getGuildData(args[1]) != null) {
 								GuildBankUtil.open(player, 1, args[1]);
 							} else {
 								sendMessage(sender, "&eThat guild does not exist");

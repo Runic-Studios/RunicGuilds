@@ -5,7 +5,6 @@ import java.util.logging.Level;
 
 import com.runicrealms.runicguilds.config.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
-import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -14,7 +13,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.runicrealms.runicguilds.command.GuildCommand;
 import com.runicrealms.runicguilds.command.GuildModCommand;
-import com.runicrealms.runicguilds.config.ConfigLoader;
 import com.runicrealms.runicguilds.config.GuildUtil;
 import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
@@ -35,7 +33,6 @@ public class Plugin extends JavaPlugin {
 		FileConfiguration config = this.getConfig();
 		config.options().copyDefaults(true);
 		this.saveDefaultConfig();
-		ConfigLoader.initDirs();
 		GuildUtil.loadGuilds();
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
 		GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
