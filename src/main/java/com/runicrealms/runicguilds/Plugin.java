@@ -7,6 +7,7 @@ import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
+import com.runicrealms.runicrestart.api.RunicRestartApi;
 import com.runicrealms.runicrestart.api.ServerShutdownEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -60,6 +61,7 @@ public class Plugin extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onShutdown(ServerShutdownEvent event) {
 		TaskSavingQueue.emptyQueue();
+		RunicRestartApi.markPluginSaved("guilds");
 	}
 
 	public static Set<UUID> getPlayersCreatingGuild() {
