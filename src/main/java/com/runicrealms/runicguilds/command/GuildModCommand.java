@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds.command;
 import java.util.UUID;
 
 import com.runicrealms.runicguilds.data.GuildData;
+import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -28,10 +29,12 @@ public class GuildModCommand implements CommandExecutor {
 			if (args[0].equalsIgnoreCase("create")) {
 				if (sender.isOp()) {
 					if (args.length == 4) {
-						if (GuildUtil.getOfflinePlayerUUID(args[1]) != null) {
-							GuildCreationResult result = GuildUtil.createGuild(GuildUtil.getOfflinePlayerUUID(args[1]), args[2], args[3]);
+						UUID uuid = GuildUtil.getOfflinePlayerUUID(args[1]);
+						if (uuid != null) {
+							GuildCreationResult result = GuildUtil.createGuild(uuid, args[2], args[3]);
 							sendMessage(sender, "&e" + result.getMessage());
 							if (result == GuildCreationResult.SUCCESSFUL) {
+								PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(uuid).getData().getGuildPrefix(), uuid.toString());
 								Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(args[3]).getData(), true));
 							}
 						} else {
@@ -55,6 +58,7 @@ public class GuildModCommand implements CommandExecutor {
 								GuildCommand.getDisbanding().remove(guild.getOwner().getUUID());
 							}
 							for (GuildMember member : guild.getMembers()) {
+								PlayerGuildDataUtil.setGuildForPlayer("None", member.getUUID().toString());
 								if (GuildUtil.getPlayerCache().containsKey(member.getUUID())) {
 									GuildUtil.getPlayerCache().put(member.getUUID(), null);
 								}
@@ -92,6 +96,7 @@ public class GuildModCommand implements CommandExecutor {
 								if (GuildUtil.getPlayerCache().containsKey(uuid)) {
 									GuildUtil.getPlayerCache().put(uuid, null);
 								}
+								PlayerGuildDataUtil.setGuildForPlayer("None", uuid.toString());
 								guild.removeMember(uuid);
 								guildData.queueToSave();
 								Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, GuildUtil.getOfflinePlayerUUID(args[1]), null, true));

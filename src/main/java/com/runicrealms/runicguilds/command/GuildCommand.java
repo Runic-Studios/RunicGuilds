@@ -6,6 +6,7 @@ import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.*;
 import com.runicrealms.runicguilds.data.GuildData;
+import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -83,6 +84,7 @@ public class GuildCommand implements CommandExecutor {
 									if (guild.isInGuild(args[1])) {
 										if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() < guild.getMember(otherPlayer).getRank().getRankNumber()) {
 											guild.removeMember(otherPlayer);
+											PlayerGuildDataUtil.setGuildForPlayer("None", otherPlayer.toString());
 											sendMessage(player, "&eRemoved player from the guild!");
 											if (GuildUtil.getPlayerCache().containsKey(otherPlayer)) {
 												GuildUtil.getPlayerCache().put(otherPlayer, null);
@@ -196,6 +198,7 @@ public class GuildCommand implements CommandExecutor {
 								} else if (args[1].equalsIgnoreCase("prefix")) {
 									if (args.length == 3) {
 										sendMessage(player, "&e" + GuildUtil.reprefixGuild(guild, args[2], guild.getGuildPrefix()).getMessage());
+										// set guild member's prefixes with PlayerGuildDataUtil
 									} else {
 										sendMessage(player, "&eType &6/guild set prefix &e<prefix>.");
 									}
@@ -210,6 +213,7 @@ public class GuildCommand implements CommandExecutor {
 						}*/
 					} else if (args[0].equalsIgnoreCase("leave")) {
 						if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
+							PlayerGuildDataUtil.setGuildForPlayer("None", player.getUniqueId().toString());
 							guild.removeMember(player.getUniqueId());
 							sendMessage(player, "&eYou have left your guild.");
 							GuildUtil.getPlayerCache().put(player.getUniqueId(), null);
@@ -233,6 +237,7 @@ public class GuildCommand implements CommandExecutor {
 								if (player.getInventory().contains(Material.GOLD_NUGGET, Plugin.GUILD_COST)) {
 									GuildCreationResult result = RunicGuildsAPI.createGuild(player.getUniqueId(), combineArgs(args, 2), args[1], false);
 									if (result == GuildCreationResult.SUCCESSFUL) {
+										PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildPrefix(), player.getUniqueId().toString());
 										ItemRemover.takeItem(player, Material.GOLD_NUGGET, Plugin.GUILD_COST);
 										Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
 										sendMessage(player, "&e" + result.getMessage());
@@ -248,6 +253,7 @@ public class GuildCommand implements CommandExecutor {
 							}
 						} else if (transferOwnership.containsKey(player.getUniqueId())) {
 							guild.transferOwnership(guild.getMember(transferOwnership.get(player.getUniqueId())));
+							PlayerGuildDataUtil.setGuildForPlayer("None", player.getUniqueId().toString());
 							sendMessage(player, "&eSuccessfully transferred guild ownership. You have been removed from your guild.");
 							GuildUtil.getPlayerCache().put(player.getUniqueId(), null);
 							guildData.queueToSave();
@@ -255,6 +261,7 @@ public class GuildCommand implements CommandExecutor {
 							transferOwnership.remove(player.getUniqueId());
 						} else if (disbanding.contains(player.getUniqueId())) {
 							for (GuildMember member : guild.getMembers()) {
+								PlayerGuildDataUtil.setGuildForPlayer("None", member.getUUID().toString());
 								if (GuildUtil.getPlayerCache().containsKey(member.getUUID())) {
 									GuildUtil.getPlayerCache().put(member.getUUID(), null);
 								}
@@ -313,6 +320,7 @@ public class GuildCommand implements CommandExecutor {
 						GuildData guildData = GuildUtil.getGuildData(invites.get(player.getUniqueId()));
 						Guild guild = guildData.getData();
 						guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.MEMBER, 0, player.getName()));
+						PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildPrefix(), player.getUniqueId().toString());
 						sendMessage(player, "&eYou have accepted the guild invitation.");
 						guildData.queueToSave();
 						GuildUtil.getPlayerCache().put(player.getUniqueId(), guild.getGuildPrefix());

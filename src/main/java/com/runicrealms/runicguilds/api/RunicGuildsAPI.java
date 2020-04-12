@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.runicrealms.runicguilds.data.GuildData;
+import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
 import org.bukkit.Bukkit;
 
 import com.runicrealms.runicguilds.data.GuildUtil;
@@ -17,6 +18,7 @@ public class RunicGuildsAPI {
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix, boolean modCreated) {
 		GuildCreationResult result = GuildUtil.createGuild(owner, name, prefix);
 		if (result == GuildCreationResult.SUCCESSFUL) {
+			PlayerGuildDataUtil.setGuildForPlayer(prefix, owner.toString());
 			Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(prefix).getData(), modCreated));
 		}
 		return result;
