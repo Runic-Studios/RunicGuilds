@@ -25,11 +25,19 @@ public class RunicGuildsAPI {
 	}
 
 	public static Guild getGuild(UUID uuid) {
-		return GuildUtil.getGuildData(uuid).getData();
+		GuildData data = GuildUtil.getGuildData(uuid);
+		if (data != null) {
+			return data.getData();
+		}
+		return null;
 	}
 
 	public static Guild getGuild(String prefix) {
-		return GuildUtil.getGuildData(prefix).getData();
+		GuildData data = GuildUtil.getGuildData(prefix);
+		if (data != null)
+			return data.getData();
+		}
+		return null;
 	}
 
 	public static List<Guild> getAllGuilds() {
