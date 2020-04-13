@@ -34,7 +34,7 @@ public class GuildModCommand implements CommandExecutor {
 							GuildCreationResult result = GuildUtil.createGuild(uuid, args[2], args[3]);
 							sendMessage(sender, "&e" + result.getMessage());
 							if (result == GuildCreationResult.SUCCESSFUL) {
-								PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(uuid).getData().getGuildPrefix(), uuid.toString());
+								PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(uuid).getData().getGuildName(), uuid.toString());
 								Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(args[3]).getData(), true));
 							}
 						} else {

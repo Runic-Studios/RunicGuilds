@@ -18,7 +18,7 @@ public class RunicGuildsAPI {
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix, boolean modCreated) {
 		GuildCreationResult result = GuildUtil.createGuild(owner, name, prefix);
 		if (result == GuildCreationResult.SUCCESSFUL) {
-			PlayerGuildDataUtil.setGuildForPlayer(prefix, owner.toString());
+			PlayerGuildDataUtil.setGuildForPlayer(name, owner.toString());
 			Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(prefix).getData(), modCreated));
 		}
 		return result;

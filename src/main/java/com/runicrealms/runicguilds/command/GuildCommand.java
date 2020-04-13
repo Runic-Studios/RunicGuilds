@@ -237,7 +237,7 @@ public class GuildCommand implements CommandExecutor {
 								if (player.getInventory().contains(Material.GOLD_NUGGET, Plugin.GUILD_COST)) {
 									GuildCreationResult result = RunicGuildsAPI.createGuild(player.getUniqueId(), combineArgs(args, 2), args[1], false);
 									if (result == GuildCreationResult.SUCCESSFUL) {
-										PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildPrefix(), player.getUniqueId().toString());
+										PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildName(), player.getUniqueId().toString());
 										ItemRemover.takeItem(player, Material.GOLD_NUGGET, Plugin.GUILD_COST);
 										Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
 										sendMessage(player, "&e" + result.getMessage());
@@ -320,7 +320,7 @@ public class GuildCommand implements CommandExecutor {
 						GuildData guildData = GuildUtil.getGuildData(invites.get(player.getUniqueId()));
 						Guild guild = guildData.getData();
 						guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.MEMBER, 0, player.getName()));
-						PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildPrefix(), player.getUniqueId().toString());
+						PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
 						sendMessage(player, "&eYou have accepted the guild invitation.");
 						guildData.queueToSave();
 						GuildUtil.getPlayerCache().put(player.getUniqueId(), guild.getGuildPrefix());

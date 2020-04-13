@@ -6,12 +6,12 @@ import org.bukkit.Bukkit;
 
 public class PlayerGuildDataUtil {
 
-    public static void setGuildForPlayer(String prefix, String uuid) {
+    public static void setGuildForPlayer(String name, String uuid) {
         Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), new Runnable() {
             @Override
             public void run() {
                 PlayerMongoData mongoData = new PlayerMongoData(uuid);
-                mongoData.set("guild", prefix);
+                mongoData.set("guild", name);
                 mongoData.save();
             }
         });
