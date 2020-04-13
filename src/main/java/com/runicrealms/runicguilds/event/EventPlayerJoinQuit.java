@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.data.GuildData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,7 +16,12 @@ public class EventPlayerJoinQuit implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
-		GuildUtil.getPlayerCache().put(event.getPlayer().getUniqueId(), GuildUtil.getGuildData(event.getPlayer().getUniqueId()).getData().getGuildPrefix());
+		GuildData guildData = GuildUtil.getGuildData(event.getPlayer().getUniqueId());
+		if (guildData != null) {
+			GuildUtil.getPlayerCache().put(event.getPlayer().getUniqueId(), guildData.getData().getGuildPrefix());
+		} else {
+			GuildUtil.getPlayerCache().put(event.getPlayer().getUniqueId(), null);
+		}
 	}
 	
 	@EventHandler

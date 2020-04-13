@@ -34,7 +34,7 @@ public class RunicGuildsAPI {
 
 	public static Guild getGuild(String prefix) {
 		GuildData data = GuildUtil.getGuildData(prefix);
-		if (data != null) { 
+		if (data != null) {
 			return data.getData();
 		}
 		return null;
