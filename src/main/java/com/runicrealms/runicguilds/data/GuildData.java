@@ -38,7 +38,7 @@ public class GuildData {
         this.prefix = prefix;
         this.guildData = new GuildMongoData(prefix);
         MongoDataSection ownerSection = this.guildData.getSection("owner");
-        UUID ownerUuid = UUID.fromString(((String[]) ownerSection.getKeys().toArray())[0]);
+        UUID ownerUuid = UUID.fromString(ownerSection.getKeys().iterator().next());
         GuildMember owner = new GuildMember(ownerUuid, GuildRank.OWNER, ownerSection.get(ownerUuid.toString() + ".score", Integer.class), GuildUtil.getOfflinePlayerName(ownerUuid));
         Set<GuildMember> members = new HashSet<GuildMember>();
         if (this.guildData.has("members")) {
