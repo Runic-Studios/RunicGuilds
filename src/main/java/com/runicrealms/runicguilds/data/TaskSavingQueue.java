@@ -1,5 +1,7 @@
 package com.runicrealms.runicguilds.data;
 
+import com.mongodb.client.model.UpdateOptions;
+import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.runicguilds.Plugin;
 import org.bukkit.Bukkit;
 
@@ -31,7 +33,7 @@ public class TaskSavingQueue {
     public static void emptyQueue() {
         for (int i = 0; i < queue.size(); i++) {
             GuildData data = queue.pop();
-            data.save(data.getData());
+            data.saveSync(data.getData());
         }
     }
 
