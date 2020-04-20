@@ -36,15 +36,22 @@ public class GuildCommand implements CommandExecutor {
 				if (args.length > 0) {
 					if (args[0].equalsIgnoreCase("confirm") || args[0].equalsIgnoreCase("cancel")) {
 						if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
-							isConfirming = true;
+							if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
+								isConfirming = true;
+							}
 						}
 					}
 				}
 			}
 			if (GuildUtil.getPlayerCache().get(player.getUniqueId()) != null || isConfirming) {
-				String prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
-				GuildData guildData = GuildUtil.getGuildData(prefix);
-				Guild guild = guildData.getData();
+				String prefix = null;
+				GuildData guildData = null;
+				Guild guild = null;
+				if (!isConfirming) {
+					prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
+					guildData = GuildUtil.getGuildData(prefix);
+					guild = guildData.getData();
+				}
 				if (args.length == 0) {
 					sendHelpMessage(player);
 				} else {

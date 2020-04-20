@@ -78,7 +78,8 @@ public class GuildData {
             @Override
             public void run() {
                 guildData.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
-                guildData.set("members", null);
+                guildData.remove("members");
+                guildData.save();
                 for (GuildMember member : guild.getMembers()) {
                     guildData.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
                     guildData.set("members." + member.getUUID().toString() + ".score", member.getScore());
