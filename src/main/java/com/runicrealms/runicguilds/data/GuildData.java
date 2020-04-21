@@ -146,7 +146,7 @@ public class GuildData {
     }
 
     public void deleteData() {
-        RunicCore.getDatabaseManager().getGuildData().deleteOne(Filters.eq("preifx", this.prefix));
+        RunicCore.getDatabaseManager().getGuildData().deleteOne(Filters.eq("prefix", this.prefix));
     }
 
 }
