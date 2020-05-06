@@ -3,6 +3,8 @@ package com.runicrealms.runicguilds;
 import java.util.*;
 import java.util.logging.Level;
 
+import com.runicrealms.RunicChat;
+import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.listeners.DataListener;
@@ -51,6 +53,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new DataListener(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
+		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel());
 		TaskSavingQueue.scheduleTask();
 		// register placeholder tags
 		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
