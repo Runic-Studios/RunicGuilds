@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds.chat;
 import com.runicrealms.api.chat.ChatChannel;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -32,12 +33,14 @@ public class GuildChannel extends ChatChannel {
                     }
                 }
             }
+        } else {
+            player.sendMessage(ChatColor.RED + "You must be in a guild to use guild chat!");
         }
         return recipients;
     }
 
     @Override
     public String getMessageFormat() {
-        return "&7%player_name%&8: &e%message%";
+        return "%luckperms_meta_name_color%%player_name%: &e%message%";
     }
 }
