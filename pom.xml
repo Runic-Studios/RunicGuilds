@@ -138,7 +138,15 @@
 			<artifactId>RunicChat</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicChat-1.0.jar</systemPath>
+			<systemPath>${project.basedir}/lib/RunicChat-1.0-SNAPSHOT.jar</systemPath>
+		</dependency>
+		<!-- RunicNpcs -->
+		<dependency>
+			<groupId>com.runicrealms.runicnpcs</groupId>
+			<artifactId>RunicNpcs</artifactId>
+			<version>1.15.2</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/RunicNpcs-1.15.2.jar</systemPath>
 		</dependency>
 	</dependencies>
 </project>

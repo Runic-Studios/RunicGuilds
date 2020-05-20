@@ -75,4 +75,8 @@ public class RunicGuildsAPI {
 		return recipients;
 	}
 
+	public static void registerGuildShop(GuildShop shop) {
+
+	}
+
 }

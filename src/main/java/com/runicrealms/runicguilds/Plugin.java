@@ -8,6 +8,7 @@ import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.listeners.DataListener;
+import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
 import com.runicrealms.runicrestart.api.ServerShutdownEvent;
@@ -51,6 +52,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new GuildBankUtil(), this);
 		this.getServer().getPluginManager().registerEvents(new EventClickNpc(), this);
 		this.getServer().getPluginManager().registerEvents(new DataListener(), this);
+		this.getServer().getPluginManager().registerEvents(new GuildShopManager(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
 		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel());
