@@ -23,23 +23,25 @@ public class GuildHeraldShop implements GuildShop {
 
         this.icon = new ItemStack(Material.GOLD_INGOT);
         ItemMeta iconMeta = this.icon.getItemMeta();
-        assert iconMeta != null;
-        iconMeta.setDisplayName(ChatColor.GOLD + "Guild Herald Shop");
-        iconMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Purchase a Guild"));
-        this.icon.setItemMeta(iconMeta);
+        if (iconMeta != null) {
+            iconMeta.setDisplayName(ChatColor.GOLD + "Guild Herald Shop");
+            iconMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Purchase a Guild"));
+            this.icon.setItemMeta(iconMeta);
+        }
 
         ItemStack trade = new ItemStack(Material.IRON_SWORD);
         ItemMeta tradeMeta = trade.getItemMeta();
-        assert tradeMeta != null;
-        tradeMeta.setDisplayName(ChatColor.YELLOW + "Purchase a Guild!");
-        tradeMeta.setLore(Arrays.asList("",
-                ChatColor.GRAY + "Become a guild master! Take part in guild activities",
-                ChatColor.GRAY + "and make your mark on the realm!",
-                "",
-                ChatColor.GOLD + "Price: " +
-                        ChatColor.GREEN + ChatColor.BOLD + Plugin.GUILD_COST + "c"));
-        tradeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        trade.setItemMeta(tradeMeta);
+        if (tradeMeta != null) {
+            tradeMeta.setDisplayName(ChatColor.YELLOW + "Purchase a Guild!");
+            tradeMeta.setLore(Arrays.asList("",
+                    ChatColor.GRAY + "Become a guild master! Take part in guild activities",
+                    ChatColor.GRAY + "and make your mark on the realm!",
+                    "",
+                    ChatColor.GOLD + "Price: " +
+                            ChatColor.GREEN + ChatColor.BOLD + Plugin.GUILD_COST + "c"));
+            tradeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            trade.setItemMeta(tradeMeta);
+        }
 
         GuildShopIcon tradeIcon = new GuildShopIcon(Plugin.GUILD_COST, CurrencyUtil.goldCoin(), trade, player -> {
             if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {

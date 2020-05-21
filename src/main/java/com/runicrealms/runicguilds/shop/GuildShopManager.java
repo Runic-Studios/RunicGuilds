@@ -36,7 +36,7 @@ public class GuildShopManager implements Listener {
         if (blankSlot == null) {
             blankSlot = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
             ItemMeta meta = blankSlot.getItemMeta();
-            assert meta != null;
+            if (meta == null) return;
             meta.setDisplayName(" ");
             blankSlot.setItemMeta(meta);
         }
