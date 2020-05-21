@@ -11,17 +11,19 @@ import com.runicrealms.runicguilds.data.GuildUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class GuildHeraldShop implements GuildShop {
 
     private ItemStack icon;
-    private Map<Integer, GuildShopIcon> trades;
+    private Map<Integer, GuildShopIcon> trades = new HashMap<Integer, GuildShopIcon>();
 
     public GuildHeraldShop() {
 
@@ -35,6 +37,7 @@ public class GuildHeraldShop implements GuildShop {
         ItemMeta tradeMeta = trade.getItemMeta();
         tradeMeta.setDisplayName(ChatColor.YELLOW + "Purchase a Guild");
         tradeMeta.setLore(Arrays.asList(new String[] {ChatColor.GOLD + " " + Plugin.GUILD_COST + " " + ChatColor.GRAY + "coins"}));
+        tradeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         trade.setItemMeta(tradeMeta);
 
         GuildShopIcon tradeIcon = new GuildShopIcon(Plugin.GUILD_COST, CurrencyUtil.goldCoin(), trade, new GuildShopBuyCondition() {
@@ -63,7 +66,7 @@ public class GuildHeraldShop implements GuildShop {
 
     @Override
     public Map<Integer, GuildShopIcon> getTrades() {
-        return null;
+        return this.trades;
     }
 
     @Override

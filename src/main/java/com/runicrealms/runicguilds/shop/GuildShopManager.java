@@ -1,5 +1,7 @@
 package com.runicrealms.runicguilds.shop;
 
+import com.runicrealms.plugin.item.util.ItemUtils;
+import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.api.GuildShopBuyResponse;
 import com.runicrealms.runicguilds.api.GuildShopIcon;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
@@ -71,12 +73,12 @@ public class GuildShopManager implements Listener {
             Player player = (Player) event.getWhoClicked();
             if (inShop.containsKey(player.getUniqueId())) {
                 event.setCancelled(true);
-                if (inShop.get(player.getUniqueId()).getTrades().containsKey(event.getSlot())) {
+                if (inShop.get(player.getUniqueId()).getTrades().containsKey(event.getSlot() - 9)) {
                     if (event.getRawSlot() < event.getInventory().getSize()) {
-                        GuildShopIcon icon = inShop.get(player.getUniqueId()).getTrades().get(event.getSlot());
+                        GuildShopIcon icon = inShop.get(player.getUniqueId()).getTrades().get(event.getSlot() - 9);
                         GuildShopBuyResponse response = icon.getCondition().getResponse(player);
                         if (response.canBuy()) {
-                            if (player.getInventory().contains(icon.getCurrency(), icon.getPrice())) {
+                            if (hasItems(player, icon.getCurrency(), icon.getPrice())) {
                                 if (icon.removePayment()) {
                                     if (icon.getPrice() > icon.getCurrency().getMaxStackSize()) {
                                         ItemStack stack = icon.getCurrency().clone();
@@ -125,4 +127,20 @@ public class GuildShopManager implements Listener {
             inShop.remove(event.getPlayer().getUniqueId());
         }
     }
+
+    private static boolean hasItems(Player player, ItemStack item, Integer needed) {
+        int amount = 0;
+        for (ItemStack inventoryItem : player.getInventory().getContents()) {
+            if (inventoryItem != null) {
+                if (inventoryItem.isSimilar(item)) {
+                    amount += inventoryItem.getAmount();
+                    if (amount >= needed) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }
