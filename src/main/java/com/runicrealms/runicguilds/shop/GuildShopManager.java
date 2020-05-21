@@ -57,7 +57,7 @@ public class GuildShopManager implements Listener {
             }
             inventory.setItem(4, shop.getIcon());
             for (Map.Entry<Integer, GuildShopIcon> trade : shop.getTrades().entrySet()) {
-                inventory.setItem(trade.getKey(), trade.getValue().getItem());
+                inventory.setItem(trade.getKey() + 9, trade.getValue().getItem());
             }
             event.getPlayer().openInventory(inventory);
             inShop.put(event.getPlayer().getUniqueId(), shop);
