@@ -4,8 +4,6 @@ import org.bukkit.entity.Player;
 
 public interface GuildShopBuyCondition {
 
-    public boolean canBuy(Player player);
-
-    public String getDeniedMessage();
+    public GuildShopBuyResponse getResponse(Player player);
 
 }
