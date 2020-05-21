@@ -1,7 +1,5 @@
 package com.runicrealms.runicguilds.shop;
 
-import com.runicrealms.plugin.item.util.ItemUtils;
-import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.api.GuildShopBuyResponse;
 import com.runicrealms.runicguilds.api.GuildShopIcon;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
@@ -26,8 +24,8 @@ import java.util.UUID;
 public class GuildShopManager implements Listener {
 
     private static Map<Integer, GuildShop> shops = new HashMap<>();
-    private static Map<UUID, Long> clickCooldowns = new HashMap<UUID, Long>();
-    private static Map<UUID, GuildShop> inShop = new HashMap<UUID, GuildShop>();
+    private static Map<UUID, Long> clickCooldowns = new HashMap<>();
+    private static Map<UUID, GuildShop> inShop = new HashMap<>();
     private static ItemStack blankSlot;
 
     public static void registerShop(GuildShop shop) {
@@ -37,6 +35,7 @@ public class GuildShopManager implements Listener {
         if (blankSlot == null) {
             blankSlot = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
             ItemMeta meta = blankSlot.getItemMeta();
+            assert meta != null;
             meta.setDisplayName(" ");
             blankSlot.setItemMeta(meta);
         }
@@ -113,19 +112,13 @@ public class GuildShopManager implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (inShop.containsKey(event.getPlayer().getUniqueId())) {
-            inShop.remove(event.getPlayer().getUniqueId());
-        }
+        inShop.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        if (clickCooldowns.containsKey(event.getPlayer().getUniqueId())) {
-            clickCooldowns.remove(event.getPlayer().getUniqueId());
-        }
-        if (inShop.containsKey(event.getPlayer().getUniqueId())) {
-            inShop.remove(event.getPlayer().getUniqueId());
-        }
+        clickCooldowns.remove(event.getPlayer().getUniqueId());
+        inShop.remove(event.getPlayer().getUniqueId());
     }
 
     private static boolean hasItems(Player player, ItemStack item, Integer needed) {
