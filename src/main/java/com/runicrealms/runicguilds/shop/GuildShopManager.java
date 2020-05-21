@@ -75,19 +75,21 @@ public class GuildShopManager implements Listener {
                         GuildShopIcon icon = inShop.get(player.getUniqueId()).getTrades().get(event.getSlot());
                         if (icon.canBuy(player)) {
                             if (player.getInventory().contains(icon.getCurrency(), icon.getPrice())) {
-                                if (icon.getPrice() > icon.getCurrency().getMaxStackSize()) {
-                                    ItemStack stack = icon.getCurrency().clone();
-                                    stack.setAmount(icon.getCurrency().getMaxStackSize());
-                                    for (int i = 0; i < (icon.getPrice() - (icon.getPrice() % icon.getCurrency().getMaxStackSize())) / icon.getCurrency().getMaxStackSize(); i++) {
-                                        player.getInventory().remove(stack);
+                                if (icon.removePayment()) {
+                                    if (icon.getPrice() > icon.getCurrency().getMaxStackSize()) {
+                                        ItemStack stack = icon.getCurrency().clone();
+                                        stack.setAmount(icon.getCurrency().getMaxStackSize());
+                                        for (int i = 0; i < (icon.getPrice() - (icon.getPrice() % icon.getCurrency().getMaxStackSize())) / icon.getCurrency().getMaxStackSize(); i++) {
+                                            player.getInventory().remove(stack);
+                                        }
                                     }
+                                    if (icon.getPrice() % icon.getCurrency().getMaxStackSize() != 0) {
+                                        ItemStack leftOver = icon.getCurrency().clone();
+                                        leftOver.setAmount(icon.getPrice() % icon.getCurrency().getMaxStackSize());
+                                        player.getInventory().remove(leftOver);
+                                    }
+                                    player.updateInventory();
                                 }
-                                if (icon.getPrice() % icon.getCurrency().getMaxStackSize() != 0) {
-                                    ItemStack leftOver = icon.getCurrency().clone();
-                                    leftOver.setAmount(icon.getPrice() % icon.getCurrency().getMaxStackSize());
-                                    player.getInventory().remove(leftOver);
-                                }
-                                player.updateInventory();
                                 player.closeInventory();
                                 icon.getOnBuyRunnable().run(player);
                             } else {
