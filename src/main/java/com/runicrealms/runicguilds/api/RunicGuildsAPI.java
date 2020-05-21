@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
+import com.runicrealms.runicguilds.shop.GuildShopManager;
 import org.bukkit.Bukkit;
 
 import com.runicrealms.runicguilds.data.GuildUtil;
@@ -76,7 +77,7 @@ public class RunicGuildsAPI {
 	}
 
 	public static void registerGuildShop(GuildShop shop) {
-
+		GuildShopManager.registerShop(shop);
 	}
 
 }

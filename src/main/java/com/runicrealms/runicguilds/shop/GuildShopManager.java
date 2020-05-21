@@ -22,7 +22,7 @@ import java.util.UUID;
 
 public class GuildShopManager implements Listener {
 
-    private static Map<Integer, GuildShop> shops = new HashMap<Integer, GuildShop>();
+    private static Map<Integer, GuildShop> shops = new HashMap<>();
     private static Map<UUID, Long> clickCooldowns = new HashMap<UUID, Long>();
     private static Map<UUID, GuildShop> inShop = new HashMap<UUID, GuildShop>();
     private static ItemStack blankSlot;
@@ -120,5 +120,4 @@ public class GuildShopManager implements Listener {
             inShop.remove(event.getPlayer().getUniqueId());
         }
     }
-
 }
