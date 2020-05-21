@@ -19,12 +19,6 @@ public class GuildShopIcon {
         this.condition = condition;
         this.onBuy = onBuy;
     }
-    public GuildShopIcon(int price, ItemStack currency, ItemStack item, GuildShopBuyRunnable onBuy) {
-        this.price = price;
-        this.currency = currency;
-        this.item = item;
-        this.onBuy = onBuy;
-    }
 
     public int getPrice() {
         return this.price;
@@ -38,19 +32,14 @@ public class GuildShopIcon {
         return this.item;
     }
 
-    public boolean canBuy(Player player) {
-        if (this.condition == null) {
-            return true;
-        }
-        return this.condition.canBuy(player);
-    }
-
     public GuildShopBuyCondition getCondition() {
         return this.condition;
     }
 
-    public GuildShopBuyRunnable getOnBuyRunnable() {
-        return this.onBuy;
+    public void runBuy(Player player) {
+        if (this.onBuy != null) {
+            this.onBuy.run(player);
+        }
     }
 
     public boolean removePayment() {

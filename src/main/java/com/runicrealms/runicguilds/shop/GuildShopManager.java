@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.shop;
 
+import com.runicrealms.runicguilds.api.GuildShopBuyResponse;
 import com.runicrealms.runicguilds.api.GuildShopIcon;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
 import com.runicrealms.runicguilds.api.GuildShop;
@@ -73,7 +74,8 @@ public class GuildShopManager implements Listener {
                 if (inShop.get(player.getUniqueId()).getTrades().containsKey(event.getSlot())) {
                     if (event.getRawSlot() < event.getInventory().getSize()) {
                         GuildShopIcon icon = inShop.get(player.getUniqueId()).getTrades().get(event.getSlot());
-                        if (icon.canBuy(player)) {
+                        GuildShopBuyResponse response = icon.getCondition().getResponse(player);
+                        if (response.canBuy()) {
                             if (player.getInventory().contains(icon.getCurrency(), icon.getPrice())) {
                                 if (icon.removePayment()) {
                                     if (icon.getPrice() > icon.getCurrency().getMaxStackSize()) {
@@ -91,14 +93,15 @@ public class GuildShopManager implements Listener {
                                     player.updateInventory();
                                 }
                                 player.closeInventory();
-                                icon.getOnBuyRunnable().run(player);
+                                icon.runBuy(player);
+                                player.sendMessage(ChatColor.translateAlternateColorCodes('&', response.getResponse()));
                             } else {
                                 player.closeInventory();
                                 player.sendMessage(ChatColor.RED + "You do not have enough items to buy this!");
                             }
                         } else {
                             player.closeInventory();
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', icon.getCondition().getDeniedMessage()));
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', response.getResponse()));
                         }
                     }
                 }
