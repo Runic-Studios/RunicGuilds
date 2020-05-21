@@ -7,6 +7,7 @@ import com.runicrealms.runicguilds.api.GuildShop;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -61,6 +62,7 @@ public class GuildShopManager implements Listener {
             for (Map.Entry<Integer, GuildShopIcon> trade : shop.getTrades().entrySet()) {
                 inventory.setItem(trade.getKey() + 9, trade.getValue().getItem());
             }
+            event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
             event.getPlayer().openInventory(inventory);
             inShop.put(event.getPlayer().getUniqueId(), shop);
         }
@@ -98,7 +100,8 @@ public class GuildShopManager implements Listener {
                                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', response.getResponse()));
                             } else {
                                 player.closeInventory();
-                                player.sendMessage(ChatColor.RED + "You do not have enough items to buy this!");
+                                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+                                player.sendMessage(ChatColor.RED + "You don't have enough items to buy this!");
                             }
                         } else {
                             player.closeInventory();
