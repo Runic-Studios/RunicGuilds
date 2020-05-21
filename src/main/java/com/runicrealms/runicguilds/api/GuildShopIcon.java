@@ -10,6 +10,7 @@ public class GuildShopIcon {
     private ItemStack item;
     private GuildShopBuyCondition condition;
     private GuildShopBuyRunnable onBuy;
+    private boolean removePayment = true;
 
     public GuildShopIcon(int price, ItemStack currency, ItemStack item, GuildShopBuyCondition condition, GuildShopBuyRunnable onBuy) {
         this.price = price;
@@ -50,6 +51,14 @@ public class GuildShopIcon {
 
     public GuildShopBuyRunnable getOnBuyRunnable() {
         return this.onBuy;
+    }
+
+    public boolean removePayment() {
+        return this.removePayment;
+    }
+
+    public void setRemovePayment(boolean removePayment) {
+        this.removePayment = removePayment;
     }
 
 }
