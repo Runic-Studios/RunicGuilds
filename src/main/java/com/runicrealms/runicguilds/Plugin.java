@@ -4,10 +4,12 @@ import java.util.*;
 import java.util.logging.Level;
 
 import com.runicrealms.RunicChat;
+import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.listeners.DataListener;
+import com.runicrealms.runicguilds.shop.GuildHeraldShop;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
@@ -61,6 +63,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 			new PlaceholderAPI().register();
 		}
+		RunicGuildsAPI.registerGuildShop(new GuildHeraldShop());
 	}
 
 	@EventHandler
