@@ -36,21 +36,6 @@ public class EventClickNpc implements Listener {
     }
 
     private static void runClickEvent(NPCRightClickEvent event) {
-        for (Integer heraldId : Plugin.GUILD_HERALDS) {
-            if (heraldId == event.getNPC().getId()) {
-                if (GuildUtil.getPlayerCache().get(event.getClicker().getUniqueId()) == null) {
-                    if (!Plugin.getPlayersCreatingGuild().contains(event.getClicker().getUniqueId())) {
-                        event.getClicker().sendMessage(ChatColor.YELLOW + "Creating a guild will cost you " + Plugin.GUILD_COST + " gold. To confirm or cancel the purchasing of this guild, type " + ChatColor.GOLD + "/guild confirm" + ChatColor.YELLOW + " or " + ChatColor.GOLD + "/guild cancel" + ChatColor.YELLOW + " in chat.");
-                        Plugin.getPlayersCreatingGuild().add(event.getClicker().getUniqueId());
-                    } else {
-                        event.getClicker().sendMessage(ChatColor.YELLOW + "Type " + ChatColor.GOLD + "/guild confirm" + ChatColor.YELLOW + " or " + ChatColor.GOLD + "/guild cancel" + ChatColor.YELLOW + " in chat to confirm/cancel the creation of your guild.");
-                    }
-                } else {
-                    event.getClicker().sendMessage(ChatColor.YELLOW + "You cannot create a guild because you are already in one!");
-                }
-                return;
-            }
-        }
         for (Integer bankerId : Plugin.GUILD_BANKERS) {
             if (bankerId == event.getNPC().getId()) {
                 if (GuildUtil.getPlayerCache().get(event.getClicker().getUniqueId()) != null) {
