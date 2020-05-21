@@ -33,9 +33,10 @@ public class GuildHeraldShop implements GuildShop {
         ItemMeta tradeMeta = trade.getItemMeta();
         if (tradeMeta != null) {
             tradeMeta.setDisplayName(ChatColor.YELLOW + "Purchase a Guild!");
-            tradeMeta.setLore(Arrays.asList("",
-                    ChatColor.GRAY + "Become a guild master! Take part in guild activities",
-                    ChatColor.GRAY + "and make your mark on the realm!",
+            tradeMeta.setLore(Arrays.asList(
+                    "",
+                    ChatColor.GRAY + "Become a guild master! Take part in guild",
+                    ChatColor.GRAY + "activities and make your mark on the realm!",
                     "",
                     ChatColor.GOLD + "Price: " +
                             ChatColor.GREEN + ChatColor.BOLD + Plugin.GUILD_COST + "c"));
