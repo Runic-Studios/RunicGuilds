@@ -3,7 +3,7 @@ package com.runicrealms.runicguilds.event;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import net.citizensnpcs.api.event.NPCRightClickEvent;
+import com.runicrealms.runicnpcs.api.NpcClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,13 +18,13 @@ public class EventClickNpc implements Listener {
     public static Map<UUID, Long> cooldowns = new HashMap<UUID, Long>();
 
     @EventHandler
-    public void onRightClick(NPCRightClickEvent event) {
-        if (!cooldowns.containsKey(event.getClicker())) {
+    public void onRightClick(NpcClickEvent event) {
+        if (!cooldowns.containsKey(event.getPlayer())) {
             runClickEvent(event);
-            cooldowns.put(event.getClicker().getUniqueId(), System.currentTimeMillis());
-        } else if (cooldowns.get(event.getClicker().getUniqueId()) + 1000 <= System.currentTimeMillis()){
+            cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
+        } else if (cooldowns.get(event.getPlayer().getUniqueId()) + 1000 <= System.currentTimeMillis()){
             runClickEvent(event);
-            cooldowns.put(event.getClicker().getUniqueId(), System.currentTimeMillis());
+            cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
     }
 
@@ -35,13 +35,13 @@ public class EventClickNpc implements Listener {
         }
     }
 
-    private static void runClickEvent(NPCRightClickEvent event) {
+    private static void runClickEvent(NpcClickEvent event) {
         for (Integer bankerId : Plugin.GUILD_BANKERS) {
-            if (bankerId == event.getNPC().getId()) {
-                if (GuildUtil.getPlayerCache().get(event.getClicker().getUniqueId()) != null) {
-                    GuildBankUtil.open(event.getClicker(), 1);
+            if (bankerId == event.getNpc().getId()) {
+                if (GuildUtil.getPlayerCache().get(event.getPlayer().getUniqueId()) != null) {
+                    GuildBankUtil.open(event.getPlayer(), 1);
                 } else {
-                    event.getClicker().sendMessage(ChatColor.YELLOW + "You have to be in a guild to use the guild bank.");
+                    event.getPlayer().sendMessage(ChatColor.YELLOW + "You have to be in a guild to use the guild bank.");
                 }
                 return;
             }
