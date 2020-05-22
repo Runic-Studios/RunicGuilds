@@ -36,9 +36,18 @@ public class PlaceholderAPI extends PlaceholderExpansion {
         switch (lowerArg) {
             case "guild_prefix":
                 if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null) {
-                    return "[" + RunicGuildsAPI.getGuild(pl.getUniqueId()).getGuildPrefix() + "] ";
+                    return "[" + RunicGuildsAPI.getGuild(pl.getUniqueId()).getGuildPrefix()
+                            + "|"
+                            + RunicGuildsAPI.getGuild(pl.getUniqueId()).getScore() + "] ";
                 } else {
                     return "";
+                }
+            case "guild_score":
+                if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null
+                        && RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()) != null) {
+                    return String.valueOf(RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()).getScore());
+                } else {
+                    return "0";
                 }
             default:
                 return "";

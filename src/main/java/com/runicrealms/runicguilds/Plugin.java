@@ -57,12 +57,12 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new GuildShopManager(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
-		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel());
 		TaskSavingQueue.scheduleTask();
 		// register placeholder tags
 		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 			new PlaceholderAPI().register();
 		}
+		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel()); // register channels after place holders
 		RunicGuildsAPI.registerGuildShop(new GuildHeraldShop());
 	}
 
