@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.chat;
 
 import com.runicrealms.api.chat.ChatChannel;
+import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GuildChannel extends ChatChannel {
+
     @Override
     public String getPrefix() {
         return "&e[&6Guild&e]&r ";
@@ -41,6 +43,16 @@ public class GuildChannel extends ChatChannel {
 
     @Override
     public String getMessageFormat() {
-        return "%luckperms_meta_name_color%%player_name%: &e%message%";
+        return "&e[%runic_guild_score%] %luckperms_meta_name_color%%player_name%: &e%message%";
+    }
+
+    // TODO: enable guild placeholders in guild chat
+    private String displayScore(Player pl) {
+        if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null
+                && RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()) != null) {
+            return String.valueOf(RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()).getScore());
+        } else {
+            return "0";
+        }
     }
 }

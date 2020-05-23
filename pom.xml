@@ -75,6 +75,14 @@
 			<artifactId>mongodb-driver-sync</artifactId>
 			<version>3.12.2</version>
 		</dependency>
+		<!-- MythicMobs -->
+		<dependency>
+			<groupId>net.elseland.xikage</groupId>
+			<artifactId>mythicmobs</artifactId>
+			<version>4.9.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/MythicMobs-4.9.0.jar</systemPath>
+		</dependency>
 		<!-- Spigot API -->
 		<dependency>
 			<groupId>org.spigotmc</groupId>
