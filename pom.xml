@@ -62,11 +62,6 @@
 			<id>papermc</id>
 			<url>https://papermc.io/repo/repository/maven-public/</url>
 		</repository>
-		<!-- Citizens Repo -->
-		<repository>
-			<id>everything</id>
-			<url>http://repo.citizensnpcs.co/</url>
-		</repository>
 		<!-- PlaceholderAPI Repo -->
 		<repository>
 			<id>placeholderapi</id>
@@ -107,14 +102,6 @@
 			<groupId>me.clip</groupId>
 			<artifactId>placeholderapi</artifactId>
 			<version>2.9.2</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- CitizensAPI -->
-		<dependency>
-			<groupId>net.citizensnpcs</groupId>
-			<artifactId>citizens</artifactId>
-			<version>2.0.26-SNAPSHOT</version>
-			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Placeholder API -->
