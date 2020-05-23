@@ -5,6 +5,8 @@ import java.util.logging.Level;
 
 import com.runicrealms.RunicChat;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.boss.GuildBossListener;
+import com.runicrealms.runicguilds.boss.GuildBossManager;
 import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
@@ -29,6 +31,7 @@ import com.runicrealms.runicguilds.gui.GuildBankUtil;
 public class Plugin extends JavaPlugin implements Listener {
 	
 	private static Plugin instance;
+	private static GuildBossManager guildBossManager;
 	private static Set<UUID> playersCreatingGuild = new HashSet<UUID>();
 
 	public static List<Integer> GUILD_HERALDS;
@@ -39,6 +42,7 @@ public class Plugin extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		instance = this;
+		guildBossManager = new GuildBossManager();
 		FileConfiguration config = this.getConfig();
 		config.options().copyDefaults(true);
 		this.saveDefaultConfig();
@@ -55,6 +59,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new EventClickNpc(), this);
 		this.getServer().getPluginManager().registerEvents(new DataListener(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildShopManager(), this);
+		this.getServer().getPluginManager().registerEvents(new GuildBossListener(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
 		TaskSavingQueue.scheduleTask();
@@ -70,6 +75,8 @@ public class Plugin extends JavaPlugin implements Listener {
 	public void onShutdown(ServerShutdownEvent event) {
 		TaskSavingQueue.emptyQueue();
 		RunicRestartApi.markPluginSaved("guilds");
+		guildBossManager = null;
+		instance = null;
 	}
 
 	public static Set<UUID> getPlayersCreatingGuild() {
@@ -78,6 +85,10 @@ public class Plugin extends JavaPlugin implements Listener {
 
 	public static Plugin getInstance() {
 		return instance;
+	}
+
+	public static GuildBossManager getGuildBossManager() {
+		return guildBossManager;
 	}
 
 }
