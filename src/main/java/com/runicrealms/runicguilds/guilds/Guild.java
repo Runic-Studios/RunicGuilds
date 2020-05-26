@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class Guild implements Cloneable {
 
-	private Set<GuildMember> members;
+	private final Set<GuildMember> members;
 	private GuildMember owner;
 	private String guildName;
 	private String guildPrefix;
@@ -51,7 +51,7 @@ public class Guild implements Cloneable {
 	}
 
 	public List<GuildMember> getMembersWithOwner() {
-		List<GuildMember> membersWithOwner = new ArrayList<GuildMember>(this.members);
+		List<GuildMember> membersWithOwner = new ArrayList<>(this.members);
 		membersWithOwner.add(this.owner);
 		return membersWithOwner;
 	}
@@ -118,11 +118,12 @@ public class Guild implements Cloneable {
 		return this.score;
 	}
 
-	private void recalculateScore() {
+	public void recalculateScore() {
 		this.score = 0;
 		for (GuildMember member : members) {
 			score += member.getScore();
 		}
+		score += owner.getScore();
 	}
 
 	public void setPlayerScore(UUID player, Integer score) {

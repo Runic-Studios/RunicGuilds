@@ -2,15 +2,18 @@ package com.runicrealms.runicguilds.boss;
 
 import com.runicrealms.runicguilds.Plugin;
 import io.lumine.xikage.mythicmobs.MythicMobs;
+import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import io.lumine.xikage.mythicmobs.spawning.spawners.MythicSpawner;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class GuildBossManager {
 
     private static final int SPAWN_TIMER = 1; // minutes (90?)
+    private static final int KILL_POINTS = 20;
 
     public GuildBossManager() {
 
@@ -43,5 +46,9 @@ public class GuildBossManager {
         }
         bossSpawner.ActivateSpawner();
         return (LivingEntity) Bukkit.getEntity(bossSpawner.getAssociatedMobs().stream().findFirst().get());
+    }
+
+    public int getKillPoints() {
+        return KILL_POINTS;
     }
 }

@@ -52,8 +52,11 @@ public class RunicGuildsAPI {
 	public static boolean addPlayerScore(UUID player, Integer score) {
 		if (isInGuild(player)) {
 			GuildData guildData = GuildUtil.getGuildData(player);
-			guildData.getData().increasePlayerScore(player, score);
-			guildData.queueToSave();
+			if (guildData != null) {
+				guildData.getData().increasePlayerScore(player, score);
+				guildData.getData().recalculateScore();
+				guildData.queueToSave();
+			}
 			return true;
 		}
 		return false;

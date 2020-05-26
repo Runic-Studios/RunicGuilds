@@ -93,6 +93,7 @@ public class GuildShopManager implements Listener {
                                         leftOver.setAmount(icon.getPrice() % icon.getCurrency().getMaxStackSize());
                                         player.getInventory().remove(leftOver);
                                     }
+                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.0f);
                                     player.updateInventory();
                                 }
                                 player.closeInventory();
