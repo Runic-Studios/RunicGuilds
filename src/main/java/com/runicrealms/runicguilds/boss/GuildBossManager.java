@@ -35,13 +35,13 @@ public class GuildBossManager {
 
     private LivingEntity randomGuildBoss() {
         MythicSpawner bossSpawner;
-        if (Math.random() < 0.5) {
+//        if (Math.random() < 0.5) {
             Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss has spawned in the desert!");
             bossSpawner = MythicMobs.inst().getSpawnerManager().getSpawnerByName("GuildBoss1");
-        } else {
-            Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss has spawned in the volcano!");
-            bossSpawner = MythicMobs.inst().getSpawnerManager().getSpawnerByName("GuildBoss2");
-        }
+//        } else {
+//            Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss has spawned in the volcano!");
+//            bossSpawner = MythicMobs.inst().getSpawnerManager().getSpawnerByName("GuildBoss2");
+//        }
         bossSpawner.ActivateSpawner();
         return (LivingEntity) Bukkit.getEntity(bossSpawner.getAssociatedMobs().stream().findFirst().get());
     }

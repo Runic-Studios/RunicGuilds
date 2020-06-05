@@ -83,7 +83,10 @@ public class GuildBossListener implements Listener {
         if (currentBoss == null) return;
         if (!en.equals(currentBoss)) return;
         if (RunicCore.getPartyManager().getPlayerParty(pl) == null) return;
-        int current = bossKillers.get(RunicCore.getPartyManager().getPlayerParty(pl));
+        int current = 0;
+        if (bossKillers.get(RunicCore.getPartyManager().getPlayerParty(pl)) != null) {
+            current = bossKillers.get(RunicCore.getPartyManager().getPlayerParty(pl));
+        }
         bossKillers.put(RunicCore.getPartyManager().getPlayerParty(pl), current + amount);
     }
 
@@ -97,9 +100,9 @@ public class GuildBossListener implements Listener {
             double points = percent * 100;
             for (Player mem : party.getMembersWithLeader()) {
                 RunicGuildsAPI.addPlayerScore(mem.getUniqueId(), (int) points / party.getSize());
-                mem.sendMessage(ChatColor.GREEN + "You have earned a total of " +
+                mem.sendMessage(ChatColor.GREEN + "You have earned " +
                         ChatColor.YELLOW + (int) points / party.getSize() +
-                        ChatColor.GREEN + " points!");
+                        ChatColor.GREEN + " guild points!");
             }
         }
         bossKillers.clear();
