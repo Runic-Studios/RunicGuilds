@@ -33,6 +33,7 @@ public class GuildBossListener implements Listener {
     @EventHandler
     public void onGuildBossDeath(MythicMobDeathEvent e) {
 
+        if (currentBoss == null) return;
         if (!currentBoss.equals(e.getEntity())) return;
         Player pl = (Player) e.getKiller();
         if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null
