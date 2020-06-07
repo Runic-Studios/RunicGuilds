@@ -18,15 +18,15 @@ public class GuildBossManager {
 
         // 30 min before
         Bukkit.getScheduler().scheduleAsyncDelayedTask(Plugin.getInstance(),
-                () -> Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss will spawn in 30 minutes!"), (SPAWN_TIMER-30)*60*20L);
+                () -> Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "A guild boss will spawn in 30 minutes!"), (SPAWN_TIMER-30)*60*20L);
 
         // 15 min before
         Bukkit.getScheduler().scheduleAsyncDelayedTask(Plugin.getInstance(),
-                () -> Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss will spawn in 15 minutes!"), (SPAWN_TIMER-15)*60*20L);
+                () -> Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "A guild boss will spawn in 15 minutes!"), (SPAWN_TIMER-15)*60*20L);
 
         // 5 min before
         Bukkit.getScheduler().scheduleAsyncDelayedTask(Plugin.getInstance(),
-                () -> Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss will spawn in 5 minutes!"), (SPAWN_TIMER-5)*60*20L);
+                () -> Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "A guild boss will spawn in 5 minutes!"), (SPAWN_TIMER-5)*60*20L);
 
         new BukkitRunnable() {
             @Override
