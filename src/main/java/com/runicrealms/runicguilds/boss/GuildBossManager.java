@@ -11,7 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 @SuppressWarnings("deprecation")
 public class GuildBossManager {
 
-    private static final int SPAWN_TIMER = 90; // minutes (90?)
+    private static final int SPAWN_TIMER = 90; // minutes
     private static final int KILL_POINTS = 20;
 
     public GuildBossManager() {
@@ -45,7 +45,7 @@ public class GuildBossManager {
     private LivingEntity randomGuildBoss() {
         MythicSpawner bossSpawner;
 //        if (Math.random() < 0.5) {
-            Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss has spawned in the desert!");
+            Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "A guild boss has spawned in the desert!");
             bossSpawner = MythicMobs.inst().getSpawnerManager().getSpawnerByName("GuildBoss1");
 //        } else {
 //            Bukkit.broadcastMessage(ChatColor.GOLD + "A guild boss has spawned in the volcano!");

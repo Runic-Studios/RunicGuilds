@@ -46,7 +46,6 @@ public class GuildChannel extends ChatChannel {
         return "&e[%runic_guild_score%] %luckperms_meta_name_color%%player_name%: &e%message%";
     }
 
-    // TODO: enable guild placeholders in guild chat
     private String displayScore(Player pl) {
         if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null
                 && RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()) != null) {

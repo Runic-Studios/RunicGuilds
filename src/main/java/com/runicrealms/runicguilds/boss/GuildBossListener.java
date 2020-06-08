@@ -61,7 +61,8 @@ public class GuildBossListener implements Listener {
      */
     @EventHandler
     public void onServerShutdown(ServerShutdownEvent e) {
-        currentBoss.remove();
+        if (currentBoss != null)
+            currentBoss.remove();
     }
 
     /*
