@@ -1,5 +1,7 @@
 package com.runicrealms.runicguilds.shop;
 
+import com.runicrealms.plugin.item.util.ItemRemover;
+import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.api.GuildShopBuyResponse;
 import com.runicrealms.runicguilds.api.GuildShopIcon;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
@@ -24,9 +26,9 @@ import java.util.UUID;
 
 public class GuildShopManager implements Listener {
 
-    private static Map<Integer, GuildShop> shops = new HashMap<>();
-    private static Map<UUID, Long> clickCooldowns = new HashMap<>();
-    private static Map<UUID, GuildShop> inShop = new HashMap<>();
+    private static final Map<Integer, GuildShop> shops = new HashMap<>();
+    private static final Map<UUID, Long> clickCooldowns = new HashMap<>();
+    private static final Map<UUID, GuildShop> inShop = new HashMap<>();
     private static ItemStack blankSlot;
 
     public static void registerShop(GuildShop shop) {
@@ -81,18 +83,7 @@ public class GuildShopManager implements Listener {
                         if (response.canBuy()) {
                             if (hasItems(player, icon.getCurrency(), icon.getPrice())) {
                                 if (icon.removePayment()) {
-                                    if (icon.getPrice() > icon.getCurrency().getMaxStackSize()) {
-                                        ItemStack stack = icon.getCurrency().clone();
-                                        stack.setAmount(icon.getCurrency().getMaxStackSize());
-                                        for (int i = 0; i < (icon.getPrice() - (icon.getPrice() % icon.getCurrency().getMaxStackSize())) / icon.getCurrency().getMaxStackSize(); i++) {
-                                            player.getInventory().remove(stack);
-                                        }
-                                    }
-                                    if (icon.getPrice() % icon.getCurrency().getMaxStackSize() != 0) {
-                                        ItemStack leftOver = icon.getCurrency().clone();
-                                        leftOver.setAmount(icon.getPrice() % icon.getCurrency().getMaxStackSize());
-                                        player.getInventory().remove(leftOver);
-                                    }
+                                    ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), icon.getPrice());
                                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.0f);
                                     player.updateInventory();
                                 }

@@ -1,7 +1,6 @@
 package com.runicrealms.runicguilds.data;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +21,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class GuildUtil {
 
-	private static Map<String, GuildData> guilds = new HashMap<String, GuildData>();
-	private static Map<UUID, String> players = new HashMap<UUID, String>();
+	private static final Map<String, GuildData> guilds = new HashMap<String, GuildData>();
+	private static final Map<UUID, String> players = new HashMap<UUID, String>();
 
 	public static List<Guild> getAllGuilds() {
 		List<Guild> allGuilds = new ArrayList<Guild>();
@@ -34,15 +33,12 @@ public class GuildUtil {
 	}
 
 	public static void loadGuilds() {
-		Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), new Runnable() {
-			@Override
-			public void run() {
-				FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildData().find();
-				for (Document guildData : iterable) {
-					guilds.put(guildData.getString("prefix"), new GuildData(guildData.getString("prefix")));
-				}
-				RunicRestartApi.markPluginLoaded("guilds");
+		Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> {
+			FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildData().find();
+			for (Document guildData : iterable) {
+				guilds.put(guildData.getString("prefix"), new GuildData(guildData.getString("prefix")));
 			}
+			RunicRestartApi.markPluginLoaded("guilds");
 		});
 	}
 

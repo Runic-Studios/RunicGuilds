@@ -5,11 +5,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class GuildShopIcon {
 
-    private int price;
-    private ItemStack currency;
-    private ItemStack item;
-    private GuildShopBuyCondition condition;
-    private GuildShopBuyRunnable onBuy;
+    private final int price;
+    private final ItemStack currency;
+    private final ItemStack item;
+    private final GuildShopBuyCondition condition;
+    private final GuildShopBuyRunnable onBuy;
     private boolean removePayment = true;
 
     public GuildShopIcon(int price, ItemStack currency, ItemStack item, GuildShopBuyCondition condition, GuildShopBuyRunnable onBuy) {

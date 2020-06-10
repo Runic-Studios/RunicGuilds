@@ -24,8 +24,8 @@ import java.util.*;
 public class GuildData {
 
     private Guild guild;
-    private String prefix;
-    private MongoData guildData;
+    private final String prefix;
+    private final MongoData guildData;
 
     public GuildData(Guild guild) {
         this.prefix = guild.getGuildPrefix();

@@ -16,8 +16,8 @@ import java.util.*;
 
 public class GuildHeraldShop implements GuildShop {
 
-    private ItemStack icon;
-    private Map<Integer, GuildShopIcon> trades = new HashMap<>();
+    private final ItemStack icon;
+    private final Map<Integer, GuildShopIcon> trades = new HashMap<>();
 
     public GuildHeraldShop() {
 

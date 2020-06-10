@@ -32,7 +32,7 @@ public class Plugin extends JavaPlugin implements Listener {
 	
 	private static Plugin instance;
 	private static GuildBossManager guildBossManager;
-	private static Set<UUID> playersCreatingGuild = new HashSet<UUID>();
+	private static final Set<UUID> playersCreatingGuild = new HashSet<>();
 
 	public static List<Integer> GUILD_HERALDS;
 	public static int GUILD_COST;
@@ -46,7 +46,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		FileConfiguration config = this.getConfig();
 		config.options().copyDefaults(true);
 		this.saveDefaultConfig();
-		GuildUtil.loadGuilds();
+		GuildUtil.loadGuilds(); // marks plugin loaded for RunicRestart
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
 		GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
 		GUILD_COST = this.getConfig().getInt("guild-cost");
