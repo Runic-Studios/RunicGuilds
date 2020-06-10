@@ -21,11 +21,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class GuildUtil {
 
-	private static final Map<String, GuildData> guilds = new HashMap<String, GuildData>();
-	private static final Map<UUID, String> players = new HashMap<UUID, String>();
+	private static final Map<String, GuildData> guilds = new HashMap<>();
+	private static final Map<UUID, String> players = new HashMap<>();
 
 	public static List<Guild> getAllGuilds() {
-		List<Guild> allGuilds = new ArrayList<Guild>();
+		List<Guild> allGuilds = new ArrayList<>();
 		for (String key : guilds.keySet()) {
 			allGuilds.add(guilds.get(key).getData());
 		}
@@ -65,7 +65,6 @@ public class GuildUtil {
 		return null;
 	}
 
-
 	public static List<GuildMember> getOnlineMembersWithOwner(Guild guild) {
 		List<GuildMember> online = new ArrayList<>();
 		for (Player pl : Bukkit.getOnlinePlayers()) {
@@ -82,7 +81,7 @@ public class GuildUtil {
 		}
 		Pattern pattern = Pattern.compile("[a-zA-Z]");
 		Matcher matcher = pattern.matcher(prefix);
-		if (matcher.find() == false) {
+		if (!matcher.find()) {
 			return GuildCreationResult.BAD_PREFIX;
 		}
 		if (name.length() > 16) {
@@ -104,11 +103,11 @@ public class GuildUtil {
 				return GuildCreationResult.PREFIX_NOT_UNIQUE;
 			}
 		}
-		List<ItemStack> bank = new ArrayList<ItemStack>();
+		List<ItemStack> bank = new ArrayList<>();
 		for (int i = 0; i < 45; i++) {
 			bank.add(null);
 		}
-		GuildData data = new GuildData(new Guild(new HashSet<GuildMember>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45));
+		GuildData data = new GuildData(new Guild(new HashSet<>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45));
 		guilds.put(prefix, data);
 		players.put(owner, prefix);
 		return GuildCreationResult.SUCCESSFUL;

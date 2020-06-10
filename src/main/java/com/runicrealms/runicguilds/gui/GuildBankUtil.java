@@ -31,7 +31,7 @@ import com.runicrealms.runicguilds.guilds.Guild;
 
 public class GuildBankUtil implements Listener {
 
-	private static Map<UUID, ViewerInfo> viewers = new HashMap<UUID, ViewerInfo>();
+	private static final Map<UUID, ViewerInfo> viewers = new HashMap<>();
 
 	public static void open(Player player, Integer page) {
 		open(player, page, GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildPrefix());
@@ -90,9 +90,7 @@ public class GuildBankUtil implements Listener {
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		if (viewers.containsKey(event.getPlayer().getUniqueId())) {
-			viewers.remove(event.getPlayer().getUniqueId());
-		}
+		viewers.remove(event.getPlayer().getUniqueId());
 	}
 
 	@EventHandler
@@ -209,7 +207,7 @@ public class GuildBankUtil implements Listener {
 	}
 
 	private static void refreshViewers(ViewerInfo viewer) {
-		Map<UUID, Integer> playersToRefresh = new HashMap<UUID, Integer>();
+		Map<UUID, Integer> playersToRefresh = new HashMap<>();
 		for (Entry<UUID, ViewerInfo> entry : viewers.entrySet()) {
 			if (entry.getValue().getGuildPrefix().equalsIgnoreCase(viewer.getGuildPrefix())) {
 				playersToRefresh.put(entry.getKey(), entry.getValue().getPage());
@@ -224,8 +222,8 @@ public class GuildBankUtil implements Listener {
 
 	private static class ViewerInfo {
 
-		private Integer currentPage;
-		private String guildPrefix;
+		private final Integer currentPage;
+		private final String guildPrefix;
 
 		public ViewerInfo(Integer currentPage, String guildPrefix) {
 			this.currentPage = currentPage;
