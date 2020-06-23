@@ -8,6 +8,7 @@ import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicrestart.api.ServerShutdownEvent;
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicMobDeathEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 public class GuildBossListener implements Listener {
 
     private double bossHealth = 0;
+    private double timeAtSpawn = 0;
     private LivingEntity currentBoss;
     private final HashMap<Party, Integer> bossKillers = new HashMap<>();
 
@@ -28,6 +30,7 @@ public class GuildBossListener implements Listener {
     public void onGuildBossEvent(GuildBossSpawnEvent e) {
         currentBoss = e.getGuildBoss();
         bossHealth = currentBoss.getMaxHealth();
+        timeAtSpawn = System.currentTimeMillis();
     }
 
     @EventHandler
@@ -35,6 +38,9 @@ public class GuildBossListener implements Listener {
 
         if (currentBoss == null) return;
         if (!currentBoss.equals(e.getEntity())) return;
+
+        Bukkit.broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Guild boss defeated in " + (System.currentTimeMillis() - timeAtSpawn) / 100 + "s!");
+
         Player pl = (Player) e.getKiller();
         if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null
                 && RunicCore.getPartyManager().getPlayerParty(pl) != null) {

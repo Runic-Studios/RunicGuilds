@@ -16,6 +16,7 @@ import com.runicrealms.runicguilds.guilds.GuildRank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -155,9 +156,13 @@ public class GuildBankUtil implements Listener {
 							if (event.getCurrentItem().hasItemMeta()) {
 								if (event.getCurrentItem().getItemMeta().hasLore()) {
 									if (AttributeUtil.getCustomString(event.getCurrentItem(), "soulbound").equalsIgnoreCase("true")) {
+										player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.5f, 1.0f);
+										player.sendMessage(ChatColor.RED + "You cannot store soulbound items in the guild bank!");
 										event.setCancelled(true);
 										return;
 									} else if (AttributeUtil.getCustomString(event.getCurrentItem(), "untradeable").equalsIgnoreCase("true")) {
+										player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.5f, 1.0f);
+										player.sendMessage(ChatColor.RED + "You cannot store untradeable items in the guild bank!");
 										event.setCancelled(true);
 										return;
 									} else if (loreContainsString(event.getCurrentItem().getItemMeta().getLore(), "quest item")) {
