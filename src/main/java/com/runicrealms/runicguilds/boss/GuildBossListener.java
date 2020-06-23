@@ -3,7 +3,7 @@ package com.runicrealms.runicguilds.boss;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.events.SpellDamageEvent;
 import com.runicrealms.plugin.events.WeaponDamageEvent;
-import com.runicrealms.plugin.parties.Party;
+import com.runicrealms.plugin.party.Party;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicrestart.api.ServerShutdownEvent;
