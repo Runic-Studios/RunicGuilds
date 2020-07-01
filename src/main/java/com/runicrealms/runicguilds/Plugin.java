@@ -74,6 +74,7 @@ public class Plugin extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onShutdown(ServerShutdownEvent event) {
 		TaskSavingQueue.emptyQueue();
+		getLogger().info(" §cRunicGuilds has been disabled.");
 		RunicRestartApi.markPluginSaved("guilds");
 		guildBossManager = null;
 		instance = null;
