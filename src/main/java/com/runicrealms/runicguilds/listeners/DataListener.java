@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.*;
 import com.runicrealms.runicguilds.guilds.Guild;
@@ -86,11 +87,10 @@ public class DataListener implements Listener {
         if (pl == null) return;
         Guild guild = RunicGuildsAPI.getGuild(pl.getUniqueId());
         // update cache
-        if (guild != null) {
-            RunicCore.getCacheManager().getPlayerCache(pl.getUniqueId()).setGuild(guild.getGuildName());
-        } else {
-            RunicCore.getCacheManager().getPlayerCache(pl.getUniqueId()).setGuild("None");
-        }
+        if (guild != null)
+            RunicCoreAPI.getPlayerCache(pl).setGuild(guild.getGuildName());
+        else
+            RunicCoreAPI.getPlayerCache(pl).setGuild("None");
         // update tab
         RunicCore.getTabListManager().setupTab(pl);
     }
