@@ -193,19 +193,21 @@ public class GuildCommand implements CommandExecutor {
 						} else {
 							sendMessage(player, "&eYou must be the guild owner to use this command.");
 						}
-					/*} else if (args[0].equalsIgnoreCase("set")) {
+					} else if (args[0].equalsIgnoreCase("set")) {
 						if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
 							if (args.length >= 2) {
 								if (args[1].equalsIgnoreCase("name")) {
 									if (args.length >= 3) {
-										sendMessage(player, "&e" + GuildUtil.renameGuild(guild, combineArgs(args, 2)).getMessage());
+										sendMessage(player, "&e" + GuildUtil.renameGuild(guildData, combineArgs(args, 2)).getMessage());
 									} else {
 										sendMessage(player, "&eType &6/guild set name &e<name>.");
 									}
 								} else if (args[1].equalsIgnoreCase("prefix")) {
 									if (args.length == 3) {
-										sendMessage(player, "&e" + GuildUtil.reprefixGuild(guild, args[2], guild.getGuildPrefix()).getMessage());
-										// set guild member's prefixes with PlayerGuildDataUtil
+										GuildData finalGuildData = guildData;
+										Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> {
+											sendMessage(player, "&e" + GuildUtil.reprefixGuild(finalGuildData, args[2]).getMessage());
+										});
 									} else {
 										sendMessage(player, "&eType &6/guild set prefix &e<prefix>.");
 									}
@@ -217,7 +219,7 @@ public class GuildCommand implements CommandExecutor {
 							}
 						} else {
 							sendMessage(player, "&eYou must be guild owner to use that command!");
-						}*/
+						}
 					} else if (args[0].equalsIgnoreCase("leave")) {
 						if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
 							PlayerGuildDataUtil.setGuildForPlayer("None", player.getUniqueId().toString());

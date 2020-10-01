@@ -28,8 +28,14 @@ public class GuildData {
     private final MongoData guildData;
 
     public GuildData(Guild guild) {
+        this(guild, true);
+    }
+
+    public GuildData(Guild guild, boolean createNewDocument) {
         this.prefix = guild.getGuildPrefix();
-        RunicCore.getDatabaseManager().getGuildData().insertOne(new Document("prefix", guild.getGuildPrefix()));
+        if (createNewDocument) {
+            RunicCore.getDatabaseManager().getGuildData().insertOne(new Document("prefix", guild.getGuildPrefix()));
+        }
         this.guildData = new GuildMongoData(guild.getGuildPrefix());
         this.save(guild, true);
     }
@@ -68,6 +74,10 @@ public class GuildData {
         return this.guild;
     }
 
+    public MongoData getMongoData() {
+        return this.guildData;
+    }
+
     public void queueToSave() {
         TaskSavingQueue.add(this);
     }
@@ -86,7 +96,7 @@ public class GuildData {
     private void save(Guild guild) {
         guildData.remove("members");
         guildData.remove("bank");
-        if (!guildData.getSection("owner").getKeys().iterator().next().equalsIgnoreCase(guild.getOwner().getUUID().toString())) {
+        if (guildData.has("owner") && !guildData.getSection("owner").getKeys().iterator().next().equalsIgnoreCase(guild.getOwner().getUUID().toString())) {
             guildData.remove("owner");
         }
         guildData.save();
