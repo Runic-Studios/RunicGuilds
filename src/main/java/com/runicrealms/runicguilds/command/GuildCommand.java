@@ -277,6 +277,10 @@ public class GuildCommand implements CommandExecutor {
 								}
 							}
 							GuildUtil.getPlayerCache().put(guild.getOwner().getUUID(), null);
+							PlayerGuildDataUtil.setGuildForPlayer("None", guild.getOwner().getUUID().toString());
+							if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
+								GuildBankUtil.close(Bukkit.getPlayer(guild.getOwner().getUUID()));
+							}
 							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, player.getUniqueId(), false));
 							guildData.deleteData();
 							GuildUtil.getGuildDatas().remove(guild.getGuildPrefix());
