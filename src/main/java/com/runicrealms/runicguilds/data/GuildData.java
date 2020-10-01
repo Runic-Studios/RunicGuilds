@@ -76,47 +76,35 @@ public class GuildData {
         this.guild = guild;
         if (saveAsync) {
             Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> {
-                guildData.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
-                guildData.remove("members");
-                guildData.save();
-                for (GuildMember member : guild.getMembers()) {
-                    guildData.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
-                    guildData.set("members." + member.getUUID().toString() + ".score", member.getScore());
-                }
-                guildData.set("prefix", guild.getGuildPrefix());
-                guildData.set("name", guild.getGuildName());
-                guildData.set("bank-size", guild.getBankSize());
-                guildData.remove("bank");
-                guildData.save();
-                for (int i = 0; i < guild.getBankSize(); i++) {
-                    if (guild.getBank().get(i) != null) {
-                        guildData.set("bank." + i, serializeItemStack(guild.getBank().get(i)));
-                    }
-                }
-                guildData.set("score", guild.getScore());
-                guildData.save();
+                this.save(guild);
             });
         } else {
-            guildData.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
-            guildData.remove("members");
-            guildData.save();
-            for (GuildMember member : guild.getMembers()) {
-                guildData.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
-                guildData.set("members." + member.getUUID().toString() + ".score", member.getScore());
-            }
-            guildData.set("prefix", guild.getGuildPrefix());
-            guildData.set("name", guild.getGuildName());
-            guildData.set("bank-size", guild.getBankSize());
-            guildData.remove("bank");
-            guildData.save();
-            for (int i = 0; i < guild.getBankSize(); i++) {
-                if (guild.getBank().get(i) != null) {
-                    guildData.set("bank." + i, serializeItemStack(guild.getBank().get(i)));
-                }
-            }
-            guildData.set("score", guild.getScore());
-            guildData.save();
+            this.save(guild);
         }
+    }
+
+    private void save(Guild guild) {
+        guildData.remove("members");
+        guildData.remove("bank");
+        if (!guildData.getSection("owner").getKeys().iterator().next().equalsIgnoreCase(guild.getOwner().getUUID().toString())) {
+            guildData.remove("owner");
+        }
+        guildData.save();
+        guildData.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
+        for (GuildMember member : guild.getMembers()) {
+            guildData.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
+            guildData.set("members." + member.getUUID().toString() + ".score", member.getScore());
+        }
+        guildData.set("prefix", guild.getGuildPrefix());
+        guildData.set("name", guild.getGuildName());
+        guildData.set("bank-size", guild.getBankSize());
+        for (int i = 0; i < guild.getBankSize(); i++) {
+            if (guild.getBank().get(i) != null) {
+                guildData.set("bank." + i, serializeItemStack(guild.getBank().get(i)));
+            }
+        }
+        guildData.set("score", guild.getScore());
+        guildData.save();
     }
 
     private static String serializeItemStack(ItemStack item) {

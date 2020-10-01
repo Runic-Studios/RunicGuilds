@@ -176,7 +176,7 @@ public class GuildCommand implements CommandExecutor {
 							if (args.length == 2) {
 								if (guild.isInGuild(args[1])) {
 									if (!args[1].equalsIgnoreCase(player.getName())) {
-										sendMessage(player, "&eType /guild confirm to confirm your actions, or /guild cancel to cancel. &cWARNING - You will be kicked from the guild if you confirm.");
+										sendMessage(player, "&eType /guild confirm to confirm your actions, or /guild cancel to cancel. &cWARNING - You will be demoted to officer if you confirm!");
 										transferOwnership.put(player.getUniqueId(), GuildUtil.getOfflinePlayerUUID(args[1]));
 										if (disbanding.contains(player.getUniqueId())) {
 											disbanding.remove(player.getUniqueId());
@@ -260,9 +260,7 @@ public class GuildCommand implements CommandExecutor {
 							}
 						} else if (transferOwnership.containsKey(player.getUniqueId())) {
 							guild.transferOwnership(guild.getMember(transferOwnership.get(player.getUniqueId())));
-							PlayerGuildDataUtil.setGuildForPlayer("None", player.getUniqueId().toString());
-							sendMessage(player, "&eSuccessfully transferred guild ownership. You have been removed from your guild.");
-							GuildUtil.getPlayerCache().put(player.getUniqueId(), null);
+							sendMessage(player, "&eSuccessfully transferred guild ownership. You have been demoted to officer.");
 							guildData.queueToSave();
 							Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, transferOwnership.get(player.getUniqueId()), player.getUniqueId()));
 							transferOwnership.remove(player.getUniqueId());

@@ -65,6 +65,8 @@ public class Guild implements Cloneable {
 	}
 
 	public void transferOwnership(GuildMember member) {
+		this.members.add(new GuildMember(this.owner.getUUID(), GuildRank.OFFICER, this.owner.getScore(), this.owner.getLastKnownName()));
+		this.owner = null;
 		this.owner = member;
 		this.members.remove(member);
 	}
