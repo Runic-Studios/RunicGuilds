@@ -1,13 +1,13 @@
 package com.runicrealms.runicguilds.guilds;
 
 public enum GuildRank {
-	
-	MEMBER("Member", 4), RECRUITER("Recruiter", 3), OFFICER("Officer", 2), OWNER("Owner", 1);
+
+	OWNER("Owner", 1), OFFICER("Officer", 2), RECRUITER("Recruiter", 3), MEMBER("Member", 4);
 	
 	private String name;
 	private Integer rank;
 	
-	private GuildRank(String name, Integer rank) {
+	GuildRank(String name, Integer rank) {
 		this.name = name;
 		this.rank = rank;
 	}

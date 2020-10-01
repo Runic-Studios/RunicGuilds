@@ -117,50 +117,67 @@ public class GuildCommand implements CommandExecutor {
 							sendMessage(player, "&eYou must be of rank officer or higher to kick other players.");
 						}
 					} else if (args[0].equalsIgnoreCase("info")) {
-						sendMessage(player, "&6Guild Info:");
-						sendMessage(player, "&eGuild Score: &6" + guild.getScore());
-						StringBuilder memberList = new StringBuilder();
-						memberList.append("&eMember List: ");
-						int i = 0;
-						memberList.append("&6Owner &r" + guild.getOwner().getLastKnownName() + (guild.getMembers().size() > 0 ? ", " : ""));
+						sendMessage(player, "&6[" + guild.getScore() + "]&r &e&l" + guild.getGuildName());
+						sendMessage(player, "&6Guild Owner: &7[" + guild.getOwner().getScore() + "] &e" + guild.getOwner().getLastKnownName());
+						HashMap<GuildRank, StringBuilder> members = new HashMap<GuildRank, StringBuilder>();
 						for (GuildMember member : guild.getMembers()) {
-							memberList.append("&6" + member.getRank().getName() + "&r " + member.getLastKnownName() + (i == guild.getMembers().size() - 1 ? "" : ", "));
-							i++;
+						    if (!members.containsKey(member.getRank())) {
+						        members.put(member.getRank(), new StringBuilder());
+                            }
+						    members.get(member.getRank())
+                                    .append("&7[")
+                                    .append(member.getScore())
+                                    .append("] &e")
+                                    .append(member.getLastKnownName())
+                                    .append("&r, ");
+                        }
+						for (GuildRank rank : GuildRank.values()) {
+							if (members.containsKey(rank)) {
+								sendMessage(player, "&6Guild " + rank.getName() + "s: &r" + members.get(rank).toString().substring(0, members.get(rank).toString().length() - 2));
+							}
 						}
-						sendMessage(player, memberList.toString());
 					} else if (args[0].equalsIgnoreCase("promote") || args[0].equalsIgnoreCase("demote")) {
 						if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
 							if (args.length == 2) {
 								if (guild.isInGuild(args[1])) {
-									GuildMember member = guild.getMember(Bukkit.getPlayerExact(args[1]).getUniqueId());
-									if (args[0].equalsIgnoreCase("promote")) {
-										if (member.getRank().getRankNumber() > guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
-												member.getRank() != GuildRank.OFFICER) {
-											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
-											sendMessage(player, "&eMember has been promoted.");
-											guildData.queueToSave();
-											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
-										} else {
-											if (member.getRank() == GuildRank.OFFICER) {
-												sendMessage(player, "&eYou cannot promote another player to owner. To transfer guild ownership, use /guild transfer.");
+									GuildMember member = null;
+									for (GuildMember target : guild.getMembers()) {
+										if (target.getLastKnownName().equalsIgnoreCase(args[1])) {
+											member = target;
+										}
+									}
+									if (member != null) {
+										if (args[0].equalsIgnoreCase("promote")) {
+											if (member.getRank().getRankNumber() > guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
+													member.getRank() != GuildRank.OFFICER) {
+												member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
+												sendMessage(player, "&eMember has been promoted.");
+												guildData.queueToSave();
+												Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guild, member.getUUID(), player.getUniqueId()));
 											} else {
-												sendMessage(player, "&eYou can only promote members that are under your rank.");
+												if (member.getRank() == GuildRank.OFFICER) {
+													sendMessage(player, "&eYou cannot promote another player to owner. To transfer guild ownership, use /guild transfer.");
+												} else {
+													sendMessage(player, "&eYou can only promote members that are under your rank.");
+												}
+											}
+										} else {
+											if (member.getRank().getRankNumber() > guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
+													member.getRank() != GuildRank.MEMBER) {
+												member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
+												sendMessage(player, "&eMember has been demoted.");
+												guildData.queueToSave();
+												Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, member.getUUID(), player.getUniqueId()));
+											} else {
+												if (member.getRank() == GuildRank.MEMBER) {
+													sendMessage(player, "&eYou cannot demote players of the lowest guild rank.");
+												} else {
+													sendMessage(player, "&eYou can only demote players that are under your rank.");
+												}
 											}
 										}
 									} else {
-										if (member.getRank().getRankNumber() > guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
-												member.getRank() != GuildRank.MEMBER) {
-											member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
-											sendMessage(player, "&eMember has been demoted.");
-											guildData.queueToSave();
-											Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, Bukkit.getPlayerExact(args[1]).getUniqueId(), player.getUniqueId()));
-										} else {
-											if (member.getRank() == GuildRank.MEMBER) {
-												sendMessage(player, "&eYou cannot demote players of the lowest guild rank.");
-											} else {
-												sendMessage(player, "&eYou can only demote players that are under your rank.");
-											}
-										}
+										sendMessage(player, "&eThat player is not in your guild!");
 									}
 								} else {
 									sendMessage(player, "&eThat player is not in your guild.");
