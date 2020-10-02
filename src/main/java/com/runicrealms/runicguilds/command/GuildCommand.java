@@ -194,13 +194,13 @@ public class GuildCommand implements CommandExecutor {
 											}
 										} else {
 											if (member.getRank().getRankNumber() > guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
-													member.getRank() != GuildRank.MEMBER) {
+													member.getRank() != GuildRank.RECRUIT) {
 												member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
 												sendMessage(player, "&eMember has been demoted.");
 												guildData.queueToSave();
 												Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, member.getUUID(), player.getUniqueId()));
 											} else {
-												if (member.getRank() == GuildRank.MEMBER) {
+												if (member.getRank() == GuildRank.RECRUIT) {
 													sendMessage(player, "&eYou cannot demote players of the lowest guild rank.");
 												} else {
 													sendMessage(player, "&eYou can only demote players that are under your rank.");
@@ -378,7 +378,7 @@ public class GuildCommand implements CommandExecutor {
 						}
 						GuildData guildData = GuildUtil.getGuildData(invites.get(player.getUniqueId()));
 						Guild guild = guildData.getData();
-						guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.MEMBER, 0, player.getName()));
+						guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
 						PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
 						sendMessage(player, "&eYou have accepted the guild invitation.");
 						guildData.queueToSave();

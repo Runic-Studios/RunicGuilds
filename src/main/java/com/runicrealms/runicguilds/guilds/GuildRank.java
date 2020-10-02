@@ -5,8 +5,8 @@ public enum GuildRank {
 	OWNER("owner", "Owner", "Owners", 1, true),
 	OFFICER("officer", "Officer", "Officers", 2, true),
 	RECRUITER("recruiter", "Recruiter", "Recruiters", 3, true),
-	TRUSTED("trusted", "Trusted", "Trusted", 4, true),
-	MEMBER("member", "Member", "Members", 5, false);
+	MEMBER("member", "Member", "Member", 4, true),
+	RECRUIT("recruit", "Recruit", "Recruits", 5, false);
 
 	private String identifier;
 	private String name;
@@ -53,10 +53,10 @@ public enum GuildRank {
 	
 	public static GuildRank getByName(String name) {
 		switch (name) {
+			case "Recruit":
+				return GuildRank.RECRUIT;
 			case "Member":
 				return GuildRank.MEMBER;
-			case "Trusted":
-				return GuildRank.TRUSTED;
 			case "Recruiter":
 				return GuildRank.RECRUITER;
 			case "Officer":
@@ -64,7 +64,7 @@ public enum GuildRank {
 			case "Owner":
 				return GuildRank.OWNER;
 		}
-		return GuildRank.MEMBER;
+		return GuildRank.RECRUIT;
 	}
 
 	public static GuildRank getByNumber(Integer number) {
@@ -76,11 +76,11 @@ public enum GuildRank {
 			case 3:
 				return GuildRank.RECRUITER;
 			case 4:
-				return GuildRank.TRUSTED;
-			case 5:
 				return GuildRank.MEMBER;
+			case 5:
+				return GuildRank.RECRUIT;
 		}
-		return GuildRank.MEMBER;
+		return GuildRank.RECRUIT;
 	}
 	
 }
