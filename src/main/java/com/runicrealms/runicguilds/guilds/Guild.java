@@ -15,14 +15,16 @@ public class Guild implements Cloneable {
 	private Integer score;
 	private List<ItemStack> bank;
 	private Integer bankSize;
+	private Map<GuildRank, Boolean> bankAccess;
 
-	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize) {
+	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess) {
 		this.members = members;
 		this.owner = owner;
 		this.guildName = guildName;
 		this.guildPrefix = guildPrefix;
 		this.bank = bank;
 		this.bankSize = bankSize;
+		this.bankAccess = bankAccess;
 		this.recalculateScore();
 	}
 
@@ -50,6 +52,14 @@ public class Guild implements Cloneable {
 		return this.bank;
 	}
 
+	public boolean canAccessBank(GuildRank rank) {
+		return rank == GuildRank.OWNER ? true : this.bankAccess.get(rank);
+	}
+
+	public Map<GuildRank, Boolean> getBankAccess() {
+		return this.bankAccess;
+	}
+
 	public List<GuildMember> getMembersWithOwner() {
 		List<GuildMember> membersWithOwner = new ArrayList<>(this.members);
 		membersWithOwner.add(this.owner);
@@ -62,6 +72,10 @@ public class Guild implements Cloneable {
 
 	public void setBank(List<ItemStack> bank) {
 		this.bank = bank;
+	}
+
+	public void setBankAccess(GuildRank rank, Boolean canAccess) {
+		this.bankAccess.put(rank, canAccess);
 	}
 
 	public void transferOwnership(GuildMember member) {
@@ -162,7 +176,7 @@ public class Guild implements Cloneable {
 		for (GuildMember member : this.members) {
 			newMembers.add(member.clone());
 		}
-		return new Guild(newMembers, this.owner.clone(), new String(this.guildName), new String(this.guildPrefix), newItems, new Integer(this.bankSize));
+		return new Guild(newMembers, this.owner.clone(), new String(this.guildName), new String(this.guildPrefix), newItems, new Integer(this.bankSize), this.bankAccess);
 	}
 
 }

@@ -110,7 +110,13 @@ public class GuildUtil {
 		for (int i = 0; i < 45; i++) {
 			bank.add(null);
 		}
-		GuildData data = new GuildData(new Guild(new HashSet<>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45));
+		Map<GuildRank, Boolean> bankPermissions = new HashMap<GuildRank, Boolean>();
+		for (GuildRank rank : GuildRank.values()) {
+			if (rank != GuildRank.OWNER && !bankPermissions.containsKey(rank)) {
+				bankPermissions.put(rank, rank.canAccessBankByDefault());
+			}
+		}
+		GuildData data = new GuildData(new Guild(new HashSet<>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45, bankPermissions));
 		guilds.put(prefix, data);
 		players.put(owner, prefix);
 		data.queueToSave();

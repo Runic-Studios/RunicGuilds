@@ -67,7 +67,23 @@ public class GuildData {
                 items.add(null);
             }
         }
-        this.guild = new Guild(members, owner, this.guildData.get("name", String.class), this.guildData.get("prefix", String.class), items, this.guildData.get("bank-size", Integer.class));
+        Map<GuildRank, Boolean> bankPermissions = new HashMap<GuildRank, Boolean>();
+        if (this.guildData.has("settings")) {
+            if (this.guildData.getSection("settings").has("bank-access")) {
+                for (String key : this.guildData.getSection("settings.bank-access").getKeys()) {
+                    GuildRank rank = GuildRank.getByIdentifier(key);
+                    if (rank != null && rank != GuildRank.OWNER) {
+                        bankPermissions.put(rank, this.guildData.get("settings.bank-access." + key, Boolean.class));
+                    }
+                }
+            }
+        }
+        for (GuildRank rank : GuildRank.values()) {
+            if (rank != GuildRank.OWNER && !bankPermissions.containsKey(rank)) {
+                bankPermissions.put(rank, rank.canAccessBankByDefault());
+            }
+        }
+        this.guild = new Guild(members, owner, this.guildData.get("name", String.class), this.guildData.get("prefix", String.class), items, this.guildData.get("bank-size", Integer.class), bankPermissions);
     }
 
     public Guild getData() {
@@ -114,6 +130,9 @@ public class GuildData {
             }
         }
         guildData.set("score", guild.getScore());
+        for (GuildRank rank : this.guild.getBankAccess().keySet()) {
+            guildData.set("settings.bank-access." + rank.getIdentifier(), this.guild.canAccessBank(rank));
+        }
         guildData.save();
     }
 

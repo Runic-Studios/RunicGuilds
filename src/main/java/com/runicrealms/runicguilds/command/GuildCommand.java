@@ -77,6 +77,37 @@ public class GuildCommand implements CommandExecutor {
 						} else {
 							sendMessage(player, "&eYou must be of rank recruiter or higher to invite other players.");
 						}
+					} else if (args[0].equalsIgnoreCase("settings")) {
+						if (args.length >= 2) {
+							if (args[1].equalsIgnoreCase("bank")) {
+								if (args.length == 4) {
+									GuildRank rank = GuildRank.getByIdentifier(args[2]);
+									if (rank == null) {
+										sendMessage(player, "&eThat isn't a valid guild rank!");
+									} else if (rank == GuildRank.OWNER) {
+										sendMessage(player, "&eYou cannot deny/allow bank access to the guild owner!");
+									} else {
+										if (args[3].equalsIgnoreCase("yes") || args[3].equalsIgnoreCase("true")) {
+											guild.setBankAccess(rank, true);
+											guildData.queueToSave();
+											sendMessage(player, "&eUpdated guild bank permissions.");
+										} else if (args[3].equalsIgnoreCase("no") || args[3].equalsIgnoreCase("false")) {
+											guild.setBankAccess(rank, false);
+											guildData.queueToSave();
+											sendMessage(player, "&eUpdated guild bank permissions.");
+										} else {
+											sendMessage(player, "&ePlease enter \"yes\" or \"no\".");
+										}
+									}
+								} else {
+									sendMessage(player, "&eUse the command: /guild bank settings <rank> <yes|no> to allow or deny a specific rank access to your bank.");
+								}
+							} else {
+								sendMessage(player, "&eUse the command: /guild bank settings <rank> <yes|no> to allow or deny a specific rank access to your bank.");
+							}
+						} else {
+							sendMessage(player, "&eUse the command: /guild bank settings <rank> <yes|no> to allow or deny a specific rank access to your bank.");
+						}
 					} else if (args[0].equalsIgnoreCase("bank")) {
 						if (player.isOp()) {
 							GuildBankUtil.open(player, 1);
@@ -133,7 +164,7 @@ public class GuildCommand implements CommandExecutor {
                         }
 						for (GuildRank rank : GuildRank.values()) {
 							if (members.containsKey(rank)) {
-								sendMessage(player, "&6Guild " + rank.getName() + "s: &r" + members.get(rank).toString().substring(0, members.get(rank).toString().length() - 2));
+								sendMessage(player, "&6Guild " + rank.getPlural() + "s: &r" + members.get(rank).toString().substring(0, members.get(rank).toString().length() - 2));
 							}
 						}
 					} else if (args[0].equalsIgnoreCase("promote") || args[0].equalsIgnoreCase("demote")) {
@@ -379,7 +410,7 @@ public class GuildCommand implements CommandExecutor {
 		sendMessage(player, "&e/guild info &r- gets guild members and score.");
 		sendMessage(player, "&e/guild invite &6[player] &r- invites a player to the guild.");
 		sendMessage(player, "&e/guild bank &r- opens your guild bank.");
-		//sendMessage(player, "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.");
+		sendMessage(player, "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.");
 		sendMessage(player, "&e/guild kick &6[player] &r- kicks a player from the guild.");
 		sendMessage(player, "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.");
 		sendMessage(player, "&e/guild disband &r- disbands your guild.");

@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
@@ -39,6 +40,13 @@ public class EventClickNpc implements Listener {
         for (Integer bankerId : Plugin.GUILD_BANKERS) {
             if (bankerId == event.getNpc().getId()) {
                 if (GuildUtil.getPlayerCache().get(event.getPlayer().getUniqueId()) != null) {
+                    GuildData guildData = GuildUtil.getGuildDatas().get(GuildUtil.getPlayerCache().get(event.getPlayer().getUniqueId()));
+                    if (guildData.getData().getOwner().getUUID() != event.getPlayer().getUniqueId()) {
+                        if (!guildData.getData().canAccessBank(guildData.getData().getMember(event.getPlayer().getUniqueId()).getRank())) {
+                            event.getPlayer().sendMessage(ChatColor.YELLOW + "Your guild rank does not have access to the guild bank!");
+                            return;
+                        }
+                    }
                     GuildBankUtil.open(event.getPlayer(), 1);
                 } else {
                     event.getPlayer().sendMessage(ChatColor.YELLOW + "You have to be in a guild to use the guild bank.");
