@@ -306,7 +306,7 @@ public class GuildCommand implements CommandExecutor {
 									Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
 								}
  							} else {
-								sendMessage(player, "&eTo confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of three letters.");
+								sendMessage(player, "&eTo confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of 3-6 english letters.");
 							}
 						} else if (transferOwnership.containsKey(player.getUniqueId())) {
 							guild.transferOwnership(guild.getMember(transferOwnership.get(player.getUniqueId())));
