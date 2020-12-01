@@ -97,14 +97,6 @@
 			<version>1.16.4-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- RunicCore -->
-		<dependency>
-			<groupId>com.runicrealms.plugin</groupId>
-			<artifactId>RunicCore</artifactId>
-			<version>1.15.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicCore-1.15.2.jar</systemPath>
-		</dependency>
 		<!-- Placeholder API -->
 		<dependency>
 			<groupId>me.clip</groupId>
@@ -118,14 +110,6 @@
 			<artifactId>placeholderapi</artifactId>
 			<version>2.9.2</version>
 			<scope>provided</scope>
-		</dependency>
-		<!-- Runic Restart -->
-		<dependency>
-			<groupId>com.runicrealms.runicrestart.Plugin</groupId>
-			<artifactId>RunicRestart</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicRestart.jar</systemPath>
 		</dependency>
 		<!-- Runic Chat -->
 		<dependency>
@@ -135,13 +119,29 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/RunicChat-1.0-SNAPSHOT.jar</systemPath>
 		</dependency>
-		<!-- RunicNpcs -->
+		<!-- RunicCore -->
+		<dependency>
+			<groupId>com.runicrealms.plugin</groupId>
+			<artifactId>RunicCore</artifactId>
+			<version>1.15.2</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/RunicCore-1.15.2.jar</systemPath>
+		</dependency>
+		<!-- Runic Npcs -->
 		<dependency>
 			<groupId>com.runicrealms.runicnpcs</groupId>
 			<artifactId>RunicNpcs</artifactId>
 			<version>1.15.2</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/RunicNpcs-1.15.2.jar</systemPath>
+		</dependency>
+		<!-- Runic Restart -->
+		<dependency>
+			<groupId>com.runicrealms.runicrestart.Plugin</groupId>
+			<artifactId>RunicRestart</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/RunicRestart.jar</systemPath>
 		</dependency>
 	</dependencies>
 </project>
