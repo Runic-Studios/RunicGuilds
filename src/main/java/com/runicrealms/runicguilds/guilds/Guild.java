@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 public class Guild implements Cloneable {
 
 	private final Set<GuildMember> members;
+	private final GuildBanner guildBanner;
 	private GuildMember owner;
 	private String guildName;
 	private String guildPrefix;
@@ -16,20 +17,55 @@ public class Guild implements Cloneable {
 	private List<ItemStack> bank;
 	private Integer bankSize;
 	private Map<GuildRank, Boolean> bankAccess;
+	private int guildEXP;
 
 	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess) {
 		this.members = members;
+		this.guildBanner = new GuildBanner();
 		this.owner = owner;
 		this.guildName = guildName;
 		this.guildPrefix = guildPrefix;
 		this.bank = bank;
 		this.bankSize = bankSize;
 		this.bankAccess = bankAccess;
+		this.guildEXP = 0;
+		this.recalculateScore();
+	}
+
+	public Guild(Set<GuildMember> members, GuildBanner guildBanner, GuildMember owner, String guildName, String guildPrefix, Integer score, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+		this.members = members;
+		this.guildBanner = guildBanner;
+		this.owner = owner;
+		this.guildName = guildName;
+		this.guildPrefix = guildPrefix;
+		this.score = score;
+		this.bank = bank;
+		this.bankSize = bankSize;
+		this.bankAccess = bankAccess;
+		this.guildEXP = guildEXP;
+		this.recalculateScore();
+	}
+
+	public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, Integer score, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+		this.members = members;
+		this.guildBanner = new GuildBanner(guildBanner);
+		this.owner = owner;
+		this.guildName = guildName;
+		this.guildPrefix = guildPrefix;
+		this.score = score;
+		this.bank = bank;
+		this.bankSize = bankSize;
+		this.bankAccess = bankAccess;
+		this.guildEXP = guildEXP;
 		this.recalculateScore();
 	}
 
 	public Set<GuildMember> getMembers() {
 		return this.members;
+	}
+
+	public GuildBanner getGuildBanner() {
+		return this.guildBanner;
 	}
 
 	public GuildMember getOwner() {
@@ -60,6 +96,10 @@ public class Guild implements Cloneable {
 		return this.bankAccess;
 	}
 
+	public int getGuildEXP() {
+		return this.guildEXP;
+	}
+
 	public List<GuildMember> getMembersWithOwner() {
 		List<GuildMember> membersWithOwner = new ArrayList<>(this.members);
 		membersWithOwner.add(this.owner);
@@ -76,6 +116,10 @@ public class Guild implements Cloneable {
 
 	public void setBankAccess(GuildRank rank, Boolean canAccess) {
 		this.bankAccess.put(rank, canAccess);
+	}
+
+	public void setGuildEXP(int guildEXP) {
+		this.guildEXP = guildEXP;
 	}
 
 	public void transferOwnership(GuildMember member) {

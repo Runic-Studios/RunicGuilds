@@ -10,6 +10,7 @@ import com.runicrealms.runicguilds.boss.GuildBossManager;
 import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
+import com.runicrealms.runicguilds.guilds.GuildBannerUIListener;
 import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.shop.GuildHeraldShop;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
@@ -29,6 +30,15 @@ import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 
 public class Plugin extends JavaPlugin implements Listener {
+
+	/*
+	TODO:
+	1: Fix the two commands, they look UGLY
+	2: Add the command to give guild exp in the guildmod command once it is fixed
+	3: Add the command to check guild exp in the normal guild command once it is fixed
+	4: Add the command to make guild banner in the normal guild command once it is fixed
+	5: Go into GuildBannerUIListener.java and find the comment that says "save new guild in cache somewhere no clue" (use command f)
+	 */
 	
 	private static Plugin instance;
 	private static GuildBossManager guildBossManager;
@@ -60,6 +70,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new DataListener(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildShopManager(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBossListener(), this);
+		this.getServer().getPluginManager().registerEvents(new GuildBannerUIListener(), this);
 		this.getCommand("guild").setExecutor(new GuildCommand());
 		this.getCommand("guildmod").setExecutor(new GuildModCommand());
 		TaskSavingQueue.scheduleTask();
