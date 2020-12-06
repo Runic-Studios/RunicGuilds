@@ -1,15 +1,17 @@
 package com.runicrealms.runicguilds;
 
-import java.util.*;
-import java.util.logging.Level;
-
 import com.runicrealms.RunicChat;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.boss.GuildBossListener;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
 import com.runicrealms.runicguilds.chat.GuildChannel;
+import com.runicrealms.runicguilds.command.OldGuildCommand;
+import com.runicrealms.runicguilds.command.OldGuildModCommand;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
+import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
+import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.GuildBannerUIListener;
 import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.shop.GuildHeraldShop;
@@ -23,21 +25,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.runicrealms.runicguilds.command.GuildCommand;
-import com.runicrealms.runicguilds.command.GuildModCommand;
-import com.runicrealms.runicguilds.data.GuildUtil;
-import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
-import com.runicrealms.runicguilds.gui.GuildBankUtil;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Level;
 
 public class Plugin extends JavaPlugin implements Listener {
 
 	/*
 	TODO:
-	1: Fix the two commands, they look UGLY
-	2: Add the command to give guild exp in the guildmod command once it is fixed
-	3: Add the command to check guild exp in the normal guild command once it is fixed
-	4: Add the command to make guild banner in the normal guild command once it is fixed
-	5: Go into GuildBannerUIListener.java and find the comment that says "save new guild in cache somewhere no clue" (use command f)
+	Fix the structure of the new commands and implement giveexp subcommand
+	1: Fill in the blanks of the new commands
+	2: Go into GuildBannerUIListener.java and find the comment that says "save new guild in cache somewhere no clue" (use command f)
 	 */
 	
 	private static Plugin instance;
@@ -63,7 +63,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
 		MAX_BANK_PAGES = this.getConfig().getInt("max-bank-pages");
 		EventPlayerJoinQuit.initializePlayerCache();
-		this.getServer().getPluginManager().registerEvents(this, this);
+		//this.getServer().getPluginManager().registerEvents(this, this);
 		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBankUtil(), this);
 		this.getServer().getPluginManager().registerEvents(new EventClickNpc(), this);
@@ -71,8 +71,8 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new GuildShopManager(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBossListener(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBannerUIListener(), this);
-		this.getCommand("guild").setExecutor(new GuildCommand());
-		this.getCommand("guildmod").setExecutor(new GuildModCommand());
+		this.getCommand("guild").setExecutor(new OldGuildCommand()); //remove later
+		this.getCommand("guildmod").setExecutor(new OldGuildModCommand()); //remove later
 		TaskSavingQueue.scheduleTask();
 		// register placeholder tags
 		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -80,6 +80,15 @@ public class Plugin extends JavaPlugin implements Listener {
 		}
 		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel()); // register channels after place holders
 		RunicGuildsAPI.registerGuildShop(new GuildHeraldShop());
+	}
+
+	@Override
+	public void onDisable() {
+		TaskSavingQueue.emptyQueue();
+		getLogger().info(" §cRunicGuilds has been disabled.");
+		RunicRestartApi.markPluginSaved("guilds");
+		guildBossManager = null;
+		instance = null;
 	}
 
 	@EventHandler

@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import com.runicrealms.runicguilds.command.GuildCommand;
+import com.runicrealms.runicguilds.command.OldGuildCommand;
 import com.runicrealms.runicguilds.data.GuildUtil;
 
 public class EventPlayerJoinQuit implements Listener {
@@ -27,11 +27,11 @@ public class EventPlayerJoinQuit implements Listener {
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		GuildUtil.getPlayerCache().remove(event.getPlayer().getUniqueId());
-		if (GuildCommand.getTransferOwnership().containsKey(event.getPlayer().getUniqueId())) {
-			GuildCommand.getTransferOwnership().remove(event.getPlayer().getUniqueId());
+		if (OldGuildCommand.getTransferOwnership().containsKey(event.getPlayer().getUniqueId())) {
+			OldGuildCommand.getTransferOwnership().remove(event.getPlayer().getUniqueId());
 		}
-		if (GuildCommand.getDisbanding().contains(event.getPlayer().getUniqueId())) {
-			GuildCommand.getDisbanding().remove(event.getPlayer().getUniqueId());
+		if (OldGuildCommand.getDisbanding().contains(event.getPlayer().getUniqueId())) {
+			OldGuildCommand.getDisbanding().remove(event.getPlayer().getUniqueId());
 		}
 		if (Plugin.getPlayersCreatingGuild().contains(event.getPlayer().getUniqueId())) {
 			Plugin.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());

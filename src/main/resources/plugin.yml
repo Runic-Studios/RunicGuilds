@@ -18,3 +18,5 @@ Permissions:
     description: Allows a moderator to reset guild scores
   permissions.guild-mod-bank:
      description: Allows a moderator to access a guild's bank
+  permissions.guild-mod-giveexp:
+    description: Allows a moderator to give a player guild exp

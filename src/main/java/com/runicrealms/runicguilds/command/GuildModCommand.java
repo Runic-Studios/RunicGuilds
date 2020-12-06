@@ -1,181 +1,133 @@
 package com.runicrealms.runicguilds.command;
 
-import java.util.UUID;
-
-import com.runicrealms.runicguilds.data.GuildData;
-import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.*;
+import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.runicguilds.api.GiveGuildEXPEvent;
+import com.runicrealms.runicguilds.data.GuildUtil;
+import com.runicrealms.runicguilds.gui.GuildBannerUI;
+import com.runicrealms.runicguilds.guilds.EXPSource;
+import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.api.GuildCreationEvent;
-import com.runicrealms.runicguilds.api.GuildCreationResult;
-import com.runicrealms.runicguilds.api.GuildDisbandEvent;
-import com.runicrealms.runicguilds.api.GuildMemberKickedEvent;
-import com.runicrealms.runicguilds.data.GuildUtil;
-import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildMember;
+public class GuildModCommand extends BaseCommand {
 
-public class GuildModCommand implements CommandExecutor {
+    private final String prefix = ColorUtil.format("&r&6&lGuilds »&r ");
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (args.length >= 1) {
-			if (args[0].equalsIgnoreCase("create")) {
-				if (sender.isOp()) {
-					if (args.length == 4) {
-						UUID uuid = GuildUtil.getOfflinePlayerUUID(args[1]);
-						if (uuid != null) {
-							GuildCreationResult result = GuildUtil.createGuild(uuid, args[2], args[3]);
-							sendMessage(sender, "&e" + result.getMessage());
-							if (result == GuildCreationResult.SUCCESSFUL) {
-								PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(uuid).getData().getGuildName(), uuid.toString());
-								Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(args[3]).getData(), true));
-							}
-						} else {
-							sendMessage(sender, "&eThat player is not online.");
-						}
-					} else {
-						sendHelpMessage(sender);
-					}
-				} else {
-					sendMessage(sender, "&eYou do not have permission to do this.");
-				}
-			} else if (args[0].equalsIgnoreCase("disband")) {
-				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-disband"))) {
-					if (args.length == 2) {
-						if (GuildUtil.getGuildDatas().containsKey(args[1])) {
-							Guild guild = GuildUtil.getGuildData(args[1]).getData();
-							if (GuildCommand.getTransferOwnership().containsKey(guild.getOwner().getUUID())) {
-								GuildCommand.getTransferOwnership().remove(guild.getOwner().getUUID());
-							}
-							if (GuildCommand.getDisbanding().contains(guild.getOwner().getUUID())) {
-								GuildCommand.getDisbanding().remove(guild.getOwner().getUUID());
-							}
-							for (GuildMember member : guild.getMembers()) {
-								PlayerGuildDataUtil.setGuildForPlayer("None", member.getUUID().toString());
-								if (GuildUtil.getPlayerCache().containsKey(member.getUUID())) {
-									GuildUtil.getPlayerCache().put(member.getUUID(), null);
-								}
-								if (GuildBankUtil.isViewingBank(member.getUUID())) {
-									GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
-								}
-							}
-							if (GuildUtil.getPlayerCache().containsKey(guild.getOwner().getUUID())) {
-								GuildUtil.getPlayerCache().put(guild.getOwner().getUUID(), null);
-							}
-							Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, null, true));
-							GuildUtil.getGuildDatas().get(args[1]).deleteData();
-							GuildUtil.removeGuildFromCache(GuildUtil.getGuildData(args[1]).getData());
-							sendMessage(sender, "&eSuccessfully disbanded guild.");
-						} else {
-							sendMessage(sender, "&eThat guild does not exist.");
-						}
-					} else {
-						sendHelpMessage(sender);
-					}
-				} else {
-					sendMessage(sender, "&eYou do not have permission to do this.");
-				}
-			} else if (args[0].equalsIgnoreCase("kick")) {
-				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-kick"))) {
-					if (args.length == 2) {
-						if (GuildUtil.getGuildData(GuildUtil.getOfflinePlayerUUID(args[1])).getData() != null) {
-							GuildData guildData = GuildUtil.getGuildData(GuildUtil.getOfflinePlayerUUID(args[1]));
-							Guild guild = guildData.getData();
-							if (!guild.getOwner().getUUID().toString().equalsIgnoreCase(GuildUtil.getOfflinePlayerUUID(args[1]).toString())) {
-								UUID uuid = GuildUtil.getOfflinePlayerUUID(args[1]);
-								if (GuildBankUtil.isViewingBank(uuid)) {
-									GuildBankUtil.close(Bukkit.getPlayer(args[1]));
-								}
-								if (GuildUtil.getPlayerCache().containsKey(uuid)) {
-									GuildUtil.getPlayerCache().put(uuid, null);
-								}
-								PlayerGuildDataUtil.setGuildForPlayer("None", uuid.toString());
-								guild.removeMember(uuid);
-								guildData.queueToSave();
-								Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, GuildUtil.getOfflinePlayerUUID(args[1]), null, true));
-								sendMessage(sender, "&eSuccessfully kicked guild member.");
-							} else {
-								sendMessage(sender, "&eThat user is the guild owner. To disband the guild, use /guildmod disband [prefix].");
-							}
-							sendMessage(sender, "&ePlayer has been kicked.");
-						} else {
-							sendMessage(sender, "&eThat player is not in a guild.");
-						}
-					} else {
-						sendHelpMessage(sender);
-					}
-				} else {
-					sendMessage(sender, "&eYou do not have permission to do this.");
-				}
-			} else if (args[0].equalsIgnoreCase("reset")) {
-				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-reset"))) {
-					if (args.length == 2) {
-						UUID playerUUID = Bukkit.getPlayerExact(args[1]).getUniqueId();
-						if (GuildUtil.getPlayerCache().get(playerUUID) != null) {
-							GuildData guildData = GuildUtil.getGuildData(GuildUtil.getPlayerCache().get(playerUUID));
-							Guild guild = guildData.getData();
-							guild.setPlayerScore(GuildUtil.getOfflinePlayerUUID(args[1]), 0);
-							guildData.queueToSave();
-							sendMessage(sender, "&eSuccessfully reset guild member score.");
-						} else {
-							sendMessage(sender, "&eThat player is not in a guild.");
-						}
-					} else {
-						sendHelpMessage(sender);
-					}
-				} else {
-					sendMessage(sender, "&eYou do not have permission to do this.");
-				}
-			} else if (args[0].equalsIgnoreCase("bank")){
-				if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-bank"))) {
-					if (sender instanceof Player) {
-						Player player = (Player) sender;
-						if (args.length == 2) {
-							if (GuildUtil.getGuildData(args[1]) != null) {
-								GuildBankUtil.open(player, 1, args[1]);
-							} else {
-								sendMessage(sender, "&eThat guild does not exist");
-							}
-						} else {
-							sendHelpMessage(sender);
-						}
-					} else {
-						sendMessage(sender, "&eYou must be a player to use this command!");
-					}
-				} else {
-					sendMessage(sender, "&eYou do not have permission to do this.");
-				}
-			} else {
-				sendHelpMessage(sender);
-			}
-		} else if (sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-disband")) ||
-				sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-kick")) ||
-				sender.hasPermission(Plugin.getInstance().getConfig().getString("permissions.guildmod-reset"))) {
-			sendHelpMessage(sender);
-		} else {
-			sendMessage(sender, "&eYou do not have permission to do this.");
-		}
-		return true;
-	}
+    public GuildModCommand() {
+        //placeholder
+    }
 
-	private static void sendMessage(CommandSender sender, String message) {
-		sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-	}
+    @Default
+    @CatchUnknown
+    public void onGuildHelpCommand(Player player) {
+        String[] lines = new String[]{"&6Guild Moderator Commands:",
+                "&e/guildmod disband &6[prefix] &r- force disbands a guild.",
+                "&e/guildmod kick &6[player] &r- force kicks a player from their guild.",
+                "&e/guildmod reset &6[player] &r- resets a player's guild score and guild experience.",
+                "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.",
+                "&e/guildmod bank &6[prefix] &r- views another guild's bank",
+                "&e/guildmod giveexp &6[player] [reason] [amount] &r- give a player guild experience"};
+        for (String line : lines) {
+            player.sendMessage(ColorUtil.format(line));
+        }
+    }
 
-	private static void sendHelpMessage(CommandSender sender) {
-		sendMessage(sender, "&6Guild Moderator Commands:");
-		sendMessage(sender, "&e/guildmod disband &6[prefix] &r- force disbands a guild.");
-		sendMessage(sender, "&e/guildmod kick &6[player] &r- force kicks a player from their guild.");
-		sendMessage(sender, "&e/guildmod reset &6[player] &r- resets a player's guild score.");
-		sendMessage(sender, "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.");
-		sendMessage(sender, "&e/guildmod bank &6[prefi x] &r- views another guild's bank");
-	}
+    @Subcommand("disband")
+    @Syntax("<player>")
+    @CommandPermission("permissions.guild-mod-disband")
+    @CommandCompletion("@guildmod-disband")
+    public void onGuildModDisbandCommand(Player player, String[] args) {
+        //placeholder
+    }
 
+    @Subcommand("kick")
+    @Syntax("<player>")
+    @CommandPermission("permissions.guild-mod-kick")
+    @CommandCompletion("@guildmod-kick")
+    public void onGuildModKickCommand(Player player, String[] args) {
+        //placeholder
+    }
+
+    @Subcommand("reset")
+    @Syntax("<player>")
+    @CommandPermission("permissions.guild-mod-reset")
+    @CommandCompletion("@guildmod-reset")
+    public void onGuildModResetCommand(Player player, String[] args) {
+        //placeholder
+    }
+
+    //no clue what im doing, has more then one arg
+    @Subcommand("create")
+    @Syntax("<player>")
+    //check if op here
+    @CommandCompletion("@guildmod-create")
+    public void onGuildModCreateCommand(Player player, String[] args) {
+        //placeholder
+    }
+
+    @Subcommand("bank")
+    @Syntax("<prefix>")
+    @CommandPermission("permissions.guild-mod-bank")
+    @CommandCompletion("@guildmod-bank")
+    @Conditions("is-player")
+    public void onGuildModBankCommand(Player player, String[] args) {
+        //placeholder
+    }
+
+    @Subcommand("giveexp")
+    @Syntax("<player> <reason> <amount>")
+    @CommandPermission("permissions.guild-mod-giveexp")
+    @CommandCompletion("@guildmod-giveexp")
+    public void onGuildModGiveEXPCommand(CommandSender sender, String[] args) { //made it CommandSender because it might be console (fix if wrong please)
+        Player target = Bukkit.getPlayerExact(args[0]);
+        if (target == null) {
+            sender.sendMessage(ColorUtil.format(this.prefix + "&cYou must enter a valid player this command!"));
+            return;
+        }
+
+        Guild guild = GuildUtil.getGuildData(target.getUniqueId()).getData();
+        if (guild == null) {
+            sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
+            return;
+        }
+
+        EXPSource source;
+        if (args[1].equalsIgnoreCase("Kill")) {
+            source = EXPSource.KILL;
+        } else if (args[1].equalsIgnoreCase("Quest")) {
+            source = EXPSource.QUEST;
+        } else if (args[1].equalsIgnoreCase("Brawl")) {
+            source = EXPSource.BRAWL;
+        } else if (args[1].equalsIgnoreCase("Other")) {
+            source = EXPSource.OTHER;
+        } else {
+            sender.sendMessage(ColorUtil.format(this.prefix + "&cYou have entered an invalid source, here is a list of sources that you can use to execute this command!"));
+            sender.sendMessage(ColorUtil.format(this.prefix + "&cHere are the valid sources: Kill, Quest, Brawl, Other"));
+            sender.sendMessage(ColorUtil.format(this.prefix + "&c/giveguildexp <player> <source> <amount>"));
+            return;
+        }
+
+        int amount;
+        try {
+            amount = Integer.parseInt(args[2]);
+        } catch (NumberFormatException exception) {
+            sender.sendMessage(ColorUtil.format(this.prefix + "&cYou have entered an invalid integer, the argument used must be an integer to execute this command!"));
+            sender.sendMessage(ColorUtil.format(this.prefix + "&c/giveguildexp <player> <source> <amount>"));
+            return;
+        }
+
+        GiveGuildEXPEvent event = new GiveGuildEXPEvent(guild, amount, source);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        guild.setGuildEXP(guild.getGuildEXP() + amount);
+        //save to cache somewhere maybe?
+        target.sendMessage(ColorUtil.format("&r&aYou received " + amount + " guild experience!"));
+    }
 }
