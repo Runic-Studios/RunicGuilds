@@ -35,7 +35,6 @@ public class Plugin extends JavaPlugin implements Listener {
 
 	/*
 	TODO:
-	Fix the structure of the new commands and implement giveexp subcommand
 	1: Fill in the blanks of the new commands
 	2: Go into GuildBannerUIListener.java and find the comment that says "save new guild in cache somewhere no clue" (use command f)
 	 */
