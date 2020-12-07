@@ -18,6 +18,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class GuildModCommand extends BaseCommand {
@@ -146,14 +148,14 @@ public class GuildModCommand extends BaseCommand {
             banner.remove();
         }
 
-        List<Guild> activeGuilds = GuildUtil.getAllGuilds();
+        List<Guild> ordering = new ArrayList<>(GuildUtil.getAllGuilds());
         List<Guild> guilds = new ArrayList<>();
+        Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();
+
+        Collections.sort(ordering, comparator);
 
         for (int i = 0; i < 3; i++) {
-            if (activeGuilds.size() - 1 < i) {
-                continue;
-            }
-            guilds.add(activeGuilds.get(i));
+            guilds.add(ordering.get(i));
         }
 
         Integer i = 1;

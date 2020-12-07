@@ -88,7 +88,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		RunicGuildsAPI.registerGuildShop(new GuildHeraldShop());
 		new ForceLoadBanners().runTaskTimer(this, 0, 72000);
 	}
-
+/*
 	@Override
 	public void onDisable() {
 		for (PostedGuildBanner banner : postedGuildBanners) {
@@ -101,9 +101,13 @@ public class Plugin extends JavaPlugin implements Listener {
 		guildBossManager = null;
 		instance = null;
 	}
-
+*/
 	@EventHandler
 	public void onShutdown(ServerShutdownEvent event) {
+		for (PostedGuildBanner banner : postedGuildBanners) {
+			banner.remove();
+		}
+
 		TaskSavingQueue.emptyQueue();
 		getLogger().info(" §cRunicGuilds has been disabled.");
 		RunicRestartApi.markPluginSaved("guilds");
