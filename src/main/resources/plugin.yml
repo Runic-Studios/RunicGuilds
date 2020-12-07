@@ -3,6 +3,7 @@ description: Runic Realms Guilds Plugin, by Excel
 version: 1.0
 main: com.runicrealms.runicguilds.Plugin
 api-version: 1.13
+depend: [HolograpicDisplays]
 softdepend: [PlaceholderAPI, RunicRestart]
 commands:
   guild:

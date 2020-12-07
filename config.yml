@@ -1,9 +1,20 @@
-permissions:
-  guildmod-disband: 'runicadmin.guilds.disband'
-  guildmod-kick: 'runicadmin.guilds.kick'
-  guildmod-reset: 'runicadmin.guilds.reset'
-  guildmod-bank: 'runicadmin.guilds.bank'
 max-bank-pages: 5
+banners:
+  number1:
+    world: 'world'
+    x: 0
+    y: 0
+    z: 0
+  number2:
+    world: 'world'
+    x: 0
+    y: 0
+    z: 0
+  number3:
+    world: 'world'
+    x: 0
+    y: 0
+    z: 0
 guild-heralds:
   - 313 # Azana
   - 476 # Koldore

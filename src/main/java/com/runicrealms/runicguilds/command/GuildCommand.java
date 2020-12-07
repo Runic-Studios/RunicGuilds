@@ -22,7 +22,6 @@ public class GuildCommand extends BaseCommand {
         String[] lines = new String[]{"&6Guild Commands:",
                 "&e/guild info &r- gets guild members, score and guild experience",
                 "&e/guild invite &6[player] &r- invites a player to the guild.",
-                "&e/guild bank &r- opens your guild bank.",
                 "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.",
                 "&e/guild kick &6[player] &r- kicks a player from the guild.",
                 "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.",
@@ -52,6 +51,7 @@ public class GuildCommand extends BaseCommand {
     }
 
     @Subcommand("bank")
+    @CommandPermission("runicadmin.guilds.bank")
     @Conditions("is-player")
     public void onGuildBankCommand(Player player) {
         //placeholder

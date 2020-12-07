@@ -3,14 +3,22 @@ package com.runicrealms.runicguilds.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBannerUI;
 import com.runicrealms.runicguilds.guilds.EXPSource;
 import com.runicrealms.runicguilds.guilds.Guild;
+import com.runicrealms.runicguilds.guilds.PostedGuildBanner;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuildModCommand extends BaseCommand {
 
@@ -37,7 +45,7 @@ public class GuildModCommand extends BaseCommand {
 
     @Subcommand("disband")
     @Syntax("<player>")
-    @CommandPermission("permissions.guild-mod-disband")
+    @CommandPermission("runicadmin.guilds.disband")
     @CommandCompletion("@guildmod-disband")
     public void onGuildModDisbandCommand(Player player, String[] args) {
         //placeholder
@@ -45,7 +53,7 @@ public class GuildModCommand extends BaseCommand {
 
     @Subcommand("kick")
     @Syntax("<player>")
-    @CommandPermission("permissions.guild-mod-kick")
+    @CommandPermission("runicadmin.guilds.kick")
     @CommandCompletion("@guildmod-kick")
     public void onGuildModKickCommand(Player player, String[] args) {
         //placeholder
@@ -53,7 +61,7 @@ public class GuildModCommand extends BaseCommand {
 
     @Subcommand("reset")
     @Syntax("<player>")
-    @CommandPermission("permissions.guild-mod-reset")
+    @CommandPermission("runicadmin.guilds.reset")
     @CommandCompletion("@guildmod-reset")
     public void onGuildModResetCommand(Player player, String[] args) {
         //placeholder
@@ -70,7 +78,7 @@ public class GuildModCommand extends BaseCommand {
 
     @Subcommand("bank")
     @Syntax("<prefix>")
-    @CommandPermission("permissions.guild-mod-bank")
+    @CommandPermission("runicadmin.guilds.bank")
     @CommandCompletion("@guildmod-bank")
     @Conditions("is-player")
     public void onGuildModBankCommand(Player player, String[] args) {
@@ -79,7 +87,7 @@ public class GuildModCommand extends BaseCommand {
 
     @Subcommand("giveexp")
     @Syntax("<player> <reason> <amount>")
-    @CommandPermission("permissions.guild-mod-giveexp")
+    @CommandPermission("runicadmin.guilds.giveexp")
     @CommandCompletion("@guildmod-giveexp")
     public void onGuildModGiveEXPCommand(CommandSender sender, String[] args) { //made it CommandSender because it might be console (fix if wrong please)
         Player target = Bukkit.getPlayerExact(args[0]);
@@ -129,5 +137,37 @@ public class GuildModCommand extends BaseCommand {
         guild.setGuildEXP(guild.getGuildEXP() + amount);
         //save to cache somewhere maybe?
         target.sendMessage(ColorUtil.format("&r&aYou received " + amount + " guild experience!"));
+    }
+
+    @Subcommand("forceloadbanners")
+    @CommandPermission("runicadmin.guilds.forceloadbanners")
+    public void onGuildModGiveEXPCommand(CommandSender sender) { //made it CommandSender because it might be console (fix if wrong please)
+        for (PostedGuildBanner banner : Plugin.getPostedGuildBanners()) {
+            banner.remove();
+        }
+
+        List<Guild> activeGuilds = GuildUtil.getAllGuilds();
+        List<Guild> guilds = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            if (activeGuilds.size() - 1 < i) {
+                continue;
+            }
+            guilds.add(activeGuilds.get(i));
+        }
+
+        Integer i = 1;
+        for (Guild guild : guilds) {
+            String path = "banners.number" + i.toString();
+            FileConfiguration config = Plugin.getInstance().getConfig();
+            World world = Bukkit.getWorld(config.getString(path + ".world"));
+            double x = config.getDouble(path + ".x");
+            double y = config.getDouble(path + ".y");
+            double z = config.getDouble(path + ".z");
+            Location location = new Location(world, x, y, z);
+            PostedGuildBanner banner = new PostedGuildBanner(guild, location);
+            Plugin.getPostedGuildBanners().add(banner);
+            i++;
+        }
     }
 }
