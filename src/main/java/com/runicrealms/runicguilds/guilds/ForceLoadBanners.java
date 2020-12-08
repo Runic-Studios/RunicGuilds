@@ -9,7 +9,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class ForceLoadBanners extends BukkitRunnable {
         List<Guild> guilds = new ArrayList<>();
         Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();
 
-        Collections.sort(ordering, comparator);
+        ordering.sort(comparator);
 
         for (int i = 0; i < 3; i++) {
             guilds.add(ordering.get(i));
@@ -34,18 +33,16 @@ public class ForceLoadBanners extends BukkitRunnable {
     }
 
     private void makeBanners(List<Guild> guilds) {
-        Integer i = 1;
-        for (Guild guild : guilds) {
-            String path = "banners.number" + i.toString();
+        for (int i = 1; i <= 3; i++) {
+            String path = "banners.number" + i;
             FileConfiguration config = Plugin.getInstance().getConfig();
             World world = Bukkit.getWorld(config.getString(path + ".world"));
             double x = config.getDouble(path + ".x");
             double y = config.getDouble(path + ".y");
             double z = config.getDouble(path + ".z");
             Location location = new Location(world, x, y, z);
-            PostedGuildBanner banner = new PostedGuildBanner(guild, location);
+            PostedGuildBanner banner = new PostedGuildBanner(guilds.get(i - 1), location);
             Plugin.getPostedGuildBanners().add(banner);
-            i++;
         }
     }
 }
