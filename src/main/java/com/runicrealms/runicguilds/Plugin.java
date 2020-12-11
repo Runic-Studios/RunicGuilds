@@ -74,10 +74,9 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new GuildShopManager(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBossListener(), this);
 		this.getServer().getPluginManager().registerEvents(new GuildBannerUIListener(), this);
-
 		 */
 		//Events
-		this.registerEvents(this, this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
+		this.registerEvents(this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
 				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener());
 
 
@@ -95,20 +94,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		RunicGuildsAPI.registerGuildShop(new GuildHeraldShop());
 		new ForceLoadBanners().runTaskTimer(this, 0, 72000);
 	}
-/*
-	@Override
-	public void onDisable() {
-		for (PostedGuildBanner banner : postedGuildBanners) {
-			banner.remove();
-		}
 
-		TaskSavingQueue.emptyQueue();
-		getLogger().info(" §cRunicGuilds has been disabled.");
-		RunicRestartApi.markPluginSaved("guilds");
-		guildBossManager = null;
-		instance = null;
-	}
-*/
 	@EventHandler
 	public void onShutdown(ServerShutdownEvent event) {
 		for (PostedGuildBanner banner : postedGuildBanners) {
@@ -138,7 +124,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		return guildBossManager;
 	}
 
-	private void registerEvents(Plugin plugin, Listener... listeners) {
+	private void registerEvents(Listener... listeners) {
 		for (Listener listener : listeners) {
 			this.getServer().getPluginManager().registerEvents(listener, this);
 		}
