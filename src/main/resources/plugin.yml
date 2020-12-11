@@ -10,6 +10,10 @@ commands:
     description: Command for guild operations
   guildmod:
     description: Command for guild moderator operations
+  forcereloadbanners:
+    description: Command for guild operations
+  makeguildbanner:
+    description: Command for guild moderator operations
 Permissions:
   permissions.guild-mod-disband:
     description: Allows a moderator to force disband guilds

@@ -15,8 +15,9 @@ import java.util.List;
 public class ForceLoadBanners extends BukkitRunnable {
     @Override
     public void run() {
-        for (PostedGuildBanner banner : Plugin.getPostedGuildBanners()) {
+        for (PostedGuildBanner banner : new ArrayList<>(Plugin.getPostedGuildBanners())) {
             banner.remove();
+            Plugin.getPostedGuildBanners().remove(banner);
         }
 
         List<Guild> ordering = new ArrayList<>(GuildUtil.getAllGuilds());

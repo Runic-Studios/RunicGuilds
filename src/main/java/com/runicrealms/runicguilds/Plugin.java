@@ -1,12 +1,14 @@
 package com.runicrealms.runicguilds;
 
 import com.runicrealms.RunicChat;
+import com.runicrealms.plugin.runicguildslevelingtest.cmds.PlaceholderMakeGuildBannerCommand;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.boss.GuildBossListener;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
 import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.OldGuildCommand;
 import com.runicrealms.runicguilds.command.OldGuildModCommand;
+import com.runicrealms.runicguilds.command.PlaceholderForceReloadBannersCommand;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;
@@ -77,8 +79,13 @@ public class Plugin extends JavaPlugin implements Listener {
 		//Events
 		this.registerEvents(this, this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
 				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener());
+
+
 		this.getCommand("guild").setExecutor(new OldGuildCommand()); //remove later
 		this.getCommand("guildmod").setExecutor(new OldGuildModCommand()); //remove later
+		this.getCommand("forcereloadbanners").setExecutor(new PlaceholderForceReloadBannersCommand()); //remove later
+		this.getCommand("makeguildbanner").setExecutor(new PlaceholderMakeGuildBannerCommand()); //remove later
+
 		TaskSavingQueue.scheduleTask();
 		// register placeholder tags
 		if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
