@@ -5,16 +5,19 @@ banners:
     x: 0
     y: 0
     z: 0
+    yaw: 0
   number2:
     world: 'world'
     x: 0
     y: 0
     z: 0
+    yaw: 0
   number3:
     world: 'world'
     x: 0
     y: 0
     z: 0
+    yaw: 0
 guild-heralds:
   - 313 # Azana
   - 476 # Koldore

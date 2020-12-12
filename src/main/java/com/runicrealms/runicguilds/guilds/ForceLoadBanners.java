@@ -41,7 +41,9 @@ public class ForceLoadBanners extends BukkitRunnable {
             double x = config.getDouble(path + ".x");
             double y = config.getDouble(path + ".y");
             double z = config.getDouble(path + ".z");
+            float yaw = (float) config.getDouble(path + ".yaw");
             Location location = new Location(world, x, y, z);
+            location.setYaw(yaw);
             PostedGuildBanner banner = new PostedGuildBanner(guilds.get(i - 1), location);
             Plugin.getPostedGuildBanners().add(banner);
         }
