@@ -95,9 +95,9 @@
 		<dependency>
 			<groupId>net.elseland.xikage</groupId>
 			<artifactId>mythicmobs</artifactId>
-			<version>4.9.0</version>
+			<version>4.11.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/MythicMobs-4.9.0.jar</systemPath>
+			<systemPath>${project.basedir}/lib/MythicMobs-4.11.0-SNAPSHOT.jar</systemPath>
 		</dependency>
 		<!-- Spigot API -->
 		<dependency>
@@ -141,7 +141,7 @@
 			<artifactId>RunicCore</artifactId>
 			<version>1.15.2</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicCore-1.15.2.jar</systemPath>
+			<systemPath>${project.basedir}/lib/RunicCore-1.16.4.jar</systemPath>
 		</dependency>
 		<!-- Runic Npcs -->
 		<dependency>
@@ -149,7 +149,7 @@
 			<artifactId>RunicNpcs</artifactId>
 			<version>1.15.2</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicNpcs-1.15.2.jar</systemPath>
+			<systemPath>${project.basedir}/lib/RunicNpcs-1.16.4.jar</systemPath>
 		</dependency>
 		<!-- Runic Restart -->
 		<dependency>
@@ -157,7 +157,7 @@
 			<artifactId>RunicRestart</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicRestart.jar</systemPath>
+			<systemPath>${project.basedir}/lib/RunicRestart-1.16.4.jar</systemPath>
 		</dependency>
 		<!-- ACF -->
 		<dependency>

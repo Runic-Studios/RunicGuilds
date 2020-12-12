@@ -92,15 +92,11 @@ public class Plugin extends JavaPlugin implements Listener {
 		}
 		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel()); // register channels after place holders
 		RunicGuildsAPI.registerGuildShop(new GuildHeraldShop());
-		new ForceLoadBanners().runTaskTimer(this, 0, 72000);
+		new ForceLoadBanners().runTaskTimer(this, 400, 72000);
 	}
 
 	@EventHandler
 	public void onShutdown(ServerShutdownEvent event) {
-		for (PostedGuildBanner banner : postedGuildBanners) {
-			banner.remove();
-		}
-
 		TaskSavingQueue.emptyQueue();
 		getLogger().info(" §cRunicGuilds has been disabled.");
 		RunicRestartApi.markPluginSaved("guilds");

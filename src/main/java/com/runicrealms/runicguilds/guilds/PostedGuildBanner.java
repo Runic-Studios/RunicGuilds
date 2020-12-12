@@ -65,6 +65,7 @@ public class PostedGuildBanner {
         armorStand.setGravity(false);
         armorStand.setVisible(false);
         armorStand.setBasePlate(false);
+        armorStand.setPersistent(false);
         armorStand.getEquipment().setHelmet(item);
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
         armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, this.guild.getGuildPrefix());

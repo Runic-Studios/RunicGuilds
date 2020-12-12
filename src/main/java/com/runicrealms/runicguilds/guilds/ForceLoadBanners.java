@@ -15,6 +15,7 @@ import java.util.List;
 public class ForceLoadBanners extends BukkitRunnable {
     @Override
     public void run() {
+        Bukkit.broadcastMessage("spawn banners"); //remove
         for (PostedGuildBanner banner : new ArrayList<>(Plugin.getPostedGuildBanners())) {
             banner.remove();
             Plugin.getPostedGuildBanners().remove(banner);
