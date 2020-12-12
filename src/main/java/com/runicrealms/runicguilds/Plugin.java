@@ -1,7 +1,6 @@
 package com.runicrealms.runicguilds;
 
 import com.runicrealms.RunicChat;
-import com.runicrealms.plugin.runicguildslevelingtest.cmds.PlaceholderMakeGuildBannerCommand;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.boss.GuildBossListener;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
@@ -9,6 +8,7 @@ import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.OldGuildCommand;
 import com.runicrealms.runicguilds.command.OldGuildModCommand;
 import com.runicrealms.runicguilds.command.PlaceholderForceReloadBannersCommand;
+import com.runicrealms.runicguilds.command.PlaceholderMakeGuildBannerCommand;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.data.TaskSavingQueue;
 import com.runicrealms.runicguilds.event.EventClickNpc;

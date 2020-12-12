@@ -1,7 +1,7 @@
-package com.runicrealms.plugin.runicguildslevelingtest.cmds;
+package com.runicrealms.runicguilds.command;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
-import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBannerUI;
 import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.command.Command;
@@ -27,13 +27,13 @@ public class PlaceholderMakeGuildBannerCommand implements CommandExecutor {
 
         Player player = (Player) sender;
 
-        if (!RunicGuildsAPI.isInGuild(player.getUniqueId())) {
+        if (GuildUtil.getGuildData(player.getUniqueId()) == null) {
             player.sendMessage(ColorUtil.format("&r&cYou must be in a guild to execute this command!"));
             player.sendMessage(ColorUtil.format("&r&c/makeguildbanner"));
             return false;
         }
 
-        Guild guild = RunicGuildsAPI.getGuild(player.getUniqueId());
+        Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
 
         if (guild.getOwner().getUUID().toString().equals(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format("&r&cYou must be the owner of the guild to execute this command!"));
