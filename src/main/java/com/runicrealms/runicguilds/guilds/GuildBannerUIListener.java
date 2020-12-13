@@ -11,6 +11,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,7 +21,13 @@ public class GuildBannerUIListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getClickedInventory().getHolder() instanceof GuildBannerUI)) {
+        Inventory inventory = event.getClickedInventory();
+
+        if (inventory == null) {
+            return;
+        }
+
+        if (!(inventory.getHolder() instanceof GuildBannerUI)) {
             return;
         }
 
@@ -30,7 +37,7 @@ public class GuildBannerUIListener implements Listener {
 
         event.setCancelled(true);
 
-        GuildBannerUI ui = (GuildBannerUI) event.getClickedInventory().getHolder();
+        GuildBannerUI ui = (GuildBannerUI) inventory.getHolder();
         BannerMeta meta = (BannerMeta) ui.getDummyBanner().getItemMeta();
         ItemStack item = event.getCurrentItem();
         ItemMeta itemMeta = item.getItemMeta();
