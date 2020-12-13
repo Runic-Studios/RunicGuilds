@@ -13,6 +13,7 @@ public class Guild implements Cloneable {
 	private GuildMember owner;
 	private String guildName;
 	private String guildPrefix;
+	private GuildStage guildStage;
 	private Integer score;
 	private List<ItemStack> bank;
 	private Integer bankSize;
@@ -24,6 +25,7 @@ public class Guild implements Cloneable {
 		this.owner = owner;
 		this.guildName = guildName;
 		this.guildPrefix = guildPrefix;
+		this.guildStage = GuildStage.STAGE1;
 		this.bank = bank;
 		this.bankSize = bankSize;
 		this.bankAccess = bankAccess;
@@ -32,12 +34,13 @@ public class Guild implements Cloneable {
 		this.guildBanner = new GuildBanner(this);
 	}
 
-	public Guild(Set<GuildMember> members, GuildBanner guildBanner, GuildMember owner, String guildName, String guildPrefix, Integer score, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+	public Guild(Set<GuildMember> members, GuildBanner guildBanner, GuildMember owner, String guildName, String guildPrefix, GuildStage guildStage, Integer score, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
 		this.members = members;
 		this.guildBanner = guildBanner;
 		this.owner = owner;
 		this.guildName = guildName;
 		this.guildPrefix = guildPrefix;
+		this.guildStage = guildStage;
 		this.score = score;
 		this.bank = bank;
 		this.bankSize = bankSize;
@@ -46,11 +49,12 @@ public class Guild implements Cloneable {
 		this.recalculateScore();
 	}
 
-	public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, Integer score, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+	public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, GuildStage guildStage, Integer score, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
 		this.members = members;
 		this.owner = owner;
 		this.guildName = guildName;
 		this.guildPrefix = guildPrefix;
+		this.guildStage = guildStage;
 		this.score = score;
 		this.bank = bank;
 		this.bankSize = bankSize;
@@ -80,6 +84,10 @@ public class Guild implements Cloneable {
 		return this.guildPrefix;
 	}
 
+	public GuildStage getGuildStage() {
+		return this.guildStage;
+	}
+
 	public Integer getBankSize() {
 		return this.bankSize;
 	}
@@ -104,6 +112,10 @@ public class Guild implements Cloneable {
 		List<GuildMember> membersWithOwner = new ArrayList<>(this.members);
 		membersWithOwner.add(this.owner);
 		return membersWithOwner;
+	}
+
+	public void setGuildStage(GuildStage guildStage) {
+		this.guildStage = guildStage;
 	}
 
 	public void setBankSize(Integer size) {
@@ -154,6 +166,10 @@ public class Guild implements Cloneable {
 			}
 		}
 		return null;
+	}
+
+	public int guildEXPToLevel() {
+		return 0; //placeholder
 	}
 
 	public boolean isInGuild(String playerName) {

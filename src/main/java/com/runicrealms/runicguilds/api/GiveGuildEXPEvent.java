@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.api;
 
-import com.runicrealms.runicguilds.guilds.EXPSource;
+import com.runicrealms.runicguilds.guilds.GuildEXPSource;
 import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -9,11 +9,11 @@ import org.bukkit.event.HandlerList;
 public class GiveGuildEXPEvent extends Event implements Cancellable {
     private final Guild guild;
     private final int amount;
-    private final EXPSource source;
+    private final GuildEXPSource source;
     private boolean cancelled;
     private static final HandlerList HANDLERS_LIST = new HandlerList();
 
-    public GiveGuildEXPEvent(Guild guild, int amount, EXPSource source) {
+    public GiveGuildEXPEvent(Guild guild, int amount, GuildEXPSource source) {
         this.guild = guild;
         this.amount = amount;
         this.source = source;
@@ -47,7 +47,7 @@ public class GiveGuildEXPEvent extends Event implements Cancellable {
         return this.amount;
     }
 
-    public EXPSource getSource() {
+    public GuildEXPSource getSource() {
         return this.source;
     }
 }

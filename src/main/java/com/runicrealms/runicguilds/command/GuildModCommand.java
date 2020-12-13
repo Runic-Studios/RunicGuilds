@@ -5,7 +5,7 @@ import co.aikar.commands.annotation.*;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.api.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.data.GuildUtil;
-import com.runicrealms.runicguilds.guilds.EXPSource;
+import com.runicrealms.runicguilds.guilds.GuildEXPSource;
 import com.runicrealms.runicguilds.guilds.ForceLoadBanners;
 import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.Bukkit;
@@ -94,15 +94,15 @@ public class GuildModCommand extends BaseCommand {
             return;
         }
 
-        EXPSource source;
+        GuildEXPSource source;
         if (args[1].equalsIgnoreCase("Kill")) {
-            source = EXPSource.KILL;
+            source = GuildEXPSource.KILL;
         } else if (args[1].equalsIgnoreCase("Quest")) {
-            source = EXPSource.QUEST;
+            source = GuildEXPSource.QUEST;
         } else if (args[1].equalsIgnoreCase("Brawl")) {
-            source = EXPSource.BRAWL;
+            source = GuildEXPSource.BRAWL;
         } else if (args[1].equalsIgnoreCase("Other")) {
-            source = EXPSource.OTHER;
+            source = GuildEXPSource.OTHER;
         } else {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cYou have entered an invalid source, here is a list of sources that you can use to execute this command!"));
             sender.sendMessage(ColorUtil.format(this.prefix + "&cHere are the valid sources: Kill, Quest, Brawl, Other"));
