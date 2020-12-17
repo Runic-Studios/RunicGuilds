@@ -1,10 +1,13 @@
 package com.runicrealms.runicguilds;
 
+import co.aikar.commands.ConditionFailedException;
+import co.aikar.commands.PaperCommandManager;
 import com.runicrealms.RunicChat;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.boss.GuildBossListener;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
 import com.runicrealms.runicguilds.chat.GuildChannel;
+import com.runicrealms.runicguilds.command.GuildCommand;
 import com.runicrealms.runicguilds.command.OldGuildCommand;
 import com.runicrealms.runicguilds.command.OldGuildModCommand;
 import com.runicrealms.runicguilds.command.PlaceholderForceReloadBannersCommand;
@@ -25,6 +28,7 @@ import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
 import com.runicrealms.runicrestart.api.ServerShutdownEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -44,6 +48,7 @@ public class Plugin extends JavaPlugin implements Listener {
 	 */
 	
 	private static Plugin instance;
+	private static PaperCommandManager commandManager;
 	private static GuildBossManager guildBossManager;
 	private static final Set<UUID> playersCreatingGuild = new HashSet<>();
 	private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
@@ -65,22 +70,20 @@ public class Plugin extends JavaPlugin implements Listener {
 		GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
 		MAX_BANK_PAGES = this.getConfig().getInt("max-bank-pages");
 		EventPlayerJoinQuit.initializePlayerCache();
-		/*
-		this.getServer().getPluginManager().registerEvents(this, this);
-		this.getServer().getPluginManager().registerEvents(new EventPlayerJoinQuit(), this);
-		this.getServer().getPluginManager().registerEvents(new GuildBankUtil(), this);
-		this.getServer().getPluginManager().registerEvents(new EventClickNpc(), this);
-		this.getServer().getPluginManager().registerEvents(new DataListener(), this);
-		this.getServer().getPluginManager().registerEvents(new GuildShopManager(), this);
-		this.getServer().getPluginManager().registerEvents(new GuildBossListener(), this);
-		this.getServer().getPluginManager().registerEvents(new GuildBannerUIListener(), this);
-		 */
 		//Events
 		this.registerEvents(this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
 				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener());
 
+		commandManager = new PaperCommandManager(this);
+		commandManager.getCommandConditions().addCondition("is-player", context -> {
+			if (!(context.getIssuer().getIssuer() instanceof Player)) throw new ConditionFailedException("This command cannot be run from console!");
+		});
+		commandManager.getCommandConditions().addCondition("is-op", context -> {
+			if (!context.getIssuer().getIssuer().isOp()) throw new ConditionFailedException("You must be an operator to run this command!");
+		});
 
-		this.getCommand("guild").setExecutor(new OldGuildCommand()); //remove later
+		//this.getCommand("guild").setExecutor(new OldGuildCommand()); //remove later
+        commandManager.registerCommand(new GuildCommand()); // New Command registering
 		this.getCommand("guildmod").setExecutor(new OldGuildModCommand()); //remove later
 		this.getCommand("forcereloadbanners").setExecutor(new PlaceholderForceReloadBannersCommand()); //remove later
 		this.getCommand("makeguildbanner").setExecutor(new PlaceholderMakeGuildBannerCommand()); //remove later
@@ -114,6 +117,10 @@ public class Plugin extends JavaPlugin implements Listener {
 
 	public static Plugin getInstance() {
 		return instance;
+	}
+
+	public static PaperCommandManager getCommandManager() {
+		return commandManager;
 	}
 
 	public static GuildBossManager getGuildBossManager() {

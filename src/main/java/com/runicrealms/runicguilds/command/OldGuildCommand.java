@@ -24,6 +24,7 @@ import com.runicrealms.runicguilds.guilds.GuildRank;
 public class OldGuildCommand implements CommandExecutor {
 
 	//REMOVE THIS HORRID THING xD -BoBo
+	// no u
 
 	private static Map<UUID, UUID> transferOwnership = new HashMap<UUID, UUID>();
 	private static Map<UUID, UUID> invites = new HashMap<UUID, UUID>();
