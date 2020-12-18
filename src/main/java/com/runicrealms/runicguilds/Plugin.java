@@ -8,6 +8,7 @@ import com.runicrealms.runicguilds.boss.GuildBossListener;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
 import com.runicrealms.runicguilds.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.GuildCommand;
+import com.runicrealms.runicguilds.command.GuildModCommand;
 import com.runicrealms.runicguilds.command.OldGuildCommand;
 import com.runicrealms.runicguilds.command.OldGuildModCommand;
 import com.runicrealms.runicguilds.command.PlaceholderForceReloadBannersCommand;
@@ -84,7 +85,8 @@ public class Plugin extends JavaPlugin implements Listener {
 
 		//this.getCommand("guild").setExecutor(new OldGuildCommand()); //remove later
         commandManager.registerCommand(new GuildCommand()); // New Command registering
-		this.getCommand("guildmod").setExecutor(new OldGuildModCommand()); //remove later
+		//this.getCommand("guildmod").setExecutor(new OldGuildModCommand()); //remove later
+		commandManager.registerCommand(new GuildModCommand());
 		this.getCommand("forcereloadbanners").setExecutor(new PlaceholderForceReloadBannersCommand()); //remove later
 		this.getCommand("makeguildbanner").setExecutor(new PlaceholderMakeGuildBannerCommand()); //remove later
 
