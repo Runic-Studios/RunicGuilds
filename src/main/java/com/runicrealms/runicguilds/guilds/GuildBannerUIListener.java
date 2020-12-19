@@ -48,7 +48,7 @@ public class GuildBannerUIListener implements Listener {
             return;
         }
 
-        if (material == Material.GREEN_STAINED_GLASS_PANE) {
+        if (material == Material.SLIME_BALL) {
             this.confirm(ui, meta);
             return;
         }

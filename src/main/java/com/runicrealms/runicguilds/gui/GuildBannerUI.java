@@ -185,7 +185,7 @@ public class GuildBannerUI implements InventoryHolder {
     }
 
     private ItemStack confirm() {
-        ItemStack item = new ItemStack(Material.GREEN_STAINED_GLASS_PANE, 1);
+        ItemStack item = new ItemStack(Material.SLIME_BALL, 1);
         ItemMeta meta = item.getItemMeta();
 
         meta.setDisplayName(ColorUtil.format("&r&aConfirm"));
