@@ -552,7 +552,7 @@ public class GuildCommand extends BaseCommand {
     }
 
     private void createGuild(Player player, String[] args) {
-        if (args.length != 1) {
+        if (args.length < 1) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cTo confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of 3-6 english letters."));
             return;
         }

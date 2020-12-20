@@ -145,9 +145,10 @@ public class GuildModCommand extends BaseCommand {
 
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
-            //error msg
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
             return;
         }
+
         UUID targetUUID = target.getUniqueId();
         String targetCache = GuildUtil.getPlayerCache().get(targetUUID);
 
@@ -194,7 +195,7 @@ public class GuildModCommand extends BaseCommand {
     @Syntax("<player> <name>")
     @CommandCompletion("@players name @nothing")
     public void onGuildSetNameCommand(Player player, String[] args) {
-        if (args.length != 2) {
+        if (args.length < 2) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
@@ -245,6 +246,7 @@ public class GuildModCommand extends BaseCommand {
     @Subcommand("bank")
     @Syntax("<prefix>")
     @CommandPermission("runicadmin.guilds.bank")
+    @CommandCompletion("prefix @nothing")
     public void onGuildModBankCommand(Player player, String[] args) {
         if (args.length != 1) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
