@@ -179,7 +179,7 @@ public class GuildUtil {
 	public static GuildReprefixResult reprefixGuild(GuildData guildData, String prefix) { // Must be called async
 		Pattern pattern = Pattern.compile("[a-zA-Z]");
 		Matcher matcher = pattern.matcher(prefix);
-		if (!matcher.find()) {
+		if (!matcher.find() || (prefix.length() > 6 || prefix.length() < 3)) {
 			return GuildReprefixResult.BAD_PREFIX;
 		}
 		for (String otherGuild : guilds.keySet()) {

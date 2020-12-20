@@ -26,7 +26,7 @@ import java.util.UUID;
 @Conditions("is-player")
 public class GuildModCommand extends BaseCommand {
 
-    private final String prefix = ColorUtil.format("&r&6&lGuilds »&r ");
+    private final String prefix = "&r&6&lGuilds »&r ";
 
     public GuildModCommand() {
         Plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("reasons", context ->  {
@@ -200,8 +200,6 @@ public class GuildModCommand extends BaseCommand {
             return;
         }
 
-        //check if name breaks any restrictions
-
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
@@ -215,7 +213,7 @@ public class GuildModCommand extends BaseCommand {
 
         GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
 
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.renameGuild(guildData, this.combineArgs(args, 0)).getMessage()));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.renameGuild(guildData, this.combineArgs(args, 1)).getMessage()));
     }
 
     @Subcommand("set prefix")
@@ -235,20 +233,13 @@ public class GuildModCommand extends BaseCommand {
         }
 
         if (GuildUtil.getPlayerCache().get(target.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format("&eYou are not in a guild!")); //change
             return;
         }
 
         GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
 
-        String prefix = args[1];
-
-        if (prefix.length() < 3 || prefix.length() > 6) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cA guild's prefix must be between 3-6 letters!"));
-            return;
-        }
-
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.reprefixGuild(guildData, prefix).getMessage()));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.reprefixGuild(guildData, args[1]).getMessage()));
     }
 
     @Subcommand("bank")
@@ -364,28 +355,13 @@ public class GuildModCommand extends BaseCommand {
         player.sendMessage(ColorUtil.format(this.prefix + "&r&aForce reloaded top three guild banners!"));
     }
 
-    private void sendHelpMessage(Player player) {
-        String[] lines = new String[]{"&6Guild Moderator Commands:",
-                "&e/guildmod disband &6[prefix] &r- force disbands a guild.",
-                "&e/guildmod kick &6[player] &r- force kicks a player from their guild.",
-                "&e/guildmod reset &6[player] &r- resets a player's guild score and guild experience.",
-                "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.",
-                "&e/guild set name&6/&eprefix <player> <text> &r- sets a player's guild's name/prefix.",
-                "&e/guildmod bank &6[prefix] &r- views another guild's bank",
-                "&e/guildmod give exp &6[player] [reason] [amount] &r- give a player guild experience",
-                "&e/guildmod give score &6[player] [amount] &r- give a player guild score"};
-        for (String line : lines) {
-            player.sendMessage(ColorUtil.format(line));
-        }
-    }
-
     private void sendHelpMessage(CommandSender sender) {
         String[] lines = new String[]{"&6Guild Moderator Commands:",
                 "&e/guildmod disband &6[prefix] &r- force disbands a guild.",
                 "&e/guildmod kick &6[player] &r- force kicks a player from their guild.",
                 "&e/guildmod reset &6[player] &r- resets a player's guild score and guild experience.",
                 "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.",
-                "&e/guild set name&6/&eprefix <player> <text> &r- sets a player's guild's name/prefix.",
+                "&e/guildmod set name/prefix&r&6 [player] [text] &r- sets a player's guild's name/prefix.",
                 "&e/guildmod bank &6[prefix] &r- views another guild's bank",
                 "&e/guildmod give exp &6[player] [reason] [amount] &r- give a player guild experience",
                 "&e/guildmod give score &6[player] [amount] &r- give a player guild score"};

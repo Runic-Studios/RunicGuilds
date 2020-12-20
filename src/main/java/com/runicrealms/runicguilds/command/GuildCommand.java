@@ -19,10 +19,13 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.UUID;
 
 @CommandAlias("guild")
 public class GuildCommand extends BaseCommand {
+
+    private final String prefix = "&r&6&lGuilds »&r ";
 
     @Default
     @CatchUnknown
@@ -35,7 +38,7 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@nothing")
     public void onGuildInfoCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&aYou are not in a guild!"));
             return;
         }
 
@@ -68,36 +71,37 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildInviteCommand(Player player, String[] args) {
+        if (args.length != 1) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
         GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
         Guild guild = guildData.getData();
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.RECRUITER)) {
-            player.sendMessage(ColorUtil.format("&eYou must be of rank recruiter or higher to invite other players."));
-            return;
-        }
-
-        if (args.length != 1) {
-            this.sendHelpMessage(player);
-            return;
-        }
-
-        if (Bukkit.getPlayerExact(args[0]) == null) {
-            player.sendMessage(ColorUtil.format("&eThat player is not online."));
-            return;
-        }
-
-        if (GuildUtil.getPlayerCache().get(Bukkit.getPlayer(args[0]).getUniqueId()) != null) {
-            player.sendMessage(ColorUtil.format("&eThat player is already in a guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be of rank recruiter or higher to invite other players."));
             return;
         }
 
         Player target = Bukkit.getPlayerExact(args[0]);
-        target.sendMessage(ColorUtil.format("&eYou have been invited to join the guild " + guild.getGuildName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
-        player.sendMessage(ColorUtil.format("&eYou have invited a player to the guild. An invitation has been sent."));
+        if (target == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is not online."));
+            return;
+        }
+
+        if (GuildUtil.getPlayerCache().get(target.getUniqueId()) != null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is already in a guild."));
+            return;
+        }
+
+        target.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have been invited to join the guild " + guild.getGuildName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have invited a player to the guild. An invitation has been sent."));
         GuildCommandMapManager.getInvites().put(target.getUniqueId(), player.getUniqueId());
         guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guild, target.getUniqueId(), player.getUniqueId()));
@@ -107,40 +111,41 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("Recruit|Member|Recruiter|Officer yes|no")
     public void onGuildSettingsBankCommand(Player player, String[] args) {
+        if (args.length != 2) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
         GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
         Guild guild = guildData.getData();
 
-        if (args.length != 2) {
-            player.sendMessage(ColorUtil.format("&eUse the command: /guild bank settings <rank> <yes|no> to allow or deny a specific rank access to your bank."));
-            return;
-        }
-
         GuildRank rank = GuildRank.getByIdentifier(args[0]);
         if (rank == null) {
-            player.sendMessage(ColorUtil.format("&eThat isn't a valid guild rank!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat isn't a valid guild rank!"));
             return;
         }
 
         if (rank == GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format("&eYou cannot deny/allow bank access to the guild owner!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou cannot deny/allow bank access to the guild owner!"));
             return;
         }
 
         if (args[1].equalsIgnoreCase("yes") || args[1].equalsIgnoreCase("true")) {
             guild.setBankAccess(rank, true);
             guildData.queueToSave();
-            player.sendMessage(ColorUtil.format("&eUpdated guild bank permissions."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&aUpdated guild bank permissions."));
         } else if (args[1].equalsIgnoreCase("no") || args[1].equalsIgnoreCase("false")) {
             guild.setBankAccess(rank, false);
             guildData.queueToSave();
-            player.sendMessage(ColorUtil.format("&eUpdated guild bank permissions."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&aUpdated guild bank permissions."));
         } else {
-            player.sendMessage(ColorUtil.format("&ePlease enter \"yes\" or \"no\"."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cPlease enter \"yes\" or \"no\"."));
         }
     }
 
@@ -148,7 +153,7 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player|is-op")
     public void onGuildBankCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
         GuildBankUtil.open(player, 1);
@@ -159,8 +164,14 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildKickCommand(Player player, String[] args) {
+        if (args.length != 1) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
@@ -168,34 +179,29 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
 
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
-            player.sendMessage(ColorUtil.format("&eYou must be of rank officer or higher to kick other players."));
-            return;
-        }
-
-        if (args.length != 1) {
-            this.sendHelpMessage(player);
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be of rank officer or higher to kick other players."));
             return;
         }
 
         UUID otherPlayer = GuildUtil.getOfflinePlayerUUID(args[0]);
         if (otherPlayer.toString().equalsIgnoreCase(player.getUniqueId().toString())) {
-            player.sendMessage(ColorUtil.format("&eYou can't remove yourself from the guild. To leave, type /guild leave."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou can't remove yourself from the guild. To leave, type /guild leave."));
             return;
         }
 
         if (!guild.isInGuild(args[0])) {
-            player.sendMessage(ColorUtil.format("&eThat player is not in your guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is not in your guild."));
             return;
         }
 
         if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() >= guild.getMember(otherPlayer).getRank().getRankNumber()) {
-            player.sendMessage(ColorUtil.format("&eYou can only kick players that are of lower rank than you."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou can only kick players that are of lower rank than you."));
             return;
         }
 
         guild.removeMember(otherPlayer);
         PlayerGuildDataUtil.setGuildForPlayer("None", otherPlayer.toString());
-        player.sendMessage(ColorUtil.format("&eRemoved player from the guild!"));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aRemoved player from the guild!"));
         if (GuildUtil.getPlayerCache().containsKey(otherPlayer)) {
             GuildUtil.getPlayerCache().put(otherPlayer, null);
         }
@@ -213,8 +219,14 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildPromoteCommand(Player player, String[] args) {
+        if (args.length != 1) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
@@ -222,17 +234,12 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
 
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
-            player.sendMessage(ColorUtil.format("&eYou must be of rank officer or higher to promote other players."));
-            return;
-        }
-
-        if (args.length != 1) {
-            this.sendHelpMessage(player);
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be of rank officer or higher to promote other players."));
             return;
         }
 
         if (!guild.isInGuild(args[0])) {
-            player.sendMessage(ColorUtil.format("&eThat player is not in your guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is not in your guild."));
             return;
         }
 
@@ -244,21 +251,21 @@ public class GuildCommand extends BaseCommand {
         }
 
         if (member == null) {
-            player.sendMessage(ColorUtil.format("&eThat player is not in your guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is not in your guild!"));
             return;
         }
 
         if (member.getRank().getRankNumber() <= guild.getMember(player.getUniqueId()).getRank().getRankNumber() && member.getRank() != GuildRank.OFFICER) {
             if (member.getRank() == GuildRank.OFFICER) {
-                player.sendMessage(ColorUtil.format("&eYou cannot promote another player to owner. To transfer guild ownership, use /guild transfer."));
+                player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou cannot promote another player to owner. To transfer guild ownership, use /guild transfer."));
             } else {
-                player.sendMessage(ColorUtil.format("&eYou can only promote members that are under your rank."));
+                player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou can only promote members that are under your rank."));
             }
             return;
         }
 
         member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
-        player.sendMessage(ColorUtil.format("&e" + member.getLastKnownName() + " has been promoted."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + member.getLastKnownName() + " has been promoted."));
         guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guild, member.getUUID(), player.getUniqueId()));
     }
@@ -268,8 +275,14 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildDemoteCommand(Player player, String[] args) {
+        if (args.length != 1) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
@@ -277,17 +290,12 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
 
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
-            player.sendMessage(ColorUtil.format("&eYou must be of rank officer or higher to demote other players."));
-            return;
-        }
-
-        if (args.length != 1) {
-            this.sendHelpMessage(player);
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be of rank officer or higher to demote other players."));
             return;
         }
 
         if (!guild.isInGuild(args[0])) {
-            player.sendMessage(ColorUtil.format("&eThat player is not in your guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is not in your guild."));
             return;
         }
 
@@ -299,22 +307,22 @@ public class GuildCommand extends BaseCommand {
         }
 
         if (member == null) {
-            player.sendMessage(ColorUtil.format("&eThat player is not in your guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is not in your guild!"));
             return;
         }
 
         if (member.getRank().getRankNumber() <= guild.getMember(player.getUniqueId()).getRank().getRankNumber() &&
                 member.getRank() != GuildRank.RECRUIT) {
             if (member.getRank() == GuildRank.RECRUIT) {
-                player.sendMessage(ColorUtil.format("&eYou cannot demote players of the lowest guild rank."));
+                player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou cannot demote players of the lowest guild rank."));
             } else {
-                player.sendMessage(ColorUtil.format("&eYou can only demote players that are under your rank."));
+                player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou can only demote players that are under your rank."));
             }
             return;
         }
 
         member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
-        player.sendMessage(ColorUtil.format("&e" + member.getLastKnownName() + " has been demoted."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + member.getLastKnownName() + " has been demoted."));
         guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, member.getUUID(), player.getUniqueId()));
     }
@@ -324,8 +332,14 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildTransferCommand(Player player, String[] args) {
+        if (args.length != 1) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
@@ -333,26 +347,21 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
 
         if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format("&eYou must be the guild owner to use this command."));
-            return;
-        }
-
-        if (args.length != 1) {
-            this.sendHelpMessage(player);
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be the guild owner to use this command."));
             return;
         }
 
         if (!guild.isInGuild(args[0])) {
-            player.sendMessage(ColorUtil.format("&eThat player is not in your guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat player is not in your guild."));
             return;
         }
 
         if (args[0].equalsIgnoreCase(player.getName())) {
-            player.sendMessage(ColorUtil.format("&eYou cannot transfer ownership to yourself."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou cannot transfer ownership to yourself."));
             return;
         }
 
-        player.sendMessage(ColorUtil.format("&eType /guild confirm to confirm your actions, or /guild cancel to cancel. &cWARNING - You will be demoted to officer if you confirm!"));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aType /guild confirm to confirm your actions, or /guild cancel to cancel. &cWARNING - You will be demoted to officer if you confirm!"));
         GuildCommandMapManager.getTransferOwnership().put(player.getUniqueId(), GuildUtil.getOfflinePlayerUUID(args[0]));
         GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
     }
@@ -362,7 +371,7 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@nothing")
     public void onGuildLeaveCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
@@ -370,13 +379,13 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
 
         if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format("&eYou cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
             return;
         }
 
         PlayerGuildDataUtil.setGuildForPlayer("None", player.getUniqueId().toString());
         guild.removeMember(player.getUniqueId());
-        player.sendMessage(ColorUtil.format("&eYou have left your guild."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have left your guild."));
 
         GuildUtil.getPlayerCache().put(player.getUniqueId(), null);
         guildData.queueToSave();
@@ -414,7 +423,7 @@ public class GuildCommand extends BaseCommand {
         } else if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
             this.disbandGuild(player, guild, guildData);
         } else {
-            player.sendMessage(ColorUtil.format("&eYou have nothing to confirm."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have nothing to confirm."));
         }
     }
 
@@ -423,19 +432,19 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@nothing")
     public void onGuildCancelCommand(Player player) {
         if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.format("&eCanceled creating guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&aCanceled creating guild."));
             Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
             return;
         }
 
         if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.format("&eCanceled owner transfership."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&aCanceled owner transfership."));
             GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
             return;
         }
 
         if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.format("&eCanceled GuildCommandMapManager.getDisbanding() of the guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&aCanceled disbanding of the guild."));
             GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
         }
     }
@@ -445,7 +454,7 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@nothing")
     public void onGuildDisbandCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
@@ -453,11 +462,11 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
 
         if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format("&eYou must be the guild owner to use this command."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be the guild owner to use this command."));
             return;
         }
 
-        player.sendMessage(ColorUtil.format("&eType /guild confirm if you with to proceed with GuildCommandMapManager.getDisbanding() the guild, or /guild cancel to cancel this."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aType /guild confirm if you with to proceed with GuildCommandMapManager.getDisbanding() the guild, or /guild cancel to cancel this."));
         GuildCommandMapManager.getDisbanding().add(player.getUniqueId());
         GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
     }
@@ -467,12 +476,12 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@nothing")
     public void onGuildAcceptCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) != null) {
-            player.sendMessage(ColorUtil.format("&eYou cannot use this command since you are in a guild."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou cannot use this command since you are in a guild."));
             return;
         }
 
         if (!GuildCommandMapManager.getInvites().containsKey(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.format("&eYou don't have any pending invitations."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou don't have any pending invitations."));
             return;
         }
 
@@ -482,7 +491,7 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
         guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
         PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
-        player.sendMessage(ColorUtil.format("&eYou have accepted the guild invitation."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have accepted the guild invitation."));
 
         guildData.queueToSave();
         GuildUtil.getPlayerCache().put(player.getUniqueId(), guild.getGuildPrefix());
@@ -495,11 +504,11 @@ public class GuildCommand extends BaseCommand {
     @CommandCompletion("@nothing")
     public void onGuildDeclineCommand(Player player) {
         if (!GuildCommandMapManager.getInvites().containsKey(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.format("&eYou don't have any pending invitations."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou don't have any pending invitations."));
             return;
         }
 
-        player.sendMessage(ColorUtil.format("&eYou have decline the guild invitation."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have decline the guild invitation."));
         Guild guild = GuildUtil.getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId())).getData();
         Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guild, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
         GuildCommandMapManager.getInvites().remove(player.getUniqueId());
@@ -511,20 +520,19 @@ public class GuildCommand extends BaseCommand {
     public void onGuildBannerCommand(Player player) {
         Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
         if (guild == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou are not in a guild!"));
             return;
         }
 
         if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format("&6You must be the owner of your guild to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be the owner of your guild to execute this command!"));
             return;
         }
 
         GuildBannerUI ui = new GuildBannerUI(guild);
-        player.sendMessage(ColorUtil.format("&6Initializing user interface..."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aInitializing user interface..."));
         player.openInventory(ui.getInventory());
         ui.openColorMenu();
-        //maybe we need to store something in cache???
     }
 
     private void sendHelpMessage(CommandSender sender) {
@@ -544,32 +552,32 @@ public class GuildCommand extends BaseCommand {
     }
 
     private void createGuild(Player player, String[] args) {
-        if (args.length < 2) {
-            player.sendMessage(ColorUtil.format("&eTo confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of 3-6 english letters."));
+        if (args.length != 1) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cTo confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of 3-6 english letters."));
             return;
         }
 
         if (!player.getInventory().contains(Material.GOLD_NUGGET, Plugin.GUILD_COST)) {
-            player.sendMessage(ColorUtil.format("&ePut " + Plugin.GUILD_COST + " coins in your inventory, and speak with the guild herald again."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cPut " + Plugin.GUILD_COST + " coins in your inventory, and speak with the guild herald again."));
             Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
             return;
         }
 
         GuildCreationResult result = RunicGuildsAPI.createGuild(player.getUniqueId(), this.combineArgs(args, 1), args[0], false);
         if (result != GuildCreationResult.SUCCESSFUL) {
-            player.sendMessage(ColorUtil.format("&e" + result.getMessage() + " Try again, or type &6/guild cancel&e."));
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&c" + result.getMessage() + " Try again, or type &6/guild cancel&e."));
             return;
         }
 
         PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildName(), player.getUniqueId().toString());
         ItemRemover.takeItem(player, Material.GOLD_NUGGET, Plugin.GUILD_COST);
         Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
-        player.sendMessage(ColorUtil.format("&e" + result.getMessage()));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + result.getMessage()));
     }
 
     private void transferOwnership(Player player, Guild guild, GuildData guildData) {
         GuildCommandMapManager.getTransferOwnership().get(guild.getMember(GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId())));
-        player.sendMessage(ColorUtil.format("&eSuccessfully transferred guild ownership. You have been demoted to officer."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aSuccessfully transferred guild ownership. You have been demoted to officer."));
 
         guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId()), player.getUniqueId()));
@@ -596,7 +604,7 @@ public class GuildCommand extends BaseCommand {
         Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, player.getUniqueId(), false));
         guildData.deleteData();
         GuildUtil.getGuildDatas().remove(guild.getGuildPrefix());
-        player.sendMessage(ColorUtil.format("&eSuccessfully disbanded guild."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aSuccessfully disbanded guild."));
         GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
     }
 

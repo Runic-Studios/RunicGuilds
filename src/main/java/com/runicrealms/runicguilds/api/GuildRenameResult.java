@@ -3,13 +3,13 @@ package com.runicrealms.runicguilds.api;
 public enum GuildRenameResult {
 
     NAME_NOT_UNIQUE("There is already a guild with that name! Try using a different name."),
-    SUCCESSFUL("You have successfully changed your guild name."),
-    INTERNAL_ERROR("There was an internal error with creating your guild."),
+    SUCCESSFUL("You have successfully changed the guild name."),
+    INTERNAL_ERROR("There was an internal error with creating the guild."),
     NAME_TOO_LONG("That name is too long, the max is 16 characters.");
 
-    private String message;
+    private final String message;
 
-    private GuildRenameResult(String message) {
+    GuildRenameResult(String message) {
         this.message = message;
     }
 
