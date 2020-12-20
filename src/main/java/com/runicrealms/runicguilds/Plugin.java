@@ -46,6 +46,8 @@ public class Plugin extends JavaPlugin implements Listener {
 	TODO:
 	1: Fill in the blanks of the new commands
 	2: Go into GuildBannerUIListener.java and find the comment that says "save new guild in cache somewhere no clue" (use command f)
+	3: Finish guild exp methods in GuildStage.java and Guild.java
+	4: Add logic to all methods that need it to check GuildStage enum and do something if it is the right stage or do not do something if they are too low
 	 */
 	
 	private static Plugin instance;

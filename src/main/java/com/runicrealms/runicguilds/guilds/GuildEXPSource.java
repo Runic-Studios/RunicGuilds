@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.guilds;
 
-public enum EXPSource {
+public enum GuildEXPSource {
     KILL,
     QUEST,
     BRAWL,
