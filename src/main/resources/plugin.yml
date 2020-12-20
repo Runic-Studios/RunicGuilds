@@ -4,15 +4,6 @@ version: 1.0
 main: com.runicrealms.runicguilds.Plugin
 api-version: 1.13
 softdepend: [PlaceholderAPI, RunicRestart, HolograpicDisplays]
-commands:
-  guild:
-    description: Command for guild operations
-  guildmod:
-    description: Command for guild moderator operations
-  forcereloadbanners:
-    description: Command for guild operations
-  makeguildbanner:
-    description: Command for guild moderator operations
 Permissions:
   permissions.guild-mod-disband:
     description: Allows a moderator to force disband guilds
@@ -24,3 +15,5 @@ Permissions:
      description: Allows a moderator to access a guild's bank
   permissions.guild-mod-giveexp:
     description: Allows a moderator to give a player guild exp
+  permissions.guild-mod-givescore:
+    description: Allows a moderator to give a player guild score

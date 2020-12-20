@@ -21,15 +21,8 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+@CommandAlias("guild")
 public class GuildCommand extends BaseCommand {
-
-    private final Map<UUID, UUID> transferOwnership = new HashMap<>();
-    private final Map<UUID, UUID> invites = new HashMap<>();
-    private final Set<UUID> disbanding = new HashSet<>();
-
-    public GuildCommand() {
-        //placeholder
-    }
 
     @Default
     @CatchUnknown
@@ -71,7 +64,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("invite")
     @Syntax("<player>")
-    @CommandCompletion("@guild-invite")
+    @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildInviteCommand(Player player, String[] args) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
@@ -104,7 +97,7 @@ public class GuildCommand extends BaseCommand {
         Player target = Bukkit.getPlayerExact(args[0]);
         target.sendMessage(ColorUtil.format("&eYou have been invited to join the guild " + guild.getGuildName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
         player.sendMessage(ColorUtil.format("&eYou have invited a player to the guild. An invitation has been sent."));
-        this.invites.put(target.getUniqueId(), player.getUniqueId());
+        GuildCommandMapManager.getInvites().put(target.getUniqueId(), player.getUniqueId());
         guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guild, target.getUniqueId(), player.getUniqueId()));
     }
@@ -162,7 +155,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("kick")
     @Syntax("<player>")
-    @CommandCompletion("@guild-kick")
+    @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildKickCommand(Player player, String[] args) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
@@ -216,7 +209,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("promote")
     @Syntax("<player>")
-    @CommandCompletion("@guild-promote")
+    @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildPromoteCommand(Player player, String[] args) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
@@ -271,7 +264,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("demote")
     @Syntax("<player>")
-    @CommandCompletion("@guild-demote")
+    @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildDemoteCommand(Player player, String[] args) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
@@ -327,7 +320,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("transfer")
     @Syntax("<player>")
-    @CommandCompletion("@guild-transfer")
+    @CommandCompletion("@players @nothing")
     @Conditions("is-player")
     public void onGuildTransferCommand(Player player, String[] args) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
@@ -359,8 +352,8 @@ public class GuildCommand extends BaseCommand {
         }
 
         player.sendMessage(ColorUtil.format("&eType /guild confirm to confirm your actions, or /guild cancel to cancel. &cWARNING - You will be demoted to officer if you confirm!"));
-        this.transferOwnership.put(player.getUniqueId(), GuildUtil.getOfflinePlayerUUID(args[0]));
-        this.disbanding.remove(player.getUniqueId());
+        GuildCommandMapManager.getTransferOwnership().put(player.getUniqueId(), GuildUtil.getOfflinePlayerUUID(args[0]));
+        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
     }
 
     @Subcommand("set name")
@@ -409,8 +402,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData finalGuildData = guildData;
-        Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> player.sendMessage(ColorUtil.format("&e" + GuildUtil.reprefixGuild(finalGuildData, args[0]).getMessage())));
+        Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> player.sendMessage(ColorUtil.format("&e" + GuildUtil.reprefixGuild(guildData, args[0]).getMessage())));
     }
 
     @Subcommand("leave")
@@ -437,9 +429,9 @@ public class GuildCommand extends BaseCommand {
         guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guild, player.getUniqueId()));
 
-        this.transferOwnership.remove(player.getUniqueId());
+        GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
 
-        this.disbanding.remove(player.getUniqueId());
+        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
 
         if (GuildBankUtil.isViewingBank(player.getUniqueId())) {
             GuildBankUtil.close(player);
@@ -463,9 +455,9 @@ public class GuildCommand extends BaseCommand {
 
         if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
             this.createGuild(player, args);
-        } else if (this.transferOwnership.containsKey(player.getUniqueId())) {
+        } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
             this.transferOwnership(player, guild, guildData);
-        } else if (this.disbanding.contains(player.getUniqueId())) {
+        } else if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
             this.disbandGuild(player, guild, guildData);
         } else {
             player.sendMessage(ColorUtil.format("&eYou have nothing to confirm."));
@@ -481,15 +473,15 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (this.transferOwnership.containsKey(player.getUniqueId())) {
+        if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format("&eCanceled owner transfership."));
-            this.transferOwnership.remove(player.getUniqueId());
+            GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
             return;
         }
 
-        if (this.disbanding.contains(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.format("&eCanceled this.disbanding of the guild."));
-            this.disbanding.remove(player.getUniqueId());
+        if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
+            player.sendMessage(ColorUtil.format("&eCanceled GuildCommandMapManager.getDisbanding() of the guild."));
+            GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
         }
     }
 
@@ -509,9 +501,9 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        player.sendMessage(ColorUtil.format("&eType /guild confirm if you with to proceed with this.disbanding the guild, or /guild cancel to cancel this."));
-        this.disbanding.add(player.getUniqueId());
-        this.transferOwnership.remove(player.getUniqueId());
+        player.sendMessage(ColorUtil.format("&eType /guild confirm if you with to proceed with GuildCommandMapManager.getDisbanding() the guild, or /guild cancel to cancel this."));
+        GuildCommandMapManager.getDisbanding().add(player.getUniqueId());
+        GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
     }
 
     @Subcommand("accept")
@@ -522,14 +514,14 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!this.invites.containsKey(player.getUniqueId())) {
+        if (!GuildCommandMapManager.getInvites().containsKey(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format("&eYou don't have any pending invitations."));
             return;
         }
 
         Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
 
-        GuildData guildData = GuildUtil.getGuildData(this.invites.get(player.getUniqueId()));
+        GuildData guildData = GuildUtil.getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
         Guild guild = guildData.getData();
         guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
         PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
@@ -537,22 +529,22 @@ public class GuildCommand extends BaseCommand {
 
         guildData.queueToSave();
         GuildUtil.getPlayerCache().put(player.getUniqueId(), guild.getGuildPrefix());
-        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), this.invites.get(player.getUniqueId())));
-        this.invites.remove(player.getUniqueId());
+        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
+        GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
 
     @Subcommand("decline")
     @Conditions("is-player")
     public void onGuildDeclineCommand(Player player) {
-        if (!this.invites.containsKey(player.getUniqueId())) {
+        if (!GuildCommandMapManager.getInvites().containsKey(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format("&eYou don't have any pending invitations."));
             return;
         }
 
         player.sendMessage(ColorUtil.format("&eYou have decline the guild invitation."));
-        Guild guild = GuildUtil.getGuildData(this.invites.get(player.getUniqueId())).getData();
-        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guild, player.getUniqueId(), this.invites.get(player.getUniqueId())));
-        this.invites.remove(player.getUniqueId());
+        Guild guild = GuildUtil.getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId())).getData();
+        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guild, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
+        GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
 
     @Subcommand("banner")
@@ -579,7 +571,7 @@ public class GuildCommand extends BaseCommand {
     private void sendHelpMessage(CommandSender sender) {
         String[] messages = new String[]{"&6Guild Commands:",
                 "&e/guild info &r- gets guild members and score.",
-                "&e/guild invite &6[player] &r- this.invites a player to the guild.",
+                "&e/guild invite &6[player] &r- invites a player to the guild.",
                 "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.",
                 "&e/guild kick &6[player] &r- kicks a player from the guild.",
                 "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.",
@@ -618,12 +610,12 @@ public class GuildCommand extends BaseCommand {
     }
 
     private void transferOwnership(Player player, Guild guild, GuildData guildData) {
-        this.transferOwnership.get(guild.getMember(this.transferOwnership.get(player.getUniqueId())));
+        GuildCommandMapManager.getTransferOwnership().get(guild.getMember(GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId())));
         player.sendMessage(ColorUtil.format("&eSuccessfully transferred guild ownership. You have been demoted to officer."));
 
         guildData.queueToSave();
-        Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, this.transferOwnership.get(player.getUniqueId()), player.getUniqueId()));
-        this.transferOwnership.remove(player.getUniqueId());
+        Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId()), player.getUniqueId()));
+        GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
     }
 
     private void disbandGuild(Player player, Guild guild, GuildData guildData) {
@@ -647,19 +639,7 @@ public class GuildCommand extends BaseCommand {
         guildData.deleteData();
         GuildUtil.getGuildDatas().remove(guild.getGuildPrefix());
         player.sendMessage(ColorUtil.format("&eSuccessfully disbanded guild."));
-        this.disbanding.remove(player.getUniqueId());
-    }
-
-    public Map<UUID, UUID> getTransferOwnership() {
-        return this.transferOwnership;
-    }
-
-    public Map<UUID, UUID> getInvites() {
-        return this.invites;
-    }
-
-    public Set<UUID> getDisbanding() {
-        return this.disbanding;
+        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
     }
 
     private String combineArgs(String[] args, int start) {

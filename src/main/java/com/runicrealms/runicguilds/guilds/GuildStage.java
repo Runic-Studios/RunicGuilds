@@ -1,21 +1,22 @@
 package com.runicrealms.runicguilds.guilds;
 
 public enum GuildStage {
-    STAGE1(1),
-    STAGE2(5),
-    STAGE3(10),
-    STAGE4(15),
-    STAGE5(20),
-    STAGE6(25),
-    STAGE7(30);
+    STAGE7(513000),
+    STAGE6(322500),
+    STAGE5(186000),
+    STAGE4(94500),
+    STAGE3(39000),
+    STAGE2(10500),
+    STAGE1(1092),
+    STAGE0(0);
 
-    private final int level;
+    private final int exp;
 
-    GuildStage(int level) {
-        this.level = level;
+    GuildStage(int exp) {
+        this.exp = exp;
     }
 
-    public int levelToEXP() {
-        return 0; //placeholder
+    public int getExp() {
+        return this.exp;
     }
 }
