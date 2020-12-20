@@ -40,7 +40,9 @@ public class Plugin extends JavaPlugin implements Listener {
 
 	/*
 	TODO:
-	1: Go into GuildBannerUIListener.java and find the comment that says "save new guild in cache somewhere no clue" (use command f)
+	1: check if guild name has any restrictions
+	2: fix guild prefix when making a guild
+	3: Go into GuildBannerUIListener.java and find the comment that says "save new guild in cache somewhere no clue" (use command f)
 	 */
 	
 	private static Plugin instance;

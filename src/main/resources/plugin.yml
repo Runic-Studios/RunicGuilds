@@ -5,6 +5,8 @@ main: com.runicrealms.runicguilds.Plugin
 api-version: 1.13
 softdepend: [PlaceholderAPI, RunicRestart, HolograpicDisplays]
 Permissions:
+  permissions.guild-mod:
+    description: Allows a moderator to execute guildmod command
   permissions.guild-mod-disband:
     description: Allows a moderator to force disband guilds
   permissions.guild-mod-kick:

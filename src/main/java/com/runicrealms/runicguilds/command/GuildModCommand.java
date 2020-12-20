@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
-import com.google.common.collect.ImmutableList;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.*;
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @CommandAlias("guildmod")
+@CommandPermission("permissions.guild-mod")
 @Conditions("is-player")
 public class GuildModCommand extends BaseCommand {
 
@@ -37,8 +37,6 @@ public class GuildModCommand extends BaseCommand {
             }
             return names;
         });
-
-        Plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("numbers", context -> ImmutableList.of("0", "-1", "1"));
     }
 
     @Default
@@ -48,8 +46,9 @@ public class GuildModCommand extends BaseCommand {
     }
 
     @Subcommand("disband")
-    @Syntax("<player>")
+    @Syntax("<prefix>")
     @CommandPermission("runicadmin.guilds.disband")
+    @CommandCompletion("prefix @nothing")
     public void onGuildModDisbandCommand(Player player, String[] args) {
         if (args.length != 1) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
@@ -136,7 +135,7 @@ public class GuildModCommand extends BaseCommand {
     @Subcommand("reset")
     @Syntax("<player>")
     @CommandPermission("runicadmin.guilds.reset")
-    @CommandCompletion("@guildmod-reset")
+    @CommandCompletion("@players @nothing")
     public void onGuildModResetCommand(Player player, String[] args) {
         if (args.length != 1) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
@@ -145,6 +144,10 @@ public class GuildModCommand extends BaseCommand {
         }
 
         Player target = Bukkit.getPlayerExact(args[0]);
+        if (target == null) {
+            //error msg
+            return;
+        }
         UUID targetUUID = target.getUniqueId();
         String targetCache = GuildUtil.getPlayerCache().get(targetUUID);
 
@@ -163,6 +166,7 @@ public class GuildModCommand extends BaseCommand {
     @Subcommand("create")
     @Syntax("<owner> <name> <prefix>")
     @Conditions("is-op")
+    @CommandCompletion("@players name prefix")
     public void onGuildModCreateCommand(Player player, String[] args) {
         if (args.length != 3) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
@@ -183,6 +187,68 @@ public class GuildModCommand extends BaseCommand {
             PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), uuid.toString());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, true));
         }
+    }
+
+    @Subcommand("set name")
+    @Conditions("is-player")
+    @Syntax("<player> <name>")
+    @CommandCompletion("@players name @nothing")
+    public void onGuildSetNameCommand(Player player, String[] args) {
+        if (args.length != 2) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
+        //check if name breaks any restrictions
+
+        Player target = Bukkit.getPlayerExact(args[0]);
+        if (target == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
+            return;
+        }
+
+        if (GuildUtil.getPlayerCache().get(target.getUniqueId()) == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThe targeted player must be in a guild execute this command!"));
+            return;
+        }
+
+        GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
+
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.renameGuild(guildData, this.combineArgs(args, 0)).getMessage()));
+    }
+
+    @Subcommand("set prefix")
+    @Syntax("<player> <prefix>")
+    @CommandCompletion("@players prefix @nothing")
+    public void onGuildSetPrefixCommand(Player player, String[] args) {
+        if (args.length != 2) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            this.sendHelpMessage(player);
+            return;
+        }
+
+        Player target = Bukkit.getPlayerExact(args[0]);
+        if (target == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
+            return;
+        }
+
+        if (GuildUtil.getPlayerCache().get(target.getUniqueId()) == null) {
+            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
+            return;
+        }
+
+        GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
+
+        String prefix = args[1];
+
+        if (prefix.length() < 3 || prefix.length() > 6) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cA guild's prefix must be between 3-6 letters!"));
+            return;
+        }
+
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.reprefixGuild(guildData, prefix).getMessage()));
     }
 
     @Subcommand("bank")
@@ -208,7 +274,7 @@ public class GuildModCommand extends BaseCommand {
     @Subcommand("give exp")
     @Syntax("<player> <reason> <amount>")
     @CommandPermission("runicadmin.guilds.giveexp")
-    @CommandCompletion("@players @reasons @numbers @nothing")
+    @CommandCompletion("@players @reasons 0|1|-1 @nothing")
     public void onGuildModGiveEXPCommand(CommandSender sender, String[] args) {
         if (args.length != 3) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
@@ -259,7 +325,7 @@ public class GuildModCommand extends BaseCommand {
     @Subcommand("give score")
     @Syntax("<player> <amount>")
     @CommandPermission("runicadmin.guilds.givescore")
-    @CommandCompletion("@players @numbers @nothing")
+    @CommandCompletion("@players 0|1|-1 @nothing")
     public void onGuildModGiveScoreCommand(CommandSender sender, String[] args) {
         if (args.length != 2) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
@@ -293,8 +359,9 @@ public class GuildModCommand extends BaseCommand {
 
     @Subcommand("forceloadbanners")
     @Conditions("is-op")
-    public void onGuildModGiveEXPCommand() {
+    public void onGuildModGiveEXPCommand(Player player) {
         new ForceLoadBanners().run();
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aForce reloaded top three guild banners!"));
     }
 
     private void sendHelpMessage(Player player) {
@@ -303,6 +370,7 @@ public class GuildModCommand extends BaseCommand {
                 "&e/guildmod kick &6[player] &r- force kicks a player from their guild.",
                 "&e/guildmod reset &6[player] &r- resets a player's guild score and guild experience.",
                 "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.",
+                "&e/guild set name&6/&eprefix <player> <text> &r- sets a player's guild's name/prefix.",
                 "&e/guildmod bank &6[prefix] &r- views another guild's bank",
                 "&e/guildmod give exp &6[player] [reason] [amount] &r- give a player guild experience",
                 "&e/guildmod give score &6[player] [amount] &r- give a player guild score"};
@@ -317,6 +385,7 @@ public class GuildModCommand extends BaseCommand {
                 "&e/guildmod kick &6[player] &r- force kicks a player from their guild.",
                 "&e/guildmod reset &6[player] &r- resets a player's guild score and guild experience.",
                 "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.",
+                "&e/guild set name&6/&eprefix <player> <text> &r- sets a player's guild's name/prefix.",
                 "&e/guildmod bank &6[prefix] &r- views another guild's bank",
                 "&e/guildmod give exp &6[player] [reason] [amount] &r- give a player guild experience",
                 "&e/guildmod give score &6[player] [amount] &r- give a player guild score"};
@@ -332,5 +401,16 @@ public class GuildModCommand extends BaseCommand {
             }
         }
         return null;
+    }
+
+    private String combineArgs(String[] args, int start) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = start; i < args.length; i++) {
+            builder.append(args[i]);
+            if (i != args.length - 1) {
+                builder.append(" ");
+            }
+        }
+        return builder.toString();
     }
 }

@@ -32,6 +32,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("info")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildInfoCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
             player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
@@ -356,57 +357,9 @@ public class GuildCommand extends BaseCommand {
         GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
     }
 
-    @Subcommand("set name")
-    @Conditions("is-player")
-    @Syntax("<name>")
-    public void onGuildSetNameCommand(Player player, String[] args) {
-        if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
-            return;
-        }
-
-        GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
-        Guild guild = guildData.getData();
-
-        if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format("&eYou must be guild owner to use that command!"));
-            return;
-        }
-
-        if (args.length == 0) {
-            player.sendMessage(ColorUtil.format("&eType &6/guild set name &e<name>."));
-            return;
-        }
-        player.sendMessage(ColorUtil.format("&e" + GuildUtil.renameGuild(guildData, this.combineArgs(args, 0)).getMessage()));
-    }
-
-    @Subcommand("set prefix")
-    @Conditions("is-player")
-    @Syntax("<prefix>")
-    public void onGuildSetPrefixCommand(Player player, String[] args) {
-        if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
-            return;
-        }
-
-        GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
-        Guild guild = guildData.getData();
-
-        if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format("&eYou must be guild owner to use that command!"));
-            return;
-        }
-
-        if (args.length != 1) {
-            player.sendMessage(ColorUtil.format("&eType &6/guild set prefix &e<prefix>."));
-            return;
-        }
-
-        Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> player.sendMessage(ColorUtil.format("&e" + GuildUtil.reprefixGuild(guildData, args[0]).getMessage())));
-    }
-
     @Subcommand("leave")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildLeaveCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
             player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
@@ -440,6 +393,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("confirm")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildConfirmCommand(Player player, String[] args) {
         String prefix;
         GuildData guildData = null;
@@ -466,6 +420,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("cancel")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildCancelCommand(Player player) {
         if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format("&eCanceled creating guild."));
@@ -487,6 +442,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("disband")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildDisbandCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
             player.sendMessage(ColorUtil.format("&eYou are not in a guild!"));
@@ -508,6 +464,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("accept")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildAcceptCommand(Player player) {
         if (GuildUtil.getPlayerCache().get(player.getUniqueId()) != null) {
             player.sendMessage(ColorUtil.format("&eYou cannot use this command since you are in a guild."));
@@ -535,6 +492,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("decline")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildDeclineCommand(Player player) {
         if (!GuildCommandMapManager.getInvites().containsKey(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format("&eYou don't have any pending invitations."));
@@ -549,6 +507,7 @@ public class GuildCommand extends BaseCommand {
 
     @Subcommand("banner")
     @Conditions("is-player")
+    @CommandCompletion("@nothing")
     public void onGuildBannerCommand(Player player) {
         Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
         if (guild == null) {
@@ -572,7 +531,6 @@ public class GuildCommand extends BaseCommand {
         String[] messages = new String[]{"&6Guild Commands:",
                 "&e/guild info &r- gets guild members and score.",
                 "&e/guild invite &6[player] &r- invites a player to the guild.",
-                "&e/guild set name&6/&eprefix <text> &r- sets your guild name/prefix.",
                 "&e/guild kick &6[player] &r- kicks a player from the guild.",
                 "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.",
                 "&e/guild disband &r- disbands your guild.",
@@ -652,5 +610,4 @@ public class GuildCommand extends BaseCommand {
         }
         return builder.toString();
     }
-
 }
