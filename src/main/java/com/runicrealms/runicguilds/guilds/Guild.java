@@ -19,7 +19,7 @@ public class Guild implements Cloneable {
 	private Integer bankSize;
 	private Map<GuildRank, Boolean> bankAccess;
 
-	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess) {
+	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
 		this.members = members;
 		this.owner = owner;
 		this.guildName = guildName;
@@ -29,15 +29,14 @@ public class Guild implements Cloneable {
 		this.bankAccess = bankAccess;
 		this.recalculateScore();
 		this.guildBanner = new GuildBanner(this);
-		this.guildLevel = new GuildLevel();
+		this.guildLevel = new GuildLevel(guildEXP);
 	}
 
-	public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, Integer score, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+	public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
 		this.members = members;
 		this.owner = owner;
 		this.guildName = guildName;
 		this.guildPrefix = guildPrefix;
-		this.score = score;
 		this.bank = bank;
 		this.bankSize = bankSize;
 		this.bankAccess = bankAccess;
@@ -138,10 +137,6 @@ public class Guild implements Cloneable {
 		return null;
 	}
 
-	public int guildEXPToLevel() {
-		return 0; //placeholder
-	}
-
 	public boolean isInGuild(String playerName) {
 		@SuppressWarnings("deprecation")
 		OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
@@ -206,7 +201,7 @@ public class Guild implements Cloneable {
 		for (GuildMember member : this.members) {
 			newMembers.add(member.clone());
 		}
-		return new Guild(newMembers, this.owner.clone(), new String(this.guildName), new String(this.guildPrefix), newItems, new Integer(this.bankSize), this.bankAccess);
+		return new Guild(newMembers, this.owner.clone(), new String(this.guildName), new String(this.guildPrefix), newItems, new Integer(this.bankSize), this.bankAccess, this.guildLevel.getGuildEXP());
 	}
 
 }

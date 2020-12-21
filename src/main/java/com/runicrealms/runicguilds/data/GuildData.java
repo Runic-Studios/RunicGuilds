@@ -83,7 +83,17 @@ public class GuildData {
                 bankPermissions.put(rank, rank.canAccessBankByDefault());
             }
         }
-        this.guild = new Guild(members, owner, this.guildData.get("name", String.class), this.guildData.get("prefix", String.class), items, this.guildData.get("bank-size", Integer.class), bankPermissions);
+
+        int guildEXP = 0;
+        if (this.guildData.has("guild-exp")) {
+            guildEXP = this.guildData.get("guild-exp", Integer.class);
+        }
+
+        if (!this.guildData.has("guild-banner")) {
+            this.guild = new Guild(members, owner, this.guildData.get("name", String.class), this.guildData.get("prefix", String.class), items, this.guildData.get("bank-size", Integer.class), bankPermissions, guildEXP);
+        } else {
+            this.guild = new Guild(members, deserializeItemStack(this.guildData.get("guild-banner", String.class)), owner, this.guildData.get("name", String.class), this.guildData.get("prefix", String.class), items, this.guildData.get("bank-size", Integer.class), bankPermissions, guildEXP);
+        }
     }
 
     public Guild getData() {
@@ -133,6 +143,8 @@ public class GuildData {
         for (GuildRank rank : this.guild.getBankAccess().keySet()) {
             guildData.set("settings.bank-access." + rank.getIdentifier(), this.guild.canAccessBank(rank));
         }
+        guildData.set("guild-exp", guild.getGuildLevel().getGuildEXP());
+        guildData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
         guildData.save();
     }
 

@@ -4,11 +4,6 @@ public class GuildLevel {
     private int guildEXP;
     private GuildStage guildStage;
 
-    public GuildLevel() {
-        this.guildEXP = 0;
-        this.guildStage = GuildStage.STAGE1;
-    }
-
     public GuildLevel(int guildEXP) {
         this.guildEXP = guildEXP;
         this.guildStage = this.expToStage();

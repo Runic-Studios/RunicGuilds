@@ -14,6 +14,7 @@ import com.runicrealms.runicguilds.gui.GuildBannerUI;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.guilds.GuildRank;
+import com.runicrealms.runicguilds.guilds.GuildStage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -44,6 +45,7 @@ public class GuildCommand extends BaseCommand {
 
         Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
         player.sendMessage(ColorUtil.format("&6[" + guild.getScore() + "]&r &e&l" + guild.getGuildName()));
+        player.sendMessage(ColorUtil.format("&6Guild Experience: " + guild.getGuildLevel().getGuildEXP()));
         player.sendMessage(ColorUtil.format("&6Guild Owner: &7[" + guild.getOwner().getScore() + "] &e" + guild.getOwner().getLastKnownName()));
 
         HashMap<GuildRank, StringBuilder> members = new HashMap<>();
@@ -86,6 +88,11 @@ public class GuildCommand extends BaseCommand {
         Guild guild = guildData.getData();
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.RECRUITER)) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be of rank recruiter or higher to invite other players."));
+            return;
+        }
+
+        if (guild.getMembers().size() >= guild.getGuildLevel().getGuildStage().getMaxMembers()) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have reached your guild stages maximum amount of members."));
             return;
         }
 
@@ -446,7 +453,9 @@ public class GuildCommand extends BaseCommand {
         if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(this.prefix + "&r&aCanceled disbanding of the guild."));
             GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
+            return;
         }
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have nothing to cancel."));
     }
 
     @Subcommand("disband")
@@ -466,7 +475,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&aType /guild confirm if you with to proceed with GuildCommandMapManager.getDisbanding() the guild, or /guild cancel to cancel this."));
+        player.sendMessage(ColorUtil.format(this.prefix + "&r&aType /guild confirm if you with to proceed with disbanding the guild, or /guild cancel to cancel this."));
         GuildCommandMapManager.getDisbanding().add(player.getUniqueId());
         GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
     }
@@ -485,10 +494,16 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
-
         GuildData guildData = GuildUtil.getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
         Guild guild = guildData.getData();
+
+        Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+
+        if (guild.getMembers().size() >= guild.getGuildLevel().getGuildStage().getMaxMembers()) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThe guild has reached the maximum amount of members for their guild stage."));
+            return;
+        }
+
         guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
         PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
         player.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have accepted the guild invitation."));
@@ -529,6 +544,11 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
+        if (guild.getGuildLevel().getGuildEXP() < GuildStage.STAGE2.getExp()) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou must be at least guild stage two to execute this command!"));
+            return;
+        }
+
         GuildBannerUI ui = new GuildBannerUI(guild);
         player.sendMessage(ColorUtil.format(this.prefix + "&r&aInitializing user interface..."));
         player.openInventory(ui.getInventory());
@@ -537,15 +557,16 @@ public class GuildCommand extends BaseCommand {
 
     private void sendHelpMessage(CommandSender sender) {
         String[] messages = new String[]{"&6Guild Commands:",
-                "&e/guild info &r- gets guild members and score.",
-                "&e/guild invite &6[player] &r- invites a player to the guild.",
-                "&e/guild kick &6[player] &r- kicks a player from the guild.",
-                "&e/guild promote&6/&edemote &6[player] &r- promotes/demotes a guild member.",
+                "&e/guild info &r- gets guild members, score and experience.",
+                "&e/guild invite &6<player> &r- invites a player to the guild.",
+                "&e/guild kick &6<player> &r- kicks a player from the guild.",
+                "&e/guild promote&6/&edemote &6<player> &r- promotes/demotes a guild member.",
                 "&e/guild disband &r- disbands your guild.",
-                "&e/guild transfer &6[player] &r- transfers the guild ownership to another member.",
+                "&e/guild transfer &6<player> &r- transfers the guild ownership to another member.",
                 "&e/guild leave &r- removes you from your guild.",
                 "&e/guild accept&6/&edecline &r- accepts/declines an invitation to join a guild.",
-                "&e/guild confirm&6/&ecancel &r- for confirming/canceling certain actions."};
+                "&e/guild confirm&6/&ecancel &r- for confirming/canceling certain actions.",
+                "&e/guild banner &r- to make a custom guild banner."};
         for (String message : messages) {
             sender.sendMessage(ColorUtil.format(message));
         }

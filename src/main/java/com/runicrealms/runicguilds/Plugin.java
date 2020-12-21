@@ -19,6 +19,7 @@ import com.runicrealms.runicguilds.guilds.ForceLoadBanners;
 import com.runicrealms.runicguilds.guilds.GuildBannerUIListener;
 import com.runicrealms.runicguilds.guilds.PostedGuildBanner;
 import com.runicrealms.runicguilds.listeners.DataListener;
+import com.runicrealms.runicguilds.listeners.PlayerGainExperience;
 import com.runicrealms.runicguilds.shop.GuildHeraldShop;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
@@ -37,13 +38,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class Plugin extends JavaPlugin implements Listener {
-
-	/*
-	TODO:
-	1: make guild banners and guild exp persistent
-	2: make guild exp useful (implement rewards)
-	 */
-	
 	private static Plugin instance;
 	private static PaperCommandManager commandManager;
 	private static GuildBossManager guildBossManager;
@@ -69,7 +63,7 @@ public class Plugin extends JavaPlugin implements Listener {
 		EventPlayerJoinQuit.initializePlayerCache();
 		//Events
 		this.registerEvents(this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
-				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener());
+				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new PlayerGainExperience());
 
 		commandManager = new PaperCommandManager(this);
 		commandManager.getCommandConditions().addCondition("is-player", context -> {

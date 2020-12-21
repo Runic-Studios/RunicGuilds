@@ -48,6 +48,7 @@ public class BannerClickListener implements Listener {
         Player player = event.getPlayer();
 
         player.sendMessage(ColorUtil.format("&6[" + guild.getScore() + "]&r &e&l" + guild.getGuildName()));
+        player.sendMessage(ColorUtil.format("&6Guild Experience: " + guild.getGuildLevel().getGuildEXP()));
         player.sendMessage(ColorUtil.format("&6Guild Owner: &7[" + guild.getOwner().getScore() + "] &e" + guild.getOwner().getLastKnownName()));
         HashMap<GuildRank, StringBuilder> members = new HashMap<GuildRank, StringBuilder>();
         for (GuildMember member : guild.getMembers()) {

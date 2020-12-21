@@ -4,6 +4,7 @@ import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildBanner;
+import com.runicrealms.runicguilds.guilds.GuildStage;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -139,7 +140,16 @@ public class GuildBannerUI implements InventoryHolder {
 
         PatternType[] types = PatternType.values();
         for (int i = 0; i < emptySlots.size(); i++) {
-            this.getInventory().setItem(emptySlots.get(i), this.getPattern(types[i]));
+            PatternType pattern = types[i];
+            ItemStack item;
+
+            if (this.restrictedPattern(pattern) && this.guild.getGuildLevel().getGuildEXP() < GuildStage.STAGE3.getExp()) {
+                item = this.blocked(pattern);
+            } else {
+                item = this.getPattern(pattern);
+            }
+
+            this.getInventory().setItem(emptySlots.get(i), item);
         }
     }
 
@@ -184,6 +194,14 @@ public class GuildBannerUI implements InventoryHolder {
         return item;
     }
 
+    private boolean restrictedPattern(PatternType pattern) {
+        if (pattern == PatternType.SKULL || pattern == PatternType.CREEPER || pattern == PatternType.PIGLIN ||
+                pattern == PatternType.MOJANG || pattern == PatternType.GLOBE) {
+            return true;
+        }
+        return false;
+    }
+
     private ItemStack confirm() {
         ItemStack item = new ItemStack(Material.SLIME_BALL, 1);
         ItemMeta meta = item.getItemMeta();
@@ -199,6 +217,23 @@ public class GuildBannerUI implements InventoryHolder {
         ItemMeta meta = item.getItemMeta();
 
         meta.setDisplayName(ColorUtil.format("&r"));
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack blocked(PatternType patternType) {
+        ItemStack item = new ItemStack(Material.BARRIER, 1);
+        ItemMeta meta = item.getItemMeta();
+
+        String name = patternType.name().toLowerCase() + "_pattern";
+        String[] words = name.split("_");
+        String neoName = "";
+        for (String word : words) {
+            neoName = neoName + " " + word.substring(0, 1).toUpperCase() + word.substring(1);
+        }
+        neoName = neoName.trim();
+        meta.setDisplayName(ColorUtil.format("&r&c" + neoName));
 
         item.setItemMeta(meta);
         return item;

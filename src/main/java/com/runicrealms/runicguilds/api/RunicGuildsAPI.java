@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
+import com.runicrealms.runicguilds.guilds.GuildStage;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import org.bukkit.Bukkit;
 
@@ -37,6 +38,22 @@ public class RunicGuildsAPI {
 		GuildData data = GuildUtil.getGuildData(prefix);
 		if (data != null) {
 			return data.getData();
+		}
+		return null;
+	}
+
+	public static GuildStage getGuildStage(UUID uuid) {
+		GuildData data = GuildUtil.getGuildData(uuid);
+		if (data != null) {
+			return data.getData().getGuildLevel().getGuildStage();
+		}
+		return null;
+	}
+
+	public static GuildStage getGuildStage(String prefix) {
+		GuildData data = GuildUtil.getGuildData(prefix);
+		if (data != null) {
+			return data.getData().getGuildLevel().getGuildStage();
 		}
 		return null;
 	}
@@ -82,5 +99,4 @@ public class RunicGuildsAPI {
 	public static void registerGuildShop(GuildShop shop) {
 		GuildShopManager.registerShop(shop);
 	}
-
 }

@@ -116,7 +116,7 @@ public class GuildUtil {
 				bankPermissions.put(rank, rank.canAccessBankByDefault());
 			}
 		}
-		GuildData data = new GuildData(new Guild(new HashSet<>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45, bankPermissions));
+		GuildData data = new GuildData(new Guild(new HashSet<>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45, bankPermissions, 0));
 		guilds.put(prefix, data);
 		players.put(owner, prefix);
 		data.queueToSave();

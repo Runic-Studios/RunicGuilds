@@ -281,11 +281,13 @@ public class GuildModCommand extends BaseCommand {
             return;
         }
 
-        Guild guild = GuildUtil.getGuildData(target.getUniqueId()).getData();
-        if (guild == null) {
+        GuildData guildData =  GuildUtil.getGuildData(target.getUniqueId());
+        if (guildData == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
         }
+
+        Guild guild = guildData.getData();
 
         GuildEXPSource source = this.getGuildExpSource(args[1]);
         if (source == null) {
@@ -312,6 +314,7 @@ public class GuildModCommand extends BaseCommand {
         }
 
         guild.getGuildLevel().addGuildEXP(amount);
+        guildData.queueToSave();
         target.sendMessage(ColorUtil.format(this.prefix + "&r&aYou received " + amount + " guild experience!"));
     }
 
@@ -332,7 +335,9 @@ public class GuildModCommand extends BaseCommand {
             return;
         }
 
-        Guild guild = GuildUtil.getGuildData(target.getUniqueId()).getData();
+        GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
+
+        Guild guild = guildData.getData();
         if (guild == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -347,6 +352,7 @@ public class GuildModCommand extends BaseCommand {
         }
 
         guild.increasePlayerScore(target.getUniqueId(), amount);
+        guildData.queueToSave();
         sender.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have given " + target.getName() + " " + amount + " points!"));
     }
 
@@ -359,14 +365,14 @@ public class GuildModCommand extends BaseCommand {
 
     private void sendHelpMessage(CommandSender sender) {
         String[] lines = new String[]{"&6Guild Moderator Commands:",
-                "&e/guildmod disband &6[prefix] &r- force disbands a guild.",
-                "&e/guildmod kick &6[player] &r- force kicks a player from their guild.",
-                "&e/guildmod reset &6[player] &r- resets a player's guild score and guild experience.",
-                "&e/guildmod create &6[owner] [name] [prefix] &r- creates a guild. &cThis is only for operators.",
-                "&e/guildmod set name/prefix&r&6 [player] [text] &r- sets a player's guild's name/prefix.",
-                "&e/guildmod bank &6[prefix] &r- views another guild's bank",
-                "&e/guildmod give exp &6[player] [reason] [amount] &r- give a player guild experience",
-                "&e/guildmod give score &6[player] [amount] &r- give a player guild score"};
+                "&e/guildmod disband &6<prefix> &r- force disbands a guild.",
+                "&e/guildmod kick &6<player> &r- force kicks a player from their guild.",
+                "&e/guildmod reset &6<player> &r- resets a player's guild score and guild experience.",
+                "&e/guildmod create &6<owner> <name> <prefix> &r- creates a guild. &cThis is only for operators.",
+                "&e/guildmod set name/prefix&r&6 <player> <text> &r- sets a player's guild's name/prefix.",
+                "&e/guildmod bank &6<prefix> &r- views another guild's bank",
+                "&e/guildmod give exp &6<player> <reason> <amount> &r- give a player guild experience",
+                "&e/guildmod give score &6<player> <amount> &r- give a player guild score"};
         for (String line : lines) {
             sender.sendMessage(ColorUtil.format(line));
         }
