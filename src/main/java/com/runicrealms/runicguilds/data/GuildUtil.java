@@ -79,7 +79,7 @@ public class GuildUtil {
 	}
 	
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix) {
-		if (prefix.length() >= 3 && prefix.length() <= 6) {
+		if (prefix.length() < 3 || prefix.length() > 6) {
 			return GuildCreationResult.BAD_PREFIX;
 		}
 		Pattern pattern = Pattern.compile("[a-zA-Z]");
