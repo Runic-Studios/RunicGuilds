@@ -26,7 +26,7 @@ import java.util.UUID;
 @Conditions("is-player")
 public class GuildModCommand extends BaseCommand {
 
-    private final String prefix = "&r&6&lGuilds »&r ";
+    private final String prefix = "&r&6&lGuilds (Mod) »&r &e";
 
     public GuildModCommand() {
         Plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("reasons", context ->  {
@@ -51,13 +51,13 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("prefix @nothing")
     public void onGuildModDisbandCommand(Player player, String[] args) {
         if (args.length != 1) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
         }
 
         if (!GuildUtil.getGuildDatas().containsKey(args[0])) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid guild!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild!"));
             return;
         }
 
@@ -88,7 +88,7 @@ public class GuildModCommand extends BaseCommand {
         Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, null, true));
         GuildUtil.getGuildDatas().get(args[0]).deleteData();
         GuildUtil.removeGuildFromCache(guild);
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&aSuccessfully disbanded guild."));
+        player.sendMessage(ColorUtil.format(this.prefix + "Successfully disbanded guild."));
     }
 
     @Subcommand("kick")
@@ -97,7 +97,7 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     public void onGuildModKickCommand(Player player, String[] args) {
         if (args.length != 1) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
         }
@@ -106,14 +106,14 @@ public class GuildModCommand extends BaseCommand {
         GuildData guildData = GuildUtil.getGuildData(uuid);
 
         if (guildData.getData() == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThe specified player must be in a guild to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;
         }
 
         Guild guild = guildData.getData();
 
         if (guild.getOwner().getUUID().toString().equalsIgnoreCase(uuid.toString())) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThat user is the guild owner. To disband the guild, use /guildmod disband [prefix]."));
+            player.sendMessage(ColorUtil.format(this.prefix + "That user is the guild owner. To disband the guild, use /guildmod disband [prefix]."));
             return;
         }
 
@@ -129,7 +129,7 @@ public class GuildModCommand extends BaseCommand {
         guild.removeMember(uuid);
         guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, uuid, player.getUniqueId(), true));
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&aSuccessfully kicked guild member."));
+        player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
     }
 
     @Subcommand("reset")
@@ -138,14 +138,14 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     public void onGuildModResetCommand(Player player, String[] args) {
         if (args.length != 1) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
         }
 
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid player!"));
             return;
         }
 
@@ -153,7 +153,7 @@ public class GuildModCommand extends BaseCommand {
         String targetCache = GuildUtil.getPlayerCache().get(targetUUID);
 
         if (targetCache == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThe specified player must be in a guild to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;
         }
 
@@ -161,7 +161,7 @@ public class GuildModCommand extends BaseCommand {
         Guild guild = guildData.getData();
         guild.setPlayerScore(targetUUID, 0);
         guildData.queueToSave();
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&aSuccessfully reset guild member score."));
+        player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
     }
 
     @Subcommand("create")
@@ -170,14 +170,14 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("@players name prefix")
     public void onGuildModCreateCommand(Player player, String[] args) {
         if (args.length != 3) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
         }
 
         UUID uuid = GuildUtil.getOfflinePlayerUUID(args[0]);
         if (uuid == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid player!"));
             return;
         }
 
@@ -196,25 +196,25 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("@players name @nothing")
     public void onGuildSetNameCommand(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
         }
 
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid player!"));
             return;
         }
 
         if (GuildUtil.getPlayerCache().get(target.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cThe targeted player must be in a guild execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "The targeted player must be in a guild execute this command!"));
             return;
         }
 
         GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
 
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.renameGuild(guildData, this.combineArgs(args, 1)).getMessage()));
+        player.sendMessage(ColorUtil.format(this.prefix + GuildUtil.renameGuild(guildData, this.combineArgs(args, 1)).getMessage()));
     }
 
     @Subcommand("set prefix")
@@ -222,14 +222,14 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("@players prefix @nothing")
     public void onGuildSetPrefixCommand(Player player, String[] args) {
         if (args.length != 2) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
         }
 
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid player!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid player!"));
             return;
         }
 
@@ -240,7 +240,7 @@ public class GuildModCommand extends BaseCommand {
 
         GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
 
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&a" + GuildUtil.reprefixGuild(guildData, args[1]).getMessage()));
+        player.sendMessage(ColorUtil.format(this.prefix + GuildUtil.reprefixGuild(guildData, args[1]).getMessage()));
     }
 
     @Subcommand("bank")
@@ -249,19 +249,19 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("prefix @nothing")
     public void onGuildModBankCommand(Player player, String[] args) {
         if (args.length != 1) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(player);
             return;
         }
 
         GuildData guildData = GuildUtil.getGuildData(args[0]);
         if (guildData == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have entered an invalid guild prefix!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild prefix!"));
             return;
         }
 
         GuildBankUtil.open(player, 1, args[0]);
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have opened the bank of " + guildData.getData().getGuildName()));
+        player.sendMessage(ColorUtil.format(this.prefix + "You have opened the bank of " + guildData.getData().getGuildName()));
     }
 
     @Subcommand("give exp")
@@ -270,7 +270,7 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("@players @reasons 0|1|-1 @nothing")
     public void onGuildModGiveEXPCommand(CommandSender sender, String[] args) {
         if (args.length != 3) {
-            sender.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            sender.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(sender);
             return;
         }
@@ -315,7 +315,7 @@ public class GuildModCommand extends BaseCommand {
 
         guild.getGuildLevel().addGuildEXP(amount);
         guildData.queueToSave();
-        target.sendMessage(ColorUtil.format(this.prefix + "&r&aYou received " + amount + " guild experience!"));
+        target.sendMessage(ColorUtil.format(this.prefix + "You received " + amount + " guild experience!"));
     }
 
     @Subcommand("give score")
@@ -324,7 +324,7 @@ public class GuildModCommand extends BaseCommand {
     @CommandCompletion("@players 0|1|-1 @nothing")
     public void onGuildModGiveScoreCommand(CommandSender sender, String[] args) {
         if (args.length != 2) {
-            sender.sendMessage(ColorUtil.format(this.prefix + "&r&cYou have use improper arguments to execute this command!"));
+            sender.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
             this.sendHelpMessage(sender);
             return;
         }
@@ -353,14 +353,14 @@ public class GuildModCommand extends BaseCommand {
 
         guild.increasePlayerScore(target.getUniqueId(), amount);
         guildData.queueToSave();
-        sender.sendMessage(ColorUtil.format(this.prefix + "&r&aYou have given " + target.getName() + " " + amount + " points!"));
+        sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
     }
 
     @Subcommand("forceloadbanners")
     @Conditions("is-op")
     public void onGuildModGiveEXPCommand(Player player) {
         new ForceLoadBanners().run();
-        player.sendMessage(ColorUtil.format(this.prefix + "&r&aForce reloaded top three guild banners!"));
+        player.sendMessage(ColorUtil.format(this.prefix + "Force reloaded top three guild banners!"));
     }
 
     private void sendHelpMessage(CommandSender sender) {
