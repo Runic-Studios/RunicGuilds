@@ -26,15 +26,21 @@ public class ForceLoadBanners extends BukkitRunnable {
 
         ordering.sort(comparator);
 
-        for (int i = 0; i < 3; i++) {
-            guilds.add(ordering.get(i));
+        if (ordering.size() < 3) {
+            for (int i = 0; i < ordering.size(); i++) {
+                guilds.add(ordering.get(i));
+            }
+        } else {
+            for (int i = 0; i < 3; i++) {
+                guilds.add(ordering.get(i));
+            }
         }
 
         this.makeBanners(guilds);
     }
 
     private void makeBanners(List<Guild> guilds) {
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= guilds.size(); i++) {
             String path = "banners.number" + i;
             FileConfiguration config = Plugin.getInstance().getConfig();
             World world = Bukkit.getWorld(config.getString(path + ".world"));
