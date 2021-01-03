@@ -358,7 +358,7 @@ public class GuildModCommand extends BaseCommand {
 
     @Subcommand("forceloadbanners")
     @Conditions("is-op")
-    public void onGuildModGiveEXPCommand(Player player) {
+    public void onGuildModReloadBanners(Player player) {
         new ForceLoadBanners().run();
         player.sendMessage(ColorUtil.format(this.prefix + "Force reloaded top three guild banners!"));
     }

@@ -4,6 +4,7 @@ import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.party.Party;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicnpcs.Npc;
@@ -109,11 +110,13 @@ public class TimeChallengeListener implements Listener {
     private void giveReward(Party party, String name) {
         int reward = this.getBossReward(name) / party.getSize();
 
-        Guild guild = GuildUtil.getGuildData(party.getLeader().getUniqueId()).getData();
+        GuildData guildData = GuildUtil.getGuildData(party.getLeader().getUniqueId());
+        Guild guild = guildData.getData();
 
         for (Player player : party.getMembersWithLeader()) {
             guild.increasePlayerScore(player.getUniqueId(), reward);
         }
+        guildData.queueToSave();
     }
 
     private boolean isBoss(String name) {
