@@ -22,6 +22,8 @@ import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.listeners.PlayerGainExperience;
 import com.runicrealms.runicguilds.shop.GuildHeraldShop;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
+import com.runicrealms.runicguilds.timechallenge.TimeChallengeListener;
+import com.runicrealms.runicguilds.timechallenge.TimeChallengeManager;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
 import com.runicrealms.runicrestart.api.ServerShutdownEvent;
@@ -41,6 +43,7 @@ public class Plugin extends JavaPlugin implements Listener {
 	private static Plugin instance;
 	private static PaperCommandManager commandManager;
 	private static GuildBossManager guildBossManager;
+	private static TimeChallengeManager timeChallengeManager;
 	private static final Set<UUID> playersCreatingGuild = new HashSet<>();
 	private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
 
@@ -48,11 +51,14 @@ public class Plugin extends JavaPlugin implements Listener {
 	public static int GUILD_COST;
 	public static List<Integer> GUILD_BANKERS;
 	public static int MAX_BANK_PAGES;
+
+	//PARTY DISBAND EVENT
 	
 	@Override
 	public void onEnable() {
 		instance = this;
 		guildBossManager = new GuildBossManager();
+		timeChallengeManager = new TimeChallengeManager();
 		this.saveDefaultConfig();
 		GuildUtil.loadGuilds(); // marks plugin loaded for RunicRestart
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
@@ -63,7 +69,8 @@ public class Plugin extends JavaPlugin implements Listener {
 		EventPlayerJoinQuit.initializePlayerCache();
 		//Events
 		this.registerEvents(this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
-				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new PlayerGainExperience());
+				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new PlayerGainExperience(),
+				new TimeChallengeListener());
 
 		commandManager = new PaperCommandManager(this);
 		commandManager.getCommandConditions().addCondition("is-player", context -> {
@@ -101,6 +108,10 @@ public class Plugin extends JavaPlugin implements Listener {
 
 	public static Set<PostedGuildBanner> getPostedGuildBanners() {
 		return postedGuildBanners;
+	}
+
+	public static TimeChallengeManager getTimeChallengeManager() {
+		return timeChallengeManager;
 	}
 
 	public static Plugin getInstance() {

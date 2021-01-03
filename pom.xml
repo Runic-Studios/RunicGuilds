@@ -97,7 +97,7 @@
 			<artifactId>mythicmobs</artifactId>
 			<version>4.11.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/MythicMobs-4.11.0.jar</systemPath>
+			<systemPath>${project.basedir}/../lib/MythicMobs-4.11.0.jar</systemPath>
 		</dependency>
 		<!-- Spigot API -->
 		<dependency>
@@ -133,31 +133,31 @@
 			<artifactId>RunicChat</artifactId>
 			<version>1.16.4</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicChat-1.16.4.jar</systemPath>
+			<systemPath>${project.basedir}/../lib/RunicChat-1.16.4.jar</systemPath>
 		</dependency>
 		<!-- RunicCore -->
 		<dependency>
 			<groupId>com.runicrealms.plugin</groupId>
 			<artifactId>RunicCore</artifactId>
-			<version>1.15.2</version>
+			<version>1.16.4</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicCore-1.16.4.jar</systemPath>
+			<systemPath>${project.basedir}/../lib/RunicCore-1.16.4.jar</systemPath>
 		</dependency>
 		<!-- Runic Npcs -->
 		<dependency>
 			<groupId>com.runicrealms.runicnpcs</groupId>
 			<artifactId>RunicNpcs</artifactId>
-			<version>1.15.2</version>
+			<version>1.16.4</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicNpcs-1.16.4.jar</systemPath>
+			<systemPath>${project.basedir}/../lib/RunicNpcs-1.16.4.jar</systemPath>
 		</dependency>
 		<!-- Runic Restart -->
 		<dependency>
 			<groupId>com.runicrealms.runicrestart.Plugin</groupId>
 			<artifactId>RunicRestart</artifactId>
-			<version>1.0</version>
+			<version>1.16.4</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/RunicRestart-1.16.4.jar</systemPath>
+			<systemPath>${project.basedir}/../lib/RunicRestart-1.16.4.jar</systemPath>
 		</dependency>
 		<!-- ACF -->
 		<dependency>

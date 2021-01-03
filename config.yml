@@ -39,4 +39,16 @@ guild-bankers:
   - 721 # Zenyth
   - 722 # Naheen
   - 723 # Naz'mora
+time-challengers:
+  - 46
+  - 47
+  - 48
+  - 49
+  - 50
+dungeon-bosses:
+  - 'GoblinBossEnraged'
+  - 'Odin'
+  - 'TheLibrarian'
+  - 'DeraPharaoh'
+  - 'Eldrid'
 guild-cost: 1500
