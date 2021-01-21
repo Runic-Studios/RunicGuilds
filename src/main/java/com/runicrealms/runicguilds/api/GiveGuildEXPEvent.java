@@ -11,6 +11,7 @@ public class GiveGuildEXPEvent extends Event implements Cancellable {
     private final int amount;
     private final GuildEXPSource source;
     private boolean cancelled;
+
     private static final HandlerList HANDLERS_LIST = new HandlerList();
 
     public GiveGuildEXPEvent(Guild guild, int amount, GuildEXPSource source) {

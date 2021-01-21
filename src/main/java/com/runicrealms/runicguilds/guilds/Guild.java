@@ -29,7 +29,7 @@ public class Guild implements Cloneable {
 		this.bankAccess = bankAccess;
 		this.recalculateScore();
 		this.guildBanner = new GuildBanner(this);
-		this.guildLevel = new GuildLevel(guildEXP);
+		this.guildLevel = new GuildLevel(this, guildEXP);
 	}
 
 	public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
@@ -40,7 +40,7 @@ public class Guild implements Cloneable {
 		this.bank = bank;
 		this.bankSize = bankSize;
 		this.bankAccess = bankAccess;
-		this.guildLevel = new GuildLevel(guildEXP);
+		this.guildLevel = new GuildLevel(this, guildEXP);
 		this.recalculateScore();
 		this.guildBanner = new GuildBanner(this, guildBanner);
 	}
