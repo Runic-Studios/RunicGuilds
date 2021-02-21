@@ -41,9 +41,7 @@ public class TimeChallengeManager {
     }
 
     public long finishChallenge(Party party) {
-        long startTime = this.partiesInChallenge.get(party);
-        this.partiesInChallenge.remove(party);
-        return startTime;
+        return this.partiesInChallenge.remove(party);
     }
 
     public boolean contains(Party party) {

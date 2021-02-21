@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.timechallenge;
 
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.party.Party;
+import com.runicrealms.plugin.party.event.PartyEvent;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.data.GuildData;
@@ -15,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,12 +45,10 @@ public class TimeChallengeListener implements Listener {
             return;
         }
 
-        TimeChallengeManager timeChallengeManager = Plugin.getTimeChallengeManager();
-
-        if (!timeChallengeManager.contains(party)) {
+        if (!Plugin.getTimeChallengeManager().contains(party)) {
             this.addToChallenge(party, npc);
         } else {
-            timeChallengeManager.removeFromChallenge(party);
+            Plugin.getTimeChallengeManager().removeFromChallenge(party);
         }
     }
 
@@ -70,13 +70,11 @@ public class TimeChallengeListener implements Listener {
             return;
         }
 
-        TimeChallengeManager timeChallengeManager = Plugin.getTimeChallengeManager();
-
-        if (!timeChallengeManager.contains(party)) {
+        if (!Plugin.getTimeChallengeManager().contains(party)) {
             return;
         }
 
-        long time = System.currentTimeMillis() - timeChallengeManager.finishChallenge(party);
+        long time = System.currentTimeMillis() - Plugin.getTimeChallengeManager().finishChallenge(party);
         long resultMin = this.getBossTime(mythicMob.getInternalName());
 
         boolean result = (time <= resultMin);
@@ -92,6 +90,36 @@ public class TimeChallengeListener implements Listener {
         } else {
             party.sendMessageInChannel("&r&aYour party took too long to complete the challenge!");
         }
+    }
+
+    @EventHandler
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        Party party = RunicCore.getPartyManager().getPlayerParty(event.getPlayer());
+
+        if (party == null) {
+            return;
+        }
+
+        if (!event.getFrom().getName().equals("dungeons")) {
+            return;
+        }
+
+        if (!Plugin.getTimeChallengeManager().contains(party)) {
+            return;
+        }
+
+        Plugin.getTimeChallengeManager().removeFromChallenge(party);
+    }
+
+    @EventHandler
+    public void onPartyEvent(PartyEvent event) {
+        Party party = event.getParty();
+
+        if (!Plugin.getTimeChallengeManager().contains(party)) {
+            return;
+        }
+
+        Plugin.getTimeChallengeManager().removeFromChallenge(party);
     }
 
     private void addToChallenge(Party party, Npc npc) {

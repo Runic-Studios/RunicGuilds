@@ -27,9 +27,7 @@ public class ForceLoadBanners extends BukkitRunnable {
         ordering.sort(comparator);
 
         if (ordering.size() < 3) {
-            for (int i = 0; i < ordering.size(); i++) {
-                guilds.add(ordering.get(i));
-            }
+            guilds.addAll(ordering);
         } else {
             for (int i = 0; i < 3; i++) {
                 guilds.add(ordering.get(i));
