@@ -5,7 +5,6 @@ import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicnpcs.Npc;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -25,7 +24,10 @@ public class AddToChallengeAsync extends BukkitRunnable {
         GuildData leaderGuildData = GuildUtil.getGuildData(this.party.getLeader().getUniqueId());
 
         if (leaderGuildData == null) {
-            Bukkit.broadcastMessage("leader no guild"); //remove
+            return;
+        }
+
+        if (this.party.getSize() > 5) {
             return;
         }
 
@@ -33,23 +35,19 @@ public class AddToChallengeAsync extends BukkitRunnable {
 
         for (Player player : this.party.getMembersWithLeader()) {
             if (!player.getWorld().getName().equals(this.party.getLeader().getWorld().getName())) {
-                Bukkit.broadcastMessage("not same world"); //remove
                 return;
             }
 
             if (player.getLocation().distanceSquared(this.npc.getLocation()) > 500) {
-                Bukkit.broadcastMessage("distance squared"); //remove
                 return;
             }
 
             GuildData data = GuildUtil.getGuildData(player.getUniqueId());
             if (data == null) {
-                Bukkit.broadcastMessage("member not in guild"); //remove
                 return;
             }
 
             if (!data.getData().getGuildPrefix().equals(prefix)) {
-                Bukkit.broadcastMessage("member not in same guild"); //remove
                 return;
             }
         }
