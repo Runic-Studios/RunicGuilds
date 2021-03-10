@@ -130,13 +130,19 @@ public class TimeChallengeListener implements Listener {
             boolean result = !(addToChallenge.isCompleted());
 
             if (result) {
-                party.sendMessageInChannel("&r&aYou cannot start a time challenge until all members are in the dungeon and all party members are in the same guild!");
+                party.sendMessageInChannel("&r&aYou cannot start a time challenge until all members are in the dungeon and all party members are in the same guild and your party has less then ten members!");
             }
         }, 1L);
     }
 
     private void giveReward(Party party, String name) {
-        int reward = this.getBossReward(name) / party.getSize();
+        float preReward = this.getBossReward(name) / party.getSize().floatValue();
+
+        int reward = (int) preReward;
+
+        if (preReward % 1 != 0) {
+            reward++;
+        }
 
         GuildData guildData = GuildUtil.getGuildData(party.getLeader().getUniqueId());
         Guild guild = guildData.getData();

@@ -27,7 +27,7 @@ public class AddToChallengeAsync extends BukkitRunnable {
             return;
         }
 
-        if (this.party.getSize() > 5) {
+        if (this.party.getSize() > 10) {
             return;
         }
 
