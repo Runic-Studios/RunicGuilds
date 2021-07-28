@@ -7,6 +7,12 @@
 	<version>1.16.4</version>
 	<name>RunicGuilds</name>
 	<description>Runic Realms Guilds Plugin</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<fileOutput>${project.basedir}/../lib</fileOutput>
+	</properties>
+
 	<build>
 		<defaultGoal>clean package</defaultGoal>
 		<plugins>
@@ -45,6 +51,29 @@
 									<include>org.mongodb:mongodb-driver-core</include>
 								</includes>
 							</artifactSet>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>copy-files-on-build</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${fileOutput}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}</directory>
+									<include>${project.artifactId}-${project.version}.jar</include>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
