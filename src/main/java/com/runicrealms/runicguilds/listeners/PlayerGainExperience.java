@@ -12,6 +12,8 @@ import org.bukkit.event.Listener;
 
 public class PlayerGainExperience implements Listener {
 
+    private static final double EXP_BONUS = .05;
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerGainExperience(RunicExpEvent event) {
         Player player = event.getPlayer();
@@ -27,10 +29,10 @@ public class PlayerGainExperience implements Listener {
             return;
         }
 
-        int exp = event.getAmount();
-        exp *= 1.05;
+        int eventExperience = event.getOriginalAmount(); // exp before other bonuses so we don't apply compound bonuses
+        eventExperience *= EXP_BONUS;
 
-        event.setAmount(exp);
+        event.setFinalAmount(event.getFinalAmount() + eventExperience);
     }
 
 }

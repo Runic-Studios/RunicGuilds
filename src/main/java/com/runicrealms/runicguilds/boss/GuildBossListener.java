@@ -76,12 +76,12 @@ public class GuildBossListener implements Listener {
      */
     @EventHandler
     public void onWeaponDamage(WeaponDamageEvent e) {
-        trackPoints(e.getPlayer(), e.getEntity(), e.getAmount());
+        trackPoints(e.getPlayer(), e.getVictim(), e.getAmount());
     }
 
     @EventHandler
     public void onSpellDamage(SpellDamageEvent e) {
-        trackPoints(e.getPlayer(), e.getEntity(), e.getAmount());
+        trackPoints(e.getPlayer(), e.getVictim(), e.getAmount());
     }
 
     /*
