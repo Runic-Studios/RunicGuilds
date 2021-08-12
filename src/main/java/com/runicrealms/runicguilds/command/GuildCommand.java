@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.*;
 import com.runicrealms.runicguilds.data.GuildData;
@@ -591,7 +592,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildName(), player.getUniqueId().toString());
-        ItemRemover.takeItem(player, Material.GOLD_NUGGET, Plugin.GUILD_COST);
+        ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), Plugin.GUILD_COST);
         Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(this.prefix + result.getMessage()));
     }

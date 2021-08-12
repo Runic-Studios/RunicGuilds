@@ -4,6 +4,7 @@ import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.api.GuildShopBuyResponse;
 import com.runicrealms.runicguilds.api.GuildShopIcon;
+import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
 import com.runicrealms.runicguilds.api.GuildShop;
 import org.bukkit.Bukkit;
@@ -117,10 +118,11 @@ public class GuildShopManager implements Listener {
     }
 
     private static boolean hasItems(Player player, ItemStack item, Integer needed) {
+        if (needed == 0) return true;
         int amount = 0;
         for (ItemStack inventoryItem : player.getInventory().getContents()) {
             if (inventoryItem != null) {
-                if (inventoryItem.isSimilar(item)) {
+                if (RunicItemsAPI.isRunicItemSimilar(item, inventoryItem)) {
                     amount += inventoryItem.getAmount();
                     if (amount >= needed) {
                         return true;

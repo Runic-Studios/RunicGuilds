@@ -19,7 +19,8 @@ import com.runicrealms.runicguilds.guilds.ForceLoadBanners;
 import com.runicrealms.runicguilds.guilds.GuildBannerUIListener;
 import com.runicrealms.runicguilds.guilds.PostedGuildBanner;
 import com.runicrealms.runicguilds.listeners.DataListener;
-import com.runicrealms.runicguilds.listeners.PlayerGainExperience;
+import com.runicrealms.runicguilds.listeners.GuildRewardDamageListener;
+import com.runicrealms.runicguilds.listeners.GuildRewardExpListener;
 import com.runicrealms.runicguilds.shop.GuildHeraldShop;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.timechallenge.TimeChallengeListener;
@@ -69,8 +70,8 @@ public class Plugin extends JavaPlugin implements Listener {
 		EventPlayerJoinQuit.initializePlayerCache();
 		//Events
 		this.registerEvents(this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
-				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new PlayerGainExperience(),
-				new TimeChallengeListener());
+				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new GuildRewardExpListener(),
+				new GuildRewardDamageListener(), new TimeChallengeListener());
 
 		commandManager = new PaperCommandManager(this);
 		commandManager.getCommandConditions().addCondition("is-player", context -> {
