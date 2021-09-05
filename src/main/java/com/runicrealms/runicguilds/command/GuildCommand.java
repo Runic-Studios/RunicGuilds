@@ -17,6 +17,7 @@ import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.guilds.GuildRank;
 import com.runicrealms.runicguilds.guilds.GuildStage;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -412,27 +413,34 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildConfirmCommand(Player player, String[] args) {
-        String prefix;
-        GuildData guildData = null;
-        Guild guild = null;
-        if (!(GuildUtil.getPlayerCache().get(player.getUniqueId()) == null && args.length > 0
+
+        if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
+            // Disbanding
+            String prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
+            GuildData guildData = GuildUtil.getGuildData(prefix);
+            Guild guild = guildData.getData();
+            this.disbandGuild(player, guild, guildData);
+        } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
+            // Transferring ownership
+            String prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
+            GuildData guildData = GuildUtil.getGuildData(prefix);
+            Guild guild = guildData.getData();
+            this.transferOwnership(player, guild, guildData);
+        } else if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+            // Creating guild
+            this.createGuild(player, args);
+        } else {
+            // Not confirming
+            player.sendMessage(ColorUtil.format(this.prefix + "You have nothing to confirm."));
+        }
+        /*if (!(GuildUtil.getPlayerCache().get(player.getUniqueId()) == null && args.length > 0
                 && (args[0].equalsIgnoreCase("confirm") || args[0].equalsIgnoreCase("cancel"))
                 && Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())
                 && GuildUtil.getPlayerCache().get(player.getUniqueId()) == null)) {
             prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
             guildData = GuildUtil.getGuildData(prefix);
             guild = guildData.getData();
-        }
-
-        if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
-            this.createGuild(player, args);
-        } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
-            this.transferOwnership(player, guild, guildData);
-        } else if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
-            this.disbandGuild(player, guild, guildData);
-        } else {
-            player.sendMessage(ColorUtil.format(this.prefix + "You have nothing to confirm."));
-        }
+        }*/
     }
 
     @Subcommand("cancel")
@@ -598,7 +606,7 @@ public class GuildCommand extends BaseCommand {
     }
 
     private void transferOwnership(Player player, Guild guild, GuildData guildData) {
-        GuildCommandMapManager.getTransferOwnership().get(guild.getMember(GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId())));
+        GuildCommandMapManager.getTransferOwnership().get(guild.getMember(GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId())).getUUID());
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully transferred guild ownership. You have been demoted to officer."));
 
         guildData.queueToSave();
