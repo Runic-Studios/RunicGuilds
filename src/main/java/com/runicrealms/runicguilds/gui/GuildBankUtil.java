@@ -116,10 +116,8 @@ public class GuildBankUtil implements Listener {
 						ViewerInfo viewer = viewers.get(player.getUniqueId());
 						if (event.getRawSlot() < event.getInventory().getSize() && event.getRawSlot() < 9) {
 							if (event.getRawSlot() == 0 && event.getCurrentItem().getType() == Material.ARROW) {
-								close(player);
 								open(player, currentPage - 1);
 							} else if (event.getRawSlot() == 8 && event.getCurrentItem().getType() == Material.ARROW) {
-								close(player);
 								open(player, currentPage + 1);
 							} else if (event.getRawSlot() == 4 && event.getCurrentItem().getType() == Material.GOLD_INGOT) {
 								if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
@@ -222,7 +220,6 @@ public class GuildBankUtil implements Listener {
 		}
 		for (Entry<UUID, Integer> playerToRefresh : playersToRefresh.entrySet()) {
 			Player otherPlayer = Bukkit.getPlayer(playerToRefresh.getKey());
-			close(otherPlayer);
 			open(otherPlayer, playerToRefresh.getValue());
 		}
 	}
