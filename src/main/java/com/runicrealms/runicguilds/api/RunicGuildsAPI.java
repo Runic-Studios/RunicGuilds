@@ -8,18 +8,19 @@ import java.util.UUID;
 import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
 import com.runicrealms.runicguilds.guilds.GuildStage;
-import com.runicrealms.runicguilds.shop.GuildShopManager;
 import org.bukkit.Bukkit;
 
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
+import org.bukkit.Sound;
 
 public class RunicGuildsAPI {
 
 	public static GuildCreationResult createGuild(UUID owner, String name, String prefix, boolean modCreated) {
 		GuildCreationResult result = GuildUtil.createGuild(owner, name, prefix);
 		if (result == GuildCreationResult.SUCCESSFUL) {
+			Bukkit.getPlayer(owner).playSound(Bukkit.getPlayer(owner).getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
 			PlayerGuildDataUtil.setGuildForPlayer(name, owner.toString());
 			Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(prefix).getData(), modCreated));
 		}
@@ -94,9 +95,5 @@ public class RunicGuildsAPI {
 			}
 		}
 		return recipients;
-	}
-
-	public static void registerGuildShop(GuildShop shop) {
-		GuildShopManager.registerShop(shop);
 	}
 }

@@ -432,14 +432,6 @@ public class GuildCommand extends BaseCommand {
             // Not confirming
             player.sendMessage(ColorUtil.format(this.prefix + "You have nothing to confirm."));
         }
-        /*if (!(GuildUtil.getPlayerCache().get(player.getUniqueId()) == null && args.length > 0
-                && (args[0].equalsIgnoreCase("confirm") || args[0].equalsIgnoreCase("cancel"))
-                && Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())
-                && GuildUtil.getPlayerCache().get(player.getUniqueId()) == null)) {
-            prefix = GuildUtil.getPlayerCache().get(player.getUniqueId());
-            guildData = GuildUtil.getGuildData(prefix);
-            guild = guildData.getData();
-        }*/
     }
 
     @Subcommand("cancel")

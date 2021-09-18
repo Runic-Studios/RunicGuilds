@@ -3,7 +3,6 @@ package com.runicrealms.runicguilds;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.PaperCommandManager;
 import com.runicrealms.RunicChat;
-import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.boss.GuildBossListener;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
 import com.runicrealms.runicguilds.chat.GuildChannel;
@@ -21,8 +20,7 @@ import com.runicrealms.runicguilds.guilds.PostedGuildBanner;
 import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.listeners.GuildRewardDamageListener;
 import com.runicrealms.runicguilds.listeners.GuildRewardExpListener;
-import com.runicrealms.runicguilds.shop.GuildHeraldShop;
-import com.runicrealms.runicguilds.shop.GuildShopManager;
+import com.runicrealms.runicguilds.shop.GuildShopFactory;
 import com.runicrealms.runicguilds.timechallenge.TimeChallengeListener;
 import com.runicrealms.runicguilds.timechallenge.TimeChallengeManager;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
@@ -48,10 +46,11 @@ public class Plugin extends JavaPlugin implements Listener {
 	private static final Set<UUID> playersCreatingGuild = new HashSet<>();
 	private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
 
-	public static List<Integer> GUILD_HERALDS;
 	public static int GUILD_COST;
-	public static List<Integer> GUILD_BANKERS;
 	public static int MAX_BANK_PAGES;
+	public static List<Integer> GUILD_BANKERS;
+	public static List<Integer> GUILD_HERALDS;
+	public static List<Integer> GUILD_VENDORS;
 
 	//PARTY DISBAND EVENT
 	
@@ -63,14 +62,15 @@ public class Plugin extends JavaPlugin implements Listener {
 		this.saveDefaultConfig();
 		GuildUtil.loadGuilds(); // marks plugin loaded for RunicRestart
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
-		GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
-		GUILD_COST = this.getConfig().getInt("guild-cost");
 		GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
+		GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
+		GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");
+		GUILD_COST = this.getConfig().getInt("guild-cost");
 		MAX_BANK_PAGES = this.getConfig().getInt("max-bank-pages");
 		EventPlayerJoinQuit.initializePlayerCache();
 		//Events
 		this.registerEvents(this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
-				new GuildShopManager(), new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new GuildRewardExpListener(),
+				new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new GuildRewardExpListener(),
 				new GuildRewardDamageListener(), new TimeChallengeListener());
 
 		commandManager = new PaperCommandManager(this);
@@ -90,8 +90,11 @@ public class Plugin extends JavaPlugin implements Listener {
 			new PlaceholderAPI().register();
 		}
 		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel()); // register channels after place holders
-		RunicGuildsAPI.registerGuildShop(new GuildHeraldShop());
-		new ForceLoadBanners().runTaskTimer(this, 400, 72000);
+		new ForceLoadBanners().runTaskTimer(this, 100, 72000); // delay previously 400
+		/*
+		Shops
+		 */
+		new GuildShopFactory();
 	}
 
 	@EventHandler
