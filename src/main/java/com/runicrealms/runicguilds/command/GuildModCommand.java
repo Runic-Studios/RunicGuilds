@@ -9,7 +9,7 @@ import com.runicrealms.runicguilds.data.GuildData;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.guilds.ForceLoadBanners;
+import com.runicrealms.runicguilds.guilds.GuildBannerLoader;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildEXPSource;
 import com.runicrealms.runicguilds.guilds.GuildMember;
@@ -364,7 +364,7 @@ public class GuildModCommand extends BaseCommand {
     @Subcommand("forceloadbanners")
     @Conditions("is-op")
     public void onGuildModReloadBanners(Player player) {
-        new ForceLoadBanners().run();
+        new GuildBannerLoader().run();
         player.sendMessage(ColorUtil.format(this.prefix + "Force reloaded top three guild banners!"));
     }
 

@@ -65,7 +65,7 @@ public class PostedGuildBanner {
         armorStand.setGravity(false);
         armorStand.setVisible(false);
         armorStand.setBasePlate(false);
-        armorStand.setPersistent(false);
+        armorStand.setPersistent(true);
         armorStand.getEquipment().setHelmet(item);
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
         armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, this.guild.getGuildPrefix());
@@ -76,6 +76,7 @@ public class PostedGuildBanner {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
+
         Hologram hologram = HologramsAPI.createHologram(Plugin.getInstance(), new Location(world, x -.5, y + 2.85, z + .5));
         hologram.appendTextLine(ColorUtil.format("&r&6&l" + ChatColor.stripColor(this.guild.getGuildName())));
         hologram.appendTextLine(ColorUtil.format("&r&6&lScore: " + this.guild.getScore()));

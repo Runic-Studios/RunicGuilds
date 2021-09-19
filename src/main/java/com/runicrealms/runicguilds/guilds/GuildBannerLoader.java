@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.guilds;
 
+import com.google.common.collect.Lists;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.data.GuildUtil;
 import org.bukkit.Bukkit;
@@ -12,16 +13,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class ForceLoadBanners extends BukkitRunnable {
+public class GuildBannerLoader extends BukkitRunnable {
     @Override
     public void run() {
-        for (PostedGuildBanner banner : new ArrayList<>(Plugin.getPostedGuildBanners())) {
-            banner.remove();
-            Plugin.getPostedGuildBanners().remove(banner);
-        }
+        List<PostedGuildBanner> posted = Lists.newArrayList(Plugin.getPostedGuildBanners());
+        posted.forEach(PostedGuildBanner::remove);
 
         List<Guild> ordering = new ArrayList<>(GuildUtil.getAllGuilds());
         List<Guild> guilds = new ArrayList<>();
+
         Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();
 
         ordering.sort(comparator);
@@ -34,7 +34,7 @@ public class ForceLoadBanners extends BukkitRunnable {
             }
         }
 
-        this.makeBanners(guilds);
+        Bukkit.getScheduler().runTask(Plugin.getInstance(), () -> this.makeBanners(guilds));
     }
 
     private void makeBanners(List<Guild> guilds) {

@@ -14,7 +14,7 @@ import com.runicrealms.runicguilds.event.EventClickNpc;
 import com.runicrealms.runicguilds.event.EventPlayerJoinQuit;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.BannerClickListener;
-import com.runicrealms.runicguilds.guilds.ForceLoadBanners;
+import com.runicrealms.runicguilds.guilds.GuildBannerLoader;
 import com.runicrealms.runicguilds.guilds.GuildBannerUIListener;
 import com.runicrealms.runicguilds.guilds.PostedGuildBanner;
 import com.runicrealms.runicguilds.listeners.DataListener;
@@ -90,7 +90,7 @@ public class Plugin extends JavaPlugin implements Listener {
 			new PlaceholderAPI().register();
 		}
 		RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel()); // register channels after place holders
-		new ForceLoadBanners().runTaskTimer(this, 100, 72000); // delay previously 400
+		new GuildBannerLoader().runTaskTimerAsynchronously(this, 1200, 72000);
 		/*
 		Shops
 		 */
