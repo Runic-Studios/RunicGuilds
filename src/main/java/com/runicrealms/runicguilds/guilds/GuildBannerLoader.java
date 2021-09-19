@@ -48,6 +48,7 @@ public class GuildBannerLoader extends BukkitRunnable {
             float yaw = (float) config.getDouble(path + ".yaw");
             Location location = new Location(world, x, y, z);
             location.setYaw(yaw);
+            location.getChunk().setForceLoaded(true);
             PostedGuildBanner banner = new PostedGuildBanner(guilds.get(i - 1), location);
             Plugin.getPostedGuildBanners().add(banner);
         }
