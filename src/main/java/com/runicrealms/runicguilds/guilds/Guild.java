@@ -17,7 +17,7 @@ public class Guild implements Cloneable {
 	private Integer score;
 	private List<ItemStack> bank;
 	private Integer bankSize;
-	private Map<GuildRank, Boolean> bankAccess;
+	private final Map<GuildRank, Boolean> bankAccess;
 
 	public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
 		this.members = members;
@@ -78,7 +78,7 @@ public class Guild implements Cloneable {
 	}
 
 	public boolean canAccessBank(GuildRank rank) {
-		return rank == GuildRank.OWNER ? true : this.bankAccess.get(rank);
+		return rank == GuildRank.OWNER || this.bankAccess.get(rank);
 	}
 
 	public Map<GuildRank, Boolean> getBankAccess() {
@@ -189,7 +189,7 @@ public class Guild implements Cloneable {
 
 	@Override
 	public Guild clone() {
-		List<ItemStack> newItems = new ArrayList<ItemStack>();
+		List<ItemStack> newItems = new ArrayList<>();
 		for (ItemStack item : this.bank) {
 			if (item != null) {
 				newItems.add(item.clone());
@@ -197,11 +197,11 @@ public class Guild implements Cloneable {
 				newItems.add(null);
 			}
 		}
-		Set<GuildMember> newMembers = new HashSet<GuildMember>();
+		Set<GuildMember> newMembers = new HashSet<>();
 		for (GuildMember member : this.members) {
 			newMembers.add(member.clone());
 		}
-		return new Guild(newMembers, this.owner.clone(), new String(this.guildName), new String(this.guildPrefix), newItems, new Integer(this.bankSize), this.bankAccess, this.guildLevel.getGuildEXP());
+		return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankAccess, this.guildLevel.getGuildEXP());
 	}
 
 }

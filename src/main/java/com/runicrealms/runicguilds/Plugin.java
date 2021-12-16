@@ -21,8 +21,6 @@ import com.runicrealms.runicguilds.listeners.DataListener;
 import com.runicrealms.runicguilds.listeners.GuildRewardDamageListener;
 import com.runicrealms.runicguilds.listeners.GuildRewardExpListener;
 import com.runicrealms.runicguilds.shop.GuildShopFactory;
-import com.runicrealms.runicguilds.timechallenge.TimeChallengeListener;
-import com.runicrealms.runicguilds.timechallenge.TimeChallengeManager;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
 import com.runicrealms.runicrestart.api.ServerShutdownEvent;
@@ -39,10 +37,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class Plugin extends JavaPlugin implements Listener {
+
 	private static Plugin instance;
 	private static PaperCommandManager commandManager;
 	private static GuildBossManager guildBossManager;
-	private static TimeChallengeManager timeChallengeManager;
 	private static final Set<UUID> playersCreatingGuild = new HashSet<>();
 	private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
 
@@ -56,9 +54,9 @@ public class Plugin extends JavaPlugin implements Listener {
 	
 	@Override
 	public void onEnable() {
+
 		instance = this;
 		guildBossManager = new GuildBossManager();
-		timeChallengeManager = new TimeChallengeManager();
 		this.saveDefaultConfig();
 		GuildUtil.loadGuilds(); // marks plugin loaded for RunicRestart
 		Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
@@ -68,11 +66,27 @@ public class Plugin extends JavaPlugin implements Listener {
 		GUILD_COST = this.getConfig().getInt("guild-cost");
 		MAX_BANK_PAGES = this.getConfig().getInt("max-bank-pages");
 		EventPlayerJoinQuit.initializePlayerCache();
-		//Events
-		this.registerEvents(this, new EventPlayerJoinQuit(), new GuildBankUtil(), new EventClickNpc(), new DataListener(),
-				new GuildBossListener(), new GuildBannerUIListener(), new BannerClickListener(), new GuildRewardExpListener(),
-				new GuildRewardDamageListener(), new TimeChallengeListener());
 
+		/*
+		Events
+		 */
+		this.registerEvents
+				(
+				this,
+						new EventPlayerJoinQuit(),
+						new GuildBankUtil(),
+						new EventClickNpc(),
+						new DataListener(),
+						new GuildBossListener(),
+						new GuildBannerUIListener(),
+						new BannerClickListener(),
+						new GuildRewardExpListener(),
+						new GuildRewardDamageListener()
+				);
+
+		/*
+		Commands
+		 */
 		commandManager = new PaperCommandManager(this);
 		commandManager.getCommandConditions().addCondition("is-player", context -> {
 			if (!(context.getIssuer().getIssuer() instanceof Player)) throw new ConditionFailedException("This command cannot be run from console!");
@@ -80,7 +94,6 @@ public class Plugin extends JavaPlugin implements Listener {
 		commandManager.getCommandConditions().addCondition("is-op", context -> {
 			if (!context.getIssuer().getIssuer().isOp()) throw new ConditionFailedException("You must be an operator to run this command!");
 		});
-
         commandManager.registerCommand(new GuildCommand());
 		commandManager.registerCommand(new GuildModCommand());
 
@@ -112,10 +125,6 @@ public class Plugin extends JavaPlugin implements Listener {
 
 	public static Set<PostedGuildBanner> getPostedGuildBanners() {
 		return postedGuildBanners;
-	}
-
-	public static TimeChallengeManager getTimeChallengeManager() {
-		return timeChallengeManager;
 	}
 
 	public static Plugin getInstance() {
