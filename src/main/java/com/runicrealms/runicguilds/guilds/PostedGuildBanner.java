@@ -10,6 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 public class PostedGuildBanner {
     private final Guild guild;
@@ -44,7 +45,7 @@ public class PostedGuildBanner {
         return this.hologram;
     }
 
-    private ArmorStand[] createShowcase(Location location) {
+    private ArmorStand[] createShowcase(@NotNull Location location) {
         World world = location.getWorld();
         double x = location.getX();
         double y = location.getY();
@@ -65,7 +66,9 @@ public class PostedGuildBanner {
         armorStand.setGravity(false);
         armorStand.setVisible(false);
         armorStand.setBasePlate(false);
-        armorStand.setPersistent(true);
+        armorStand.setPersistent(false);
+        armorStand.setCollidable(false);
+        armorStand.setMarker(true);
         armorStand.getEquipment().setHelmet(item);
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
         armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, this.guild.getGuildPrefix());
