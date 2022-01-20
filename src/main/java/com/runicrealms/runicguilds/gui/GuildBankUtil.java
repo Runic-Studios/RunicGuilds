@@ -47,12 +47,12 @@ public class GuildBankUtil implements Listener {
         int pagePrice = (int) Math.pow(2, guild.getBankSize() / 45 + 8);
         if (guild.getBankSize() / 45 < maxBankPages) {
             if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
-                inventory.setItem(4, new ItemBuilder(Material.GOLD_INGOT, (int) (guild.getBankSize() / 45), "&6Purchase New Bank Page", "&eCost: " + pagePrice + " coins").getItem());
+                inventory.setItem(4, new ItemBuilder(Material.GOLD_INGOT, guild.getBankSize() / 45, "&6Purchase New Bank Page", "&eCost: " + pagePrice + " coins").getItem());
             } else {
-                inventory.setItem(4, new ItemBuilder(Material.GOLD_INGOT, (int) (guild.getBankSize() / 45), "&6Purchase New Bank Page", "&cYou must be of rank officer or higher to do this!", "&eCost: " + pagePrice + " coins").getItem());
+                inventory.setItem(4, new ItemBuilder(Material.GOLD_INGOT, guild.getBankSize() / 45, "&6Purchase New Bank Page", "&cYou must be of rank officer or higher to do this!", "&eCost: " + pagePrice + " coins").getItem());
             }
         } else {
-            inventory.setItem(4, new ItemBuilder(Material.GOLD_INGOT, (int) (guild.getBankSize() / 45), "&6Purchase New Bank Page", "&cYou have reached the max amount of pages!").getItem());
+            inventory.setItem(4, new ItemBuilder(Material.GOLD_INGOT, guild.getBankSize() / 45, "&6Purchase New Bank Page", "&cYou have reached the max amount of pages!").getItem());
         }
         for (int i = 1; i < 8; i++) {
             if (i != 4) {

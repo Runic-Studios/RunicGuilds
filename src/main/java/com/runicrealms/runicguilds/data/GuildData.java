@@ -9,6 +9,10 @@ import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.guilds.GuildRank;
+import com.runicrealms.runicitems.DupeManager;
+import com.runicrealms.runicitems.ItemManager;
+import com.runicrealms.runicitems.config.ItemLoader;
+import com.runicrealms.runicitems.item.RunicItem;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -20,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class GuildData {
 
@@ -53,11 +58,24 @@ public class GuildData {
                 members.add(new GuildMember(UUID.fromString(key), GuildRank.getByName(membersSection.get(key + ".rank", String.class)), membersSection.get(key + ".score", Integer.class), GuildUtil.getOfflinePlayerName(UUID.fromString(key))));
             }
         }
+
         List<ItemStack> items = new ArrayList<>();
-        if (this.guildData.has("bank")) {
+        if (this.guildData.has("bank-type")
+                && !this.guildData.get("bank-type", String.class).equalsIgnoreCase("runicitems")
+                && this.guildData.has("bank")) {
+            this.guildData.remove("bank");
+            Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), this.guildData::save);
+        } else if (this.guildData.has("bank")) {
             for (int i = 0; i < this.guildData.get("bank-size", Integer.class); i++) {
                 if (this.guildData.has("bank." + i)) {
-                    items.add(deserializeItemStack(this.guildData.get("bank." + i, String.class)));
+                    try {
+                        RunicItem item = ItemLoader.loadItem(this.guildData.getSection("bank." + i), DupeManager.getNextItemId());
+                        items.add(item.generateItem());
+                    } catch (Exception exception) {
+                        Bukkit.getLogger().log(Level.WARNING, "[RunicItems] ERROR loading item " + i + " for guild bank " + prefix);
+                        exception.printStackTrace();
+                        items.add(null);
+                    }
                 } else {
                     items.add(null);
                 }
@@ -136,7 +154,10 @@ public class GuildData {
         guildData.set("bank-size", guild.getBankSize());
         for (int i = 0; i < guild.getBankSize(); i++) {
             if (guild.getBank().get(i) != null) {
-                guildData.set("bank." + i, serializeItemStack(guild.getBank().get(i)));
+                RunicItem runicItem = ItemManager.getRunicItemFromItemStack(guild.getBank().get(i));
+                if (runicItem != null) {
+                    runicItem.addToData(guildData, "bank." + i);
+                }
             }
         }
         guildData.set("score", guild.getScore());
@@ -148,6 +169,7 @@ public class GuildData {
         guildData.save();
     }
 
+    // TODO change from serializing banner using base64 to no-data-loss method
     private static String serializeItemStack(ItemStack item) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
