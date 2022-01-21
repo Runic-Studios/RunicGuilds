@@ -60,8 +60,8 @@ public class GuildData {
         }
 
         List<ItemStack> items = new ArrayList<>();
-        if (this.guildData.has("bank-type")
-                && !this.guildData.get("bank-type", String.class).equalsIgnoreCase("runicitems")
+        if (((!this.guildData.has("bank-type"))
+                || !this.guildData.get("bank-type", String.class).equalsIgnoreCase("runicitems"))
                 && this.guildData.has("bank")) {
             this.guildData.remove("bank");
             Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), this.guildData::save);
