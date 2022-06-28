@@ -43,6 +43,14 @@
                                 </relocation>
                             </relocations>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.mongodb:mongodb-driver-sync</include>
+                                    <include>org.mongodb:bson</include>
+                                    <include>org.mongodb:mongo-java-driver</include>
+                                    <include>org.mongodb:mongodb-driver-core</include>
+                                </includes>
+                            </artifactSet>
                         </configuration>
                     </execution>
                 </executions>
@@ -106,6 +114,12 @@
         </repository>
     </repositories>
     <dependencies>
+        <!-- MongoDB -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>3.12.2</version>
+        </dependency>
         <!-- MythicMobs -->
         <dependency>
             <groupId>net.elseland.xikage</groupId>
