@@ -1,6 +1,8 @@
-package com.runicrealms.runicguilds.listeners;
+package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.plugin.api.RunicCoreAPI;
+import com.runicrealms.plugin.redis.RedisUtil;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.event.*;
@@ -10,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import redis.clients.jedis.Jedis;
 
 public class DataListener implements Listener {
 
@@ -51,9 +54,9 @@ public class DataListener implements Listener {
         Player whoWasKicked = Bukkit.getPlayer(event.getKicked());
         syncDisplays(whoWasKicked);
         for (GuildMember member : event.getGuild().getMembersWithOwner()) {
-            Player plMem = Bukkit.getPlayer(member.getUUID());
-            if (plMem == null) continue;
-            syncDisplays(plMem);
+            Player playerMember = Bukkit.getPlayer(member.getUUID());
+            if (playerMember == null) continue;
+            syncDisplays(playerMember);
         }
     }
 
@@ -62,9 +65,9 @@ public class DataListener implements Listener {
         Player whoLeft = Bukkit.getPlayer(event.getMember());
         syncDisplays(whoLeft);
         for (GuildMember member : event.getGuild().getMembersWithOwner()) {
-            Player plMem = Bukkit.getPlayer(member.getUUID());
-            if (plMem == null) continue;
-            syncDisplays(plMem);
+            Player playerMember = Bukkit.getPlayer(member.getUUID());
+            if (playerMember == null) continue;
+            syncDisplays(playerMember);
         }
     }
 
@@ -73,25 +76,34 @@ public class DataListener implements Listener {
         Player oldOwner = Bukkit.getPlayer(event.getOldOwner());
         syncDisplays(oldOwner);
         for (GuildMember member : event.getGuild().getMembersWithOwner()) {
-            Player plMem = Bukkit.getPlayer(member.getUUID());
-            if (plMem == null) continue;
-            syncDisplays(plMem);
+            Player playerMember = Bukkit.getPlayer(member.getUUID());
+            if (playerMember == null) continue;
+            syncDisplays(playerMember);
         }
     }
 
     /**
-     * @param player
+     * Sync displays ensures that redis and the player's session data properly reflect changes in the player's
+     * guild during play time
+     * <p>
+     * Also syncs scoreboards and tab
+     *
+     * @param player to sync
      */
     private void syncDisplays(Player player) {
         if (player == null) return;
         Guild guild = RunicGuildsAPI.getGuild(player.getUniqueId());
-        // todo: redis code
-//        if (guild != null)
-//            RunicCoreAPI.getPlayerCache(player).setGuild(guild.getGuildName());
-//        else
-//            RunicCoreAPI.getPlayerCache(player).setGuild("None");
-        // update tab
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            String key = player.getUniqueId() + ":guild";
+            if (guild != null) {
+                jedis.set(player.getUniqueId() + ":guild", guild.getGuildName());
+                jedis.expire(key, RedisUtil.EXPIRE_TIME);
+            } else {
+                jedis.set(player.getUniqueId() + ":guild", "None");
+                jedis.expire(key, RedisUtil.EXPIRE_TIME);
+            }
+        }
         RunicCore.getTabListManager().setupTab(player);
-        // todo: scoreboard
+        RunicCoreAPI.updatePlayerScoreboard(player);
     }
 }

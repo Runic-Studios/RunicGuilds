@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerJoinListener implements Listener {
 
+    // todo: move these to character
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         GuildData guildData = GuildUtil.getGuildData(event.getPlayer().getUniqueId());
@@ -26,15 +27,9 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         GuildUtil.getPlayerCache().remove(event.getPlayer().getUniqueId());
-        if (GuildCommandMapManager.getTransferOwnership().containsKey(event.getPlayer().getUniqueId())) {
-            GuildCommandMapManager.getTransferOwnership().remove(event.getPlayer().getUniqueId());
-        }
-        if (GuildCommandMapManager.getDisbanding().contains(event.getPlayer().getUniqueId())) {
-            GuildCommandMapManager.getDisbanding().remove(event.getPlayer().getUniqueId());
-        }
-        if (Plugin.getPlayersCreatingGuild().contains(event.getPlayer().getUniqueId())) {
-            Plugin.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
-        }
+        GuildCommandMapManager.getTransferOwnership().remove(event.getPlayer().getUniqueId());
+        GuildCommandMapManager.getDisbanding().remove(event.getPlayer().getUniqueId());
+        Plugin.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
     }
 
     public static void initializePlayerCache() {
