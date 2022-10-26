@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.data;
+package com.runicrealms.runicguilds.model;
 
 import com.mongodb.client.model.Filters;
 import com.runicrealms.plugin.RunicCore;
@@ -9,6 +9,7 @@ import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.guilds.GuildRank;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicitems.DupeManager;
 import com.runicrealms.runicitems.ItemManager;
 import com.runicrealms.runicitems.config.ItemLoader;
@@ -122,10 +123,6 @@ public class GuildData {
         return this.guildData;
     }
 
-    public void queueToSave() {
-        TaskSavingQueue.add(this);
-    }
-
     public void save(Guild guild, boolean saveAsync) {
         this.guild = guild;
         if (saveAsync) {
@@ -156,7 +153,7 @@ public class GuildData {
             if (guild.getBank().get(i) != null) {
                 RunicItem runicItem = ItemManager.getRunicItemFromItemStack(guild.getBank().get(i));
                 if (runicItem != null) {
-                    runicItem.addToData(guildData, "bank." + i);
+                    runicItem.addToDataSection(guildData, "bank." + i);
                 }
             }
         }

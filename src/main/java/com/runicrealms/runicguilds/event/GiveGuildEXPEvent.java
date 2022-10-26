@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.api;
+package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.guilds.GuildEXPSource;
 import com.runicrealms.runicguilds.guilds.Guild;

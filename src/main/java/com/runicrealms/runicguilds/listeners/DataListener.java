@@ -1,16 +1,15 @@
 package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.api.*;
+import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.event.*;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class DataListener implements Listener {
 
@@ -24,26 +23,34 @@ public class DataListener implements Listener {
      * Delayed by 1s, as this event is called BEFORE the guild is removed.
      */
     @EventHandler
-    public void onGuildDisband(GuildDisbandEvent e) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Player disbander = Bukkit.getPlayer(e.getDisbander());
-                syncDisplays(disbander);
-                for (GuildMember member : e.getGuild().getMembersWithOwner()) {
-                    Player plMem = Bukkit.getPlayer(member.getUUID());
-                    if (plMem == null) continue;
-                    syncDisplays(plMem);
-                }
+    public void onGuildDisband(GuildDisbandEvent event) {
+        Bukkit.getScheduler().runTaskLater(Plugin.getInstance(), () -> {
+            Player whoDisbanded = Bukkit.getPlayer(event.getDisbander());
+            syncDisplays(whoDisbanded);
+            for (GuildMember member : event.getGuild().getMembersWithOwner()) {
+                Player playerMember = Bukkit.getPlayer(member.getUUID());
+                if (playerMember == null) continue;
+                syncDisplays(playerMember);
             }
-        }.runTaskLater(Plugin.getInstance(), 20L);
+        }, 20L);
     }
 
     @EventHandler
-    public void onInvitationAccept(GuildInvitationAcceptedEvent e) {
-        Player invited = Bukkit.getPlayer(e.getInvited());
-        syncDisplays(invited);
-        for (GuildMember member : e.getGuild().getMembersWithOwner()) {
+    public void onInvitationAccept(GuildInvitationAcceptedEvent event) {
+        Player whoWasInvited = Bukkit.getPlayer(event.getInvited());
+        syncDisplays(whoWasInvited);
+        for (GuildMember member : event.getGuild().getMembersWithOwner()) {
+            Player playerMember = Bukkit.getPlayer(member.getUUID());
+            if (playerMember == null) continue;
+            syncDisplays(playerMember);
+        }
+    }
+
+    @EventHandler
+    public void onKick(GuildMemberKickedEvent event) {
+        Player whoWasKicked = Bukkit.getPlayer(event.getKicked());
+        syncDisplays(whoWasKicked);
+        for (GuildMember member : event.getGuild().getMembersWithOwner()) {
             Player plMem = Bukkit.getPlayer(member.getUUID());
             if (plMem == null) continue;
             syncDisplays(plMem);
@@ -51,10 +58,10 @@ public class DataListener implements Listener {
     }
 
     @EventHandler
-    public void onKick(GuildMemberKickedEvent e) {
-        Player kicked = Bukkit.getPlayer(e.getKicked());
-        syncDisplays(kicked);
-        for (GuildMember member : e.getGuild().getMembersWithOwner()) {
+    public void onLeave(GuildMemberLeaveEvent event) {
+        Player whoLeft = Bukkit.getPlayer(event.getMember());
+        syncDisplays(whoLeft);
+        for (GuildMember member : event.getGuild().getMembersWithOwner()) {
             Player plMem = Bukkit.getPlayer(member.getUUID());
             if (plMem == null) continue;
             syncDisplays(plMem);
@@ -62,36 +69,29 @@ public class DataListener implements Listener {
     }
 
     @EventHandler
-    public void onLeave(GuildMemberLeaveEvent e) {
-        Player leaver = Bukkit.getPlayer(e.getMember());
-        syncDisplays(leaver);
-        for (GuildMember member : e.getGuild().getMembersWithOwner()) {
-            Player plMem = Bukkit.getPlayer(member.getUUID());
-            if (plMem == null) continue;
-            syncDisplays(plMem);
-        }
-    }
-
-    @EventHandler
-    public void onTransfer(GuildOwnershipTransferedEvent e) {
-        Player oldOwner = Bukkit.getPlayer(e.getOldOwner());
+    public void onTransfer(GuildOwnershipTransferedEvent event) {
+        Player oldOwner = Bukkit.getPlayer(event.getOldOwner());
         syncDisplays(oldOwner);
-        for (GuildMember member : e.getGuild().getMembersWithOwner()) {
+        for (GuildMember member : event.getGuild().getMembersWithOwner()) {
             Player plMem = Bukkit.getPlayer(member.getUUID());
             if (plMem == null) continue;
             syncDisplays(plMem);
         }
     }
 
-    private void syncDisplays(Player pl) {
-        if (pl == null) return;
-        Guild guild = RunicGuildsAPI.getGuild(pl.getUniqueId());
-        // update cache
-        if (guild != null)
-            RunicCoreAPI.getPlayerCache(pl).setGuild(guild.getGuildName());
-        else
-            RunicCoreAPI.getPlayerCache(pl).setGuild("None");
+    /**
+     * @param player
+     */
+    private void syncDisplays(Player player) {
+        if (player == null) return;
+        Guild guild = RunicGuildsAPI.getGuild(player.getUniqueId());
+        // todo: redis code
+//        if (guild != null)
+//            RunicCoreAPI.getPlayerCache(player).setGuild(guild.getGuildName());
+//        else
+//            RunicCoreAPI.getPlayerCache(player).setGuild("None");
         // update tab
-        RunicCore.getTabListManager().setupTab(pl);
+        RunicCore.getTabListManager().setupTab(player);
+        // todo: scoreboard
     }
 }

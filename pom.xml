@@ -2,9 +2,10 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.runicrealms.runicguilds.Plugin</groupId>
     <artifactId>RunicGuilds</artifactId>
-    <version>1.16.4</version>
+    <version>1.16.5</version>
     <name>RunicGuilds</name>
     <description>Runic Realms Guilds Plugin</description>
 
@@ -24,36 +25,6 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>co.aikar.commands</pattern>
-                                    <shadedPattern>com.runicrealms.libs.acf</shadedPattern>
-                                </relocation>
-                            </relocations>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.mongodb:mongodb-driver-sync</include>
-                                    <include>org.mongodb:bson</include>
-                                    <include>org.mongodb:mongo-java-driver</include>
-                                    <include>org.mongodb:mongodb-driver-core</include>
-                                </includes>
-                            </artifactSet>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -86,6 +57,7 @@
             </resource>
         </resources>
     </build>
+
     <repositories>
         <!-- Spigot Repo -->
         <repository>
@@ -100,7 +72,7 @@
         <!-- PlaceholderAPI Repo -->
         <repository>
             <id>placeholderapi</id>
-            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
         <!-- ACF Repo -->
         <repository>
@@ -118,28 +90,28 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>3.12.2</version>
+            <version>4.6.0</version>
         </dependency>
         <!-- MythicMobs -->
         <dependency>
             <groupId>net.elseland.xikage</groupId>
             <artifactId>mythicmobs</artifactId>
-            <version>4.11.0</version>
+            <version>4.12.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/MythicMobs-4.11.0.jar</systemPath>
+            <systemPath>${project.basedir}/../lib/MythicMobs-4.12.0.jar</systemPath>
         </dependency>
         <!-- Spigot API -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.16.4-R0.1-SNAPSHOT</version>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- Paper API -->
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.16.4-R0.1-SNAPSHOT</version>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- Placeholder API -->
@@ -168,17 +140,17 @@
         <dependency>
             <groupId>com.runicrealms.plugin</groupId>
             <artifactId>RunicCore</artifactId>
-            <version>1.16.4</version>
+            <version>1.16.5</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/RunicCore-1.16.4.jar</systemPath>
+            <systemPath>${project.basedir}/../lib/RunicCore-1.16.5.jar</systemPath>
         </dependency>
         <!-- RunicItems -->
         <dependency>
             <groupId>com.runicrealms.plugin</groupId>
             <artifactId>RunicItems</artifactId>
-            <version>1.16.4</version>
+            <version>1.16.5</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/RunicItems-1.16.4.jar</systemPath>
+            <systemPath>${project.basedir}/../lib/RunicItems-1.16.5.jar</systemPath>
         </dependency>
         <!-- RunicMounts -->
         <dependency>

@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.guilds;
 
 import com.google.common.collect.Lists;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.data.GuildUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

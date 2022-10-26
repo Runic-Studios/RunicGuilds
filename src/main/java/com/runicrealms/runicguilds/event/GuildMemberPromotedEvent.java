@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.api;
+package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.event.Event;
@@ -6,18 +6,18 @@ import org.bukkit.event.HandlerList;
 
 import java.util.UUID;
 
-public class GuildMemberDemotedEvent extends Event {
+public class GuildMemberPromotedEvent extends Event {
 
     private Guild guild;
-    private UUID demoted;
-    private UUID demoter;
+    private UUID promoted;
+    private UUID promoter;
 
     private static final HandlerList handlers = new HandlerList();
 
-    public GuildMemberDemotedEvent(Guild guild, UUID demoted, UUID demoter) {
+    public GuildMemberPromotedEvent(Guild guild, UUID promoted, UUID promoter) {
         this.guild = guild;
-        this.demoted = demoted;
-        this.demoter = demoter;
+        this.promoted = promoted;
+        this.promoter = promoter;
     }
 
     public HandlerList getHandlers() {
@@ -32,12 +32,12 @@ public class GuildMemberDemotedEvent extends Event {
         return this.guild;
     }
 
-    public UUID getDemoted() {
-        return this.demoted;
+    public UUID getPromoted() {
+        return this.promoted;
     }
 
-    public UUID getDemoter() {
-        return this.demoter;
+    public UUID getPromoter() {
+        return this.promoter;
     }
 
 }

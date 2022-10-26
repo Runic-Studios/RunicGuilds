@@ -1,9 +1,9 @@
-package com.runicrealms.runicguilds.event;
+package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.data.GuildData;
-import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class EventClickNpc implements Listener {
+public class NpcClickListener implements Listener {
 
     public static Map<UUID, Long> cooldowns = new HashMap<>();
 
@@ -24,7 +24,7 @@ public class EventClickNpc implements Listener {
         if (!cooldowns.containsKey(event.getPlayer().getUniqueId())) {
             runClickEvent(event);
             cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
-        } else if (cooldowns.get(event.getPlayer().getUniqueId()) + 1000 <= System.currentTimeMillis()){
+        } else if (cooldowns.get(event.getPlayer().getUniqueId()) + 1000 <= System.currentTimeMillis()) {
             runClickEvent(event);
             cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }

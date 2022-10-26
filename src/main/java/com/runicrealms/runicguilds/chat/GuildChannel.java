@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.chat;
 
 import com.runicrealms.api.chat.ChatChannel;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
-import com.runicrealms.runicguilds.data.GuildUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -46,10 +46,10 @@ public class GuildChannel extends ChatChannel {
         return "&e[%runic_guild_score%] %luckperms_meta_name_color%%player_name%: &e%message%";
     }
 
-    private String displayScore(Player pl) {
-        if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null
-                && RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()) != null) {
-            return String.valueOf(RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()).getScore());
+    private String displayScore(Player player) {
+        if (RunicGuildsAPI.getGuild(player.getUniqueId()) != null
+                && RunicGuildsAPI.getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
+            return String.valueOf(RunicGuildsAPI.getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
         } else {
             return "0";
         }

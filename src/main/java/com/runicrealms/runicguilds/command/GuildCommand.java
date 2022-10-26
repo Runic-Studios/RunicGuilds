@@ -6,16 +6,14 @@ import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.api.*;
-import com.runicrealms.runicguilds.data.GuildData;
-import com.runicrealms.runicguilds.data.GuildUtil;
-import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
+import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.event.*;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.gui.GuildBannerUI;
-import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildMember;
-import com.runicrealms.runicguilds.guilds.GuildRank;
-import com.runicrealms.runicguilds.guilds.GuildStage;
+import com.runicrealms.runicguilds.guilds.*;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.PlayerGuildDataUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -111,7 +109,7 @@ public class GuildCommand extends BaseCommand {
         target.sendMessage(ColorUtil.format(this.prefix + "You have been invited to join the guild " + guild.getGuildName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
         player.sendMessage(ColorUtil.format(this.prefix + "You have invited a player to the guild. An invitation has been sent."));
         GuildCommandMapManager.getInvites().put(target.getUniqueId(), player.getUniqueId());
-        guildData.queueToSave();
+        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guild, target.getUniqueId(), player.getUniqueId()));
     }
 
@@ -146,11 +144,11 @@ public class GuildCommand extends BaseCommand {
 
         if (args[1].equalsIgnoreCase("yes") || args[1].equalsIgnoreCase("true")) {
             guild.setBankAccess(rank, true);
-            guildData.queueToSave();
+            // guildData.queueToSave();
             player.sendMessage(ColorUtil.format(this.prefix + "Updated guild bank permissions."));
         } else if (args[1].equalsIgnoreCase("no") || args[1].equalsIgnoreCase("false")) {
             guild.setBankAccess(rank, false);
-            guildData.queueToSave();
+            // guildData.queueToSave();
             player.sendMessage(ColorUtil.format(this.prefix + "Updated guild bank permissions."));
         } else {
             player.sendMessage(ColorUtil.format(this.prefix + "Please enter \"yes\" or \"no\"."));
@@ -214,7 +212,7 @@ public class GuildCommand extends BaseCommand {
             GuildUtil.getPlayerCache().put(otherPlayer, null);
         }
 
-        guildData.queueToSave();
+        // guildData.queueToSave();
         Player target = Bukkit.getPlayerExact(args[0]);
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, target.getUniqueId(), player.getUniqueId(), false));
         if (GuildBankUtil.isViewingBank(otherPlayer) && target != null) {
@@ -274,7 +272,7 @@ public class GuildCommand extends BaseCommand {
 
         member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
         player.sendMessage(ColorUtil.format(this.prefix + member.getLastKnownName() + " has been promoted."));
-        guildData.queueToSave();
+        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guild, member.getUUID(), player.getUniqueId()));
     }
 
@@ -331,7 +329,7 @@ public class GuildCommand extends BaseCommand {
 
         member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
         player.sendMessage(ColorUtil.format(this.prefix + member.getLastKnownName() + " has been demoted."));
-        guildData.queueToSave();
+        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, member.getUUID(), player.getUniqueId()));
     }
 
@@ -396,7 +394,7 @@ public class GuildCommand extends BaseCommand {
         player.sendMessage(ColorUtil.format(this.prefix + "You have left your guild."));
 
         GuildUtil.getPlayerCache().put(player.getUniqueId(), null);
-        guildData.queueToSave();
+        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guild, player.getUniqueId()));
 
         GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
@@ -508,7 +506,7 @@ public class GuildCommand extends BaseCommand {
         PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
         player.sendMessage(ColorUtil.format(this.prefix + "You have accepted the guild invitation."));
 
-        guildData.queueToSave();
+        // guildData.queueToSave();
         GuildUtil.getPlayerCache().put(player.getUniqueId(), guild.getGuildPrefix());
         Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
         GuildCommandMapManager.getInvites().remove(player.getUniqueId());
@@ -600,7 +598,7 @@ public class GuildCommand extends BaseCommand {
         GuildCommandMapManager.getTransferOwnership().get(guild.getMember(GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId())).getUUID());
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully transferred guild ownership. You have been demoted to officer."));
 
-        guildData.queueToSave();
+        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId()), player.getUniqueId()));
         GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
     }

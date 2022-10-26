@@ -2,10 +2,10 @@ package com.runicrealms.runicguilds.gui;
 
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.data.GuildData;
-import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildRank;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicitems.item.RunicItem;
 import org.bukkit.Bukkit;
@@ -78,7 +78,7 @@ public class GuildBankUtil implements Listener {
             bank.set(i, inventory.getItem(i - ((page - 1) * 45)));
         }
         guildData.getData().setBank(bank);
-        guildData.queueToSave();
+        // guildData.queueToSave();
     }
 
     public static boolean isViewingBank(UUID uuid) {
@@ -123,7 +123,7 @@ public class GuildBankUtil implements Listener {
                                             for (int i = 0; i < 45; i++) {
                                                 guild.getBank().add(null);
                                             }
-                                            guildData.queueToSave();
+                                            // guildData.queueToSave();
                                             refreshViewers(viewer);
                                         } else {
                                             event.setCancelled(true);

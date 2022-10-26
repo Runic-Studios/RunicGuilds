@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.api;
+package com.runicrealms.runicguilds.shop;
 
 import org.bukkit.entity.Player;
 

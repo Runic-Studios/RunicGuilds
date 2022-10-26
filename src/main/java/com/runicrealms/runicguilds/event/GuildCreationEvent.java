@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.api;
+package com.runicrealms.runicguilds.event;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

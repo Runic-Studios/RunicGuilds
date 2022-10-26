@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.api;
+package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.event.Event;
@@ -6,7 +6,7 @@ import org.bukkit.event.HandlerList;
 
 import java.util.UUID;
 
-public class GuildMemberInvitedEvent extends Event {
+public class GuildInvitationAcceptedEvent extends Event {
 
     private Guild guild;
     private UUID invited;
@@ -14,7 +14,7 @@ public class GuildMemberInvitedEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public GuildMemberInvitedEvent(Guild guild, UUID invited, UUID inviter) {
+    public GuildInvitationAcceptedEvent(Guild guild, UUID invited, UUID inviter) {
         this.guild = guild;
         this.invited = invited;
         this.inviter = inviter;

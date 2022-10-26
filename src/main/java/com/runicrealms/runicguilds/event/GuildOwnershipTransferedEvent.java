@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.api;
+package com.runicrealms.runicguilds.event;
 
 import com.runicrealms.runicguilds.guilds.Guild;
 import org.bukkit.event.Event;
@@ -6,18 +6,18 @@ import org.bukkit.event.HandlerList;
 
 import java.util.UUID;
 
-public class GuildInvitationAcceptedEvent extends Event {
+public class GuildOwnershipTransferedEvent extends Event {
 
     private Guild guild;
-    private UUID invited;
-    private UUID inviter;
+    private UUID newOwner;
+    private UUID oldOwner;
 
     private static final HandlerList handlers = new HandlerList();
 
-    public GuildInvitationAcceptedEvent(Guild guild, UUID invited, UUID inviter) {
+    public GuildOwnershipTransferedEvent(Guild guild, UUID newOwner, UUID oldOwner) {
         this.guild = guild;
-        this.invited = invited;
-        this.inviter = inviter;
+        this.newOwner = newOwner;
+        this.oldOwner = oldOwner;
     }
 
     public HandlerList getHandlers() {
@@ -32,12 +32,12 @@ public class GuildInvitationAcceptedEvent extends Event {
         return this.guild;
     }
 
-    public UUID getInvited() {
-        return this.invited;
+    public UUID getNewOwner() {
+        return this.newOwner;
     }
 
-    public UUID getInviter() {
-        return this.inviter;
+    public UUID getOldOwner() {
+        return this.oldOwner;
     }
 
 }

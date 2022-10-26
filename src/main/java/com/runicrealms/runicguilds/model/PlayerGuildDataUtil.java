@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.data;
+package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.database.PlayerMongoData;
 import com.runicrealms.runicguilds.Plugin;

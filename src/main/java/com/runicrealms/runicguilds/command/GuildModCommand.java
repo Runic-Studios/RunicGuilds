@@ -4,15 +4,15 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.api.*;
-import com.runicrealms.runicguilds.data.GuildData;
-import com.runicrealms.runicguilds.data.GuildUtil;
-import com.runicrealms.runicguilds.data.PlayerGuildDataUtil;
+import com.runicrealms.runicguilds.event.GiveGuildEXPEvent;
+import com.runicrealms.runicguilds.event.GuildCreationEvent;
+import com.runicrealms.runicguilds.event.GuildDisbandEvent;
+import com.runicrealms.runicguilds.event.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.guilds.GuildBannerLoader;
-import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildEXPSource;
-import com.runicrealms.runicguilds.guilds.GuildMember;
+import com.runicrealms.runicguilds.guilds.*;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.PlayerGuildDataUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -29,7 +29,7 @@ public class GuildModCommand extends BaseCommand {
     private final String prefix = "&r&6&lGuilds (Mod) »&r &e";
 
     public GuildModCommand() {
-        Plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("reasons", context ->  {
+        Plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("reasons", context -> {
             List<String> names = new ArrayList<>();
             for (GuildEXPSource source : GuildEXPSource.values()) {
                 String name = source.name().charAt(0) + source.name().substring(1).toLowerCase();
@@ -127,7 +127,7 @@ public class GuildModCommand extends BaseCommand {
 
         PlayerGuildDataUtil.setGuildForPlayer("None", uuid.toString());
         guild.removeMember(uuid);
-        guildData.queueToSave();
+        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, uuid, player.getUniqueId(), true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
     }
@@ -160,7 +160,7 @@ public class GuildModCommand extends BaseCommand {
         GuildData guildData = GuildUtil.getGuildData(GuildUtil.getPlayerCache().get(targetUUID));
         Guild guild = guildData.getData();
         guild.setPlayerScore(targetUUID, 0);
-        guildData.queueToSave();
+        // guildData.queueToSave();
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
     }
 
@@ -281,7 +281,7 @@ public class GuildModCommand extends BaseCommand {
             return;
         }
 
-        GuildData guildData =  GuildUtil.getGuildData(target.getUniqueId());
+        GuildData guildData = GuildUtil.getGuildData(target.getUniqueId());
         if (guildData == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -316,7 +316,7 @@ public class GuildModCommand extends BaseCommand {
         amount = event.getAmount();
 
         guild.getGuildLevel().addGuildEXP(amount);
-        guildData.queueToSave();
+        // guildData.queueToSave();
         target.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &eYou received " + amount + " guild experience!"));
         if (sender instanceof Player) {
             sender.sendMessage(ColorUtil.format(this.prefix + "You gave " + target.getName() + "'s guild " + amount + " guild experience!"));
@@ -357,7 +357,7 @@ public class GuildModCommand extends BaseCommand {
         }
 
         guild.increasePlayerScore(target.getUniqueId(), amount);
-        guildData.queueToSave();
+        // guildData.queueToSave();
         sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
     }
 

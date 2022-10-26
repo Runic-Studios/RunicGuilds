@@ -1,10 +1,10 @@
 package com.runicrealms.runicguilds.listeners;
 
-import com.runicrealms.runicguilds.data.GuildData;
-import com.runicrealms.runicguilds.data.GuildUtil;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildStage;
+import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildRewardUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicmounts.event.DismountedEvent;
 import com.runicrealms.runicmounts.event.MountedEvent;
 import org.bukkit.entity.Player;

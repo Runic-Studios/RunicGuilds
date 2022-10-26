@@ -1,12 +1,12 @@
 package com.runicrealms.runicguilds.listeners;
 
-import com.runicrealms.plugin.events.SpellDamageEvent;
-import com.runicrealms.plugin.events.WeaponDamageEvent;
-import com.runicrealms.runicguilds.data.GuildData;
-import com.runicrealms.runicguilds.data.GuildUtil;
+import com.runicrealms.plugin.events.MagicDamageEvent;
+import com.runicrealms.plugin.events.PhysicalDamageEvent;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildStage;
+import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildRewardUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,20 +16,20 @@ import org.bukkit.event.Listener;
 public class GuildRewardDamageListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onSpellDamage(SpellDamageEvent e) {
-        e.setAmount(guildCombatBonus(e.getPlayer(), e.getVictim(), e.getAmount()));
+    public void onSpellDamage(MagicDamageEvent event) {
+        event.setAmount(guildCombatBonus(event.getPlayer(), event.getVictim(), event.getAmount()));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onWeaponDamage(WeaponDamageEvent e) {
-        e.setAmount(guildCombatBonus(e.getPlayer(), e.getVictim(), e.getAmount()));
+    public void onWeaponDamage(PhysicalDamageEvent event) {
+        event.setAmount(guildCombatBonus(event.getPlayer(), event.getVictim(), event.getAmount()));
     }
 
     /**
      * Applies combat experience bonus if the player is in a guild of the right stage. Only applies to monsters
      *
-     * @param player to check for bonus
-     * @param victim entity being attacked
+     * @param player            to check for bonus
+     * @param victim            entity being attacked
      * @param damageBeforeBonus event damage
      */
     private int guildCombatBonus(Player player, LivingEntity victim, int damageBeforeBonus) {

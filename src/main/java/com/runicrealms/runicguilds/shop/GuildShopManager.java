@@ -4,10 +4,11 @@ import com.runicrealms.plugin.item.shops.RunicItemRunnable;
 import com.runicrealms.plugin.item.shops.RunicShopGeneric;
 import com.runicrealms.plugin.item.shops.RunicShopItem;
 import com.runicrealms.plugin.item.util.ItemRemover;
+import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
-import com.runicrealms.runicguilds.data.GuildUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicitems.RunicItemsAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,32 +17,37 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 
-public class GuildShopFactory {
+public class GuildShopManager {
 
-    public GuildShopFactory() {
+    public GuildShopManager() {
         getGuildHeraldShop();
         getGuildVendorShop();
     }
 
     public RunicShopGeneric getGuildHeraldShop() {
         LinkedHashSet<RunicShopItem> shopItems = new LinkedHashSet<>();
-        ItemStack purchaseGuildItemStack = new ItemStack(Material.IRON_SWORD);
+        ItemStack purchaseGuildItemStack = new ItemStack(Material.WRITABLE_BOOK);
         ItemMeta tradeMeta = purchaseGuildItemStack.getItemMeta();
         if (tradeMeta != null) {
-            tradeMeta.setDisplayName(ChatColor.YELLOW + "Purchase a Guild!");
-            tradeMeta.setLore(Arrays.asList(
-                    "",
-                    ChatColor.GRAY + "Become a guild master! Take part in guild",
-                    ChatColor.GRAY + "activities and make your mark on the realm!"));
+            tradeMeta.setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + "Guild Charter");
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+            lore.addAll(ChatUtils.formattedText
+                    (
+                            "&aPurchase a guild &7and become a guild master! " +
+                                    "Earn guild score and make your mark on the realm!"
+                    ));
+            tradeMeta.setLore(lore);
             tradeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             purchaseGuildItemStack.setItemMeta(tradeMeta);
         }
         shopItems.add(new RunicShopItem(1500, "Coin", purchaseGuildItemStack, runGuildHeraldBuy()));
         shopItems.forEach(runicShopItem -> runicShopItem.setRemovePayment(false));
-        return new RunicShopGeneric(9, ChatColor.GOLD + "Guild Herald", Plugin.GUILD_HERALDS, shopItems);
+        return new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", Plugin.GUILD_HERALDS, shopItems, new int[]{13});
     }
 
     private RunicItemRunnable runGuildHeraldBuy() {
@@ -50,9 +56,9 @@ public class GuildShopFactory {
                 if (!Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
                     player.sendMessage
                             (ChatColor.YELLOW + "Creating a guild will cost you " + Plugin.GUILD_COST +
-                            " gold. To confirm or cancel the purchasing of this guild, type " + ChatColor.GOLD +
-                            "/guild confirm" + ChatColor.YELLOW + " or " + ChatColor.GOLD + "/guild cancel"
-                            + ChatColor.YELLOW + " in chat.");
+                                    " gold. To confirm or cancel the purchasing of this guild, type " + ChatColor.GOLD +
+                                    "/guild confirm" + ChatColor.YELLOW + " or " + ChatColor.GOLD + "/guild cancel"
+                                    + ChatColor.YELLOW + " in chat.");
                     Plugin.getPlayersCreatingGuild().add(player.getUniqueId());
                 } else {
                     player.sendMessage(
@@ -101,7 +107,7 @@ public class GuildShopFactory {
                     player.sendMessage
                             (
                                     ChatColor.RED + "You must have contributed at least " +
-                                    ChatColor.YELLOW + minimumGuildPoints + ChatColor.RED +
+                                            ChatColor.YELLOW + minimumGuildPoints + ChatColor.RED +
                                             " points to your guild to purchase this!"
                             );
                 }
@@ -110,8 +116,8 @@ public class GuildShopFactory {
                 player.sendMessage
                         (
                                 ChatColor.RED + "You must have contributed at least " +
-                                ChatColor.YELLOW + minimumGuildPoints + ChatColor.RED +
-                                " points to your guild to purchase this!"
+                                        ChatColor.YELLOW + minimumGuildPoints + ChatColor.RED +
+                                        " points to your guild to purchase this!"
                         );
             }
         };
