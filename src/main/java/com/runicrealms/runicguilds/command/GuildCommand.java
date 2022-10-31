@@ -61,7 +61,7 @@ public class GuildCommand extends BaseCommand {
 
         for (GuildRank rank : GuildRank.values()) {
             if (members.containsKey(rank)) {
-                player.sendMessage(ColorUtil.format("&6Guild " + rank.getPlural() + "s: &r" + members.get(rank).substring(0, members.get(rank).toString().length() - 2)));
+                player.sendMessage(ColorUtil.format("&6Guild " + rank.getPlural() + ": &r" + members.get(rank).substring(0, members.get(rank).toString().length() - 2)));
             }
         }
     }

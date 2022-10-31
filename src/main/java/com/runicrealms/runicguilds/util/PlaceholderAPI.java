@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.util;
 
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.guilds.Guild;
+import com.runicrealms.runicguilds.guilds.GuildRank;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 
@@ -36,11 +37,23 @@ public class PlaceholderAPI extends PlaceholderExpansion {
         Guild guild = RunicGuildsAPI.getGuild(player.getUniqueId());
 
         switch (lowerArg) {
-            case "prefix":
+            case "name":
                 if (guild != null) {
-                    return guild.getGuildPrefix();
+                    return guild.getGuildName();
                 } else {
                     return "";
+                }
+            case "prefix":
+                if (guild != null) {
+                    return "[" + guild.getGuildPrefix() + "] ";
+                } else {
+                    return "";
+                }
+            case "rank":
+                if (guild != null) {
+                    return guild.getMember(player.getUniqueId()).getRank().getName();
+                } else {
+                    return GuildRank.MEMBER.getName();
                 }
             case "score":
                 if (guild != null && guild.getMember(player.getUniqueId()) != null) {

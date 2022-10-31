@@ -18,7 +18,7 @@ public class GuildChannel extends ChatChannel {
 
     @Override
     public String getPrefix() {
-        return "&6[Guild] [%guild_score%] &r";
+        return "&6[Guild] [%guild_rank%] &r";
     }
 
     @Override
@@ -57,7 +57,8 @@ public class GuildChannel extends ChatChannel {
                 (
                         HoverEvent.Action.SHOW_TEXT,
                         new Text(PlaceholderAPI.setPlaceholders(player,
-                                ChatColor.DARK_AQUA + "Title: " + ChatColor.AQUA + "%core_prefix%"
+                                ChatColor.DARK_AQUA + "Title: " + ChatColor.AQUA + "%core_prefix%" +
+                                        ChatColor.GOLD + "\nGuild Score: %guild_score%"
                         ))
                 )
         );
