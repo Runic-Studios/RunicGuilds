@@ -5,6 +5,8 @@ import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.database.GuildMongoData;
 import com.runicrealms.plugin.database.MongoData;
 import com.runicrealms.plugin.database.MongoDataSection;
+import com.runicrealms.plugin.database.PlayerMongoData;
+import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.guilds.Guild;
 import com.runicrealms.runicguilds.guilds.GuildMember;
@@ -27,16 +29,23 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 
-public class GuildData {
+public class GuildData implements SessionData {
 
     private Guild guild;
     private final String prefix;
     private final MongoData guildData;
 
+    /**
+     * @param guild
+     */
     public GuildData(Guild guild) {
         this(guild, true);
     }
 
+    /**
+     * @param guild
+     * @param createNewDocument
+     */
     public GuildData(Guild guild, boolean createNewDocument) {
         this.prefix = guild.getGuildPrefix();
         if (createNewDocument) {
@@ -46,12 +55,21 @@ public class GuildData {
         this.save(guild, true);
     }
 
+    /**
+     * @param prefix
+     */
     public GuildData(String prefix) {
         this.prefix = prefix;
         this.guildData = new GuildMongoData(prefix);
         MongoDataSection ownerSection = this.guildData.getSection("owner");
         UUID ownerUuid = UUID.fromString(ownerSection.getKeys().iterator().next());
-        GuildMember owner = new GuildMember(ownerUuid, GuildRank.OWNER, ownerSection.get(ownerUuid.toString() + ".score", Integer.class), GuildUtil.getOfflinePlayerName(ownerUuid));
+        GuildMember owner = new GuildMember
+                (
+                        ownerUuid,
+                        GuildRank.OWNER,
+                        ownerSection.get(ownerUuid + ".score", Integer.class),
+                        GuildUtil.getOfflinePlayerName(ownerUuid)
+                );
         Set<GuildMember> members = new HashSet<>();
         if (this.guildData.has("members")) {
             MongoDataSection membersSection = this.guildData.getSection("members");
@@ -123,6 +141,10 @@ public class GuildData {
         return this.guildData;
     }
 
+    /**
+     * @param guild
+     * @param saveAsync
+     */
     public void save(Guild guild, boolean saveAsync) {
         this.guild = guild;
         if (saveAsync) {
@@ -134,6 +156,9 @@ public class GuildData {
         }
     }
 
+    /**
+     * @param guild
+     */
     private void save(Guild guild) {
         guildData.remove("members");
         guildData.remove("bank");
@@ -200,4 +225,24 @@ public class GuildData {
         RunicCore.getDatabaseManager().getGuildData().deleteOne(Filters.eq("prefix", this.prefix));
     }
 
+    public static void setGuildForPlayer(String name, String uuid) {
+        Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), new Runnable() {
+            @Override
+            public void run() {
+                PlayerMongoData mongoData = new PlayerMongoData(uuid);
+                mongoData.set("guild", name);
+                mongoData.save();
+            }
+        });
+    }
+
+    @Override
+    public Map<String, String> toMap() {
+        return null;
+    }
+
+    @Override
+    public void writeToMongo(PlayerMongoData playerMongoData, int... ints) {
+
+    }
 }

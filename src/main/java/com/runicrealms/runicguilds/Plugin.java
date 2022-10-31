@@ -3,9 +3,7 @@ package com.runicrealms.runicguilds;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.PaperCommandManager;
 import com.runicrealms.RunicChat;
-import com.runicrealms.runicguilds.boss.GuildBossListener;
-import com.runicrealms.runicguilds.boss.GuildBossManager;
-import com.runicrealms.runicguilds.chat.GuildChannel;
+import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.GuildCommand;
 import com.runicrealms.runicguilds.command.GuildModCommand;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
@@ -36,7 +34,6 @@ public class Plugin extends JavaPlugin implements Listener {
 
     private static Plugin instance;
     private static PaperCommandManager commandManager;
-    private static GuildBossManager guildBossManager;
     private static final Set<UUID> playersCreatingGuild = new HashSet<>();
     private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
 
@@ -50,7 +47,6 @@ public class Plugin extends JavaPlugin implements Listener {
     public void onEnable() {
 
         instance = this;
-        guildBossManager = new GuildBossManager();
         this.saveDefaultConfig();
         GuildUtil.loadGuilds(); // marks plugin loaded for RunicRestart
         Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
@@ -71,7 +67,6 @@ public class Plugin extends JavaPlugin implements Listener {
                         new GuildBankUtil(),
                         new NpcClickListener(),
                         new DataListener(),
-                        new GuildBossListener(),
                         new GuildBannerUIListener(),
                         new BannerClickListener(),
                         new GuildRewardExpListener(),
@@ -129,10 +124,6 @@ public class Plugin extends JavaPlugin implements Listener {
 
     public static PaperCommandManager getCommandManager() {
         return commandManager;
-    }
-
-    public static GuildBossManager getGuildBossManager() {
-        return guildBossManager;
     }
 
     private void registerEvents(Listener... listeners) {

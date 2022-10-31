@@ -6,7 +6,6 @@ import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.*;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.model.PlayerGuildDataUtil;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
 import org.bson.Document;
 import org.bukkit.Bukkit;
@@ -161,9 +160,9 @@ public class GuildUtil {
         try {
             guildData.getData().setGuildName(name);
             for (GuildMember member : guildData.getData().getMembers()) {
-                PlayerGuildDataUtil.setGuildForPlayer(name, member.getUUID().toString());
+                GuildData.setGuildForPlayer(name, member.getUUID().toString());
             }
-            PlayerGuildDataUtil.setGuildForPlayer(name, guildData.getData().getOwner().toString());
+            GuildData.setGuildForPlayer(name, guildData.getData().getOwner().toString());
             // guildData.queueToSave();
         } catch (Exception exception) {
             exception.printStackTrace();

@@ -11,7 +11,6 @@ import com.runicrealms.runicguilds.event.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guilds.*;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.model.PlayerGuildDataUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -72,7 +71,7 @@ public class GuildModCommand extends BaseCommand {
         }
 
         for (GuildMember member : guild.getMembers()) {
-            PlayerGuildDataUtil.setGuildForPlayer("None", member.getUUID().toString());
+            GuildData.setGuildForPlayer("None", member.getUUID().toString());
             if (GuildUtil.getPlayerCache().containsKey(member.getUUID())) {
                 GuildUtil.getPlayerCache().put(member.getUUID(), null);
             }
@@ -125,7 +124,7 @@ public class GuildModCommand extends BaseCommand {
             GuildUtil.getPlayerCache().put(uuid, null);
         }
 
-        PlayerGuildDataUtil.setGuildForPlayer("None", uuid.toString());
+        GuildData.setGuildForPlayer("None", uuid.toString());
         guild.removeMember(uuid);
         // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, uuid, player.getUniqueId(), true));
@@ -185,7 +184,7 @@ public class GuildModCommand extends BaseCommand {
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
             Guild guild = GuildUtil.getGuildData(uuid).getData();
-            PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), uuid.toString());
+            GuildData.setGuildForPlayer(guild.getGuildName(), uuid.toString());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, true));
         }
     }
@@ -323,6 +322,28 @@ public class GuildModCommand extends BaseCommand {
         }
     }
 
+    // todo: adapt to use as a MM command
+
+    /*
+
+
+            if (RunicGuildsAPI.getGuild(player.getUniqueId()) != null
+                && RunicCore.getPartyManager().getPlayerParty(player) != null) {
+
+            player.getWorld().playSound(event.getEntity().getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 0.5f, 1.0f);
+            player.sendTitle(ChatColor.GREEN + "Guild Boss Slain!",
+                    ChatColor.GREEN + "Your party has earned an extra " +
+                            ChatColor.YELLOW + Plugin.getGuildBossManager().getKillPoints() +
+                            ChatColor.GREEN + " points!",
+                    20, 100, 20);
+            // distribute the extra 20 points
+            for (Player mem : RunicCore.getPartyManager().getPlayerParty(player).getMembersWithLeader()) {
+                RunicGuildsAPI.addPlayerScore(mem.getUniqueId(),
+                        Plugin.getGuildBossManager().getKillPoints() / RunicCore.getPartyManager().getPlayerParty(player).getSize());
+            }
+            // todo: guildmod give partyscore <caster.uuid> 100
+            // todo: make 'damage table' a modular class in core
+     */
     @Subcommand("give score")
     @Syntax("<player> <amount>")
     @CommandPermission("runicadmin.guilds.givescore")

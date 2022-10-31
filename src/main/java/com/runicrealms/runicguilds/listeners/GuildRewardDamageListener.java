@@ -37,7 +37,7 @@ public class GuildRewardDamageListener implements Listener {
         GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
         if (guildData == null) return damageBeforeBonus;
         Guild guild = guildData.getData();
-        if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.STAGE6.getExp()) return damageBeforeBonus;
+        if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.STAGE4.getExp()) return damageBeforeBonus;
         int bonusDamage = (int) (damageBeforeBonus * GuildRewardUtil.getGuildCombatBuff());
         return damageBeforeBonus + bonusDamage;
     }

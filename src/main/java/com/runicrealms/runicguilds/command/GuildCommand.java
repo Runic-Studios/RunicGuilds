@@ -12,7 +12,6 @@ import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.gui.GuildBannerUI;
 import com.runicrealms.runicguilds.guilds.*;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.model.PlayerGuildDataUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -206,7 +205,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         guild.removeMember(otherPlayer);
-        PlayerGuildDataUtil.setGuildForPlayer("None", otherPlayer.toString());
+        GuildData.setGuildForPlayer("None", otherPlayer.toString());
         player.sendMessage(ColorUtil.format(this.prefix + "Removed player from the guild!"));
         if (GuildUtil.getPlayerCache().containsKey(otherPlayer)) {
             GuildUtil.getPlayerCache().put(otherPlayer, null);
@@ -389,7 +388,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        PlayerGuildDataUtil.setGuildForPlayer("None", player.getUniqueId().toString());
+        GuildData.setGuildForPlayer("None", player.getUniqueId().toString());
         guild.removeMember(player.getUniqueId());
         player.sendMessage(ColorUtil.format(this.prefix + "You have left your guild."));
 
@@ -503,7 +502,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
-        PlayerGuildDataUtil.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
+        GuildData.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
         player.sendMessage(ColorUtil.format(this.prefix + "You have accepted the guild invitation."));
 
         // guildData.queueToSave();
@@ -588,7 +587,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        PlayerGuildDataUtil.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildName(), player.getUniqueId().toString());
+        GuildData.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildName(), player.getUniqueId().toString());
         ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), Plugin.GUILD_COST);
         Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(this.prefix + result.getMessage()));
@@ -605,7 +604,7 @@ public class GuildCommand extends BaseCommand {
 
     private void disbandGuild(Player player, Guild guild, GuildData guildData) {
         for (GuildMember member : guild.getMembers()) {
-            PlayerGuildDataUtil.setGuildForPlayer("None", member.getUUID().toString());
+            GuildData.setGuildForPlayer("None", member.getUUID().toString());
             if (GuildUtil.getPlayerCache().containsKey(member.getUUID())) {
                 GuildUtil.getPlayerCache().put(member.getUUID(), null);
             }
@@ -615,7 +614,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         GuildUtil.getPlayerCache().put(guild.getOwner().getUUID(), null);
-        PlayerGuildDataUtil.setGuildForPlayer("None", guild.getOwner().getUUID().toString());
+        GuildData.setGuildForPlayer("None", guild.getOwner().getUUID().toString());
         if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
             GuildBankUtil.close(Bukkit.getPlayer(guild.getOwner().getUUID()));
         }

@@ -29,8 +29,8 @@ public class GuildLevel {
     }
 
     public void addGuildEXP(int guildEXP) {
-        if (guildEXP + this.guildEXP > GuildStage.STAGE7.getExp()) {
-            this.guildEXP = GuildStage.STAGE7.getExp();
+        if (guildEXP + this.guildEXP > GuildStage.getMaxStage().getExp()) {
+            this.guildEXP = GuildStage.getMaxStage().getExp();
         } else {
             this.guildEXP += guildEXP;
         }

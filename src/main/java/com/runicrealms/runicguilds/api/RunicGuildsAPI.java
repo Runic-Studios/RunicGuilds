@@ -6,7 +6,6 @@ import com.runicrealms.runicguilds.guilds.GuildCreationResult;
 import com.runicrealms.runicguilds.guilds.GuildMember;
 import com.runicrealms.runicguilds.guilds.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.model.PlayerGuildDataUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -22,7 +21,7 @@ public class RunicGuildsAPI {
         GuildCreationResult result = GuildUtil.createGuild(owner, name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             Bukkit.getPlayer(owner).playSound(Bukkit.getPlayer(owner).getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-            PlayerGuildDataUtil.setGuildForPlayer(name, owner.toString());
+            GuildData.setGuildForPlayer(name, owner.toString());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(GuildUtil.getGuildData(prefix).getData(), modCreated));
         }
         return result;

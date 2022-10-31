@@ -132,9 +132,9 @@
         <dependency>
             <groupId>com.runicrealms.runicchat.RunicChat</groupId>
             <artifactId>RunicChat</artifactId>
-            <version>1.16.4</version>
+            <version>1.16.5</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/RunicChat-1.16.4.jar</systemPath>
+            <systemPath>${project.basedir}/../lib/RunicChat-1.16.5.jar</systemPath>
         </dependency>
         <!-- RunicCore -->
         <dependency>

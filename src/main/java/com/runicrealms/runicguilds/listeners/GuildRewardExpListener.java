@@ -23,7 +23,7 @@ public class GuildRewardExpListener implements Listener {
         GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
         if (guildData == null) return;
         Guild guild = guildData.getData();
-        if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.STAGE7.getExp()) return;
+        if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.getMaxStage().getExp()) return;
 
         int eventExperience = event.getOriginalAmount(); // exp before other bonuses so we don't apply compound bonuses
         eventExperience *= GuildRewardUtil.getGuildExpBuff();

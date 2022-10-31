@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.util;
 
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.guilds.Guild;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 
@@ -8,7 +9,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
 
     @Override
     public String getIdentifier() {
-        return "runic";
+        return "guild";
     }
 
     @Override
@@ -27,25 +28,23 @@ public class PlaceholderAPI extends PlaceholderExpansion {
     }
 
     @Override
-    public String onPlaceholderRequest(Player pl, String arg) {
+    public String onPlaceholderRequest(Player player, String arg) {
 
-        if (pl == null)  return null;
+        if (player == null) return null;
 
         String lowerArg = arg.toLowerCase();
+        Guild guild = RunicGuildsAPI.getGuild(player.getUniqueId());
 
         switch (lowerArg) {
-            case "guild_prefix":
-                if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null) {
-                    return "[" + RunicGuildsAPI.getGuild(pl.getUniqueId()).getGuildPrefix()
-                            + "|"
-                            + RunicGuildsAPI.getGuild(pl.getUniqueId()).getScore() + "] ";
+            case "prefix":
+                if (guild != null) {
+                    return guild.getGuildPrefix();
                 } else {
                     return "";
                 }
-            case "guild_score":
-                if (RunicGuildsAPI.getGuild(pl.getUniqueId()) != null
-                        && RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()) != null) {
-                    return String.valueOf(RunicGuildsAPI.getGuild(pl.getUniqueId()).getMember(pl.getUniqueId()).getScore());
+            case "score":
+                if (guild != null && guild.getMember(player.getUniqueId()) != null) {
+                    return String.valueOf(guild.getMember(player.getUniqueId()).getScore());
                 } else {
                     return "0";
                 }

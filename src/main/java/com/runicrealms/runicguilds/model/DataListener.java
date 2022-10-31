@@ -17,8 +17,8 @@ import redis.clients.jedis.Jedis;
 public class DataListener implements Listener {
 
     @EventHandler
-    public void onGuildCreation(GuildCreationEvent e) {
-        Player owner = Bukkit.getPlayer(e.getGuild().getOwner().getUUID());
+    public void onGuildCreation(GuildCreationEvent event) {
+        Player owner = Bukkit.getPlayer(event.getGuild().getOwner().getUUID());
         syncDisplays(owner);
     }
 
