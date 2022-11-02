@@ -73,7 +73,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         if (guild.getMembers().size() >= guild.getGuildStage().getMaxMembers()) {
-            player.sendMessage(ColorUtil.format(this.prefix + "You have reached your guild stages maximum amount of members."));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have reached your guild's maximum size."));
             return;
         }
 
@@ -480,7 +480,7 @@ public class GuildCommand extends BaseCommand {
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
 
         if (guild.getMembers().size() >= guild.getGuildStage().getMaxMembers()) {
-            player.sendMessage(ColorUtil.format(this.prefix + "The guild has reached the maximum amount of members for their guild stage."));
+            player.sendMessage(ColorUtil.format(this.prefix + "You have reached your guild's maximum size."));
             return;
         }
 
