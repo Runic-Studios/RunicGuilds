@@ -52,4 +52,16 @@ public enum GuildStage {
     public static GuildStage getMaxStage() {
         return STAGE5;
     }
+
+    /**
+     * @param stageReward
+     * @return
+     */
+    public static GuildStage getFromReward(StageReward stageReward) {
+        for (GuildStage guildStage : GuildStage.values()) {
+            if (guildStage.getStageReward() == stageReward)
+                return guildStage;
+        }
+        return null;
+    }
 }
