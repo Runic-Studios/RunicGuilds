@@ -4,6 +4,7 @@ import com.runicrealms.plugin.events.MagicDamageEvent;
 import com.runicrealms.plugin.events.PhysicalDamageEvent;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
+import com.runicrealms.runicguilds.guild.stage.StageReward;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.entity.LivingEntity;
@@ -37,7 +38,9 @@ public class RewardDamageListener implements Listener {
         if (guildData == null) return damageBeforeBonus;
         Guild guild = guildData.getData();
         if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.STAGE4.getExp()) return damageBeforeBonus;
-        int bonusDamage = (int) (damageBeforeBonus * GuildRewardUtil.getGuildCombatBuff());
+        // todo: ensure any hard reference to stage has correct reward
+        StageReward stageReward = StageReward.COMBAT_BONUS;
+        int bonusDamage = (int) (damageBeforeBonus * stageReward.getBuffPercent());
         return damageBeforeBonus + bonusDamage;
     }
 }

@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds.listeners;
 import com.runicrealms.plugin.events.RunicExpEvent;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
+import com.runicrealms.runicguilds.guild.stage.StageReward;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.entity.Player;
@@ -25,7 +26,8 @@ public class RewardExpListener implements Listener {
         if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.getMaxStage().getExp()) return;
 
         int eventExperience = event.getOriginalAmount(); // exp before other bonuses so we don't apply compound bonuses
-        eventExperience *= GuildRewardUtil.getGuildExpBuff();
+        StageReward stageReward = StageReward.COMBAT_BONUS;
+        eventExperience *= stageReward.getBuffPercent(); // determine bonus amount
 
         event.setFinalAmount(event.getFinalAmount() + eventExperience);
     }

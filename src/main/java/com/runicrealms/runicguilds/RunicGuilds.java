@@ -15,12 +15,14 @@ import com.runicrealms.runicguilds.listeners.NpcClickListener;
 import com.runicrealms.runicguilds.listeners.PlayerJoinListener;
 import com.runicrealms.runicguilds.listeners.RewardDamageListener;
 import com.runicrealms.runicguilds.listeners.RewardExpListener;
-import com.runicrealms.runicguilds.model.DataListener;
+import com.runicrealms.runicguilds.model.GuildDataManager;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
+import com.runicrealms.runicrestart.event.ServerShutdownEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -36,6 +38,22 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     private static PaperCommandManager commandManager;
     private static final Set<UUID> playersCreatingGuild = new HashSet<>();
     private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
+
+    public static Set<UUID> getPlayersCreatingGuild() {
+        return playersCreatingGuild;
+    }
+
+    public static Set<PostedGuildBanner> getPostedGuildBanners() {
+        return postedGuildBanners;
+    }
+
+    public static RunicGuilds getInstance() {
+        return instance;
+    }
+
+    public static PaperCommandManager getCommandManager() {
+        return commandManager;
+    }
 
     public static int GUILD_COST;
     public static int MAX_BANK_PAGES;
@@ -66,7 +84,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
                         new PlayerJoinListener(),
                         new GuildBankUtil(),
                         new NpcClickListener(),
-                        new DataListener(),
+                        new GuildDataManager(),
                         new GuildBannerUIListener(),
                         new BannerClickListener(),
                         new RewardExpListener(),
@@ -100,40 +118,16 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         new GuildShopManager();
     }
 
-    // todo: this
-//	@EventHandler
-//	public void onShutdown(ServerShutdownEvent event) {
-//		TaskSavingQueue.emptyQueue();
-//		getLogger().info(" §cRunicGuilds has been disabled.");
-//		RunicRestartApi.markPluginSaved("guilds");
-//		guildBossManager = null;
-//		instance = null;
-//	}
-
-    public static Set<UUID> getPlayersCreatingGuild() {
-        return playersCreatingGuild;
-    }
-
-    public static Set<PostedGuildBanner> getPostedGuildBanners() {
-        return postedGuildBanners;
-    }
-
-    public static RunicGuilds getInstance() {
-        return instance;
-    }
-
-    public static PaperCommandManager getCommandManager() {
-        return commandManager;
+    @EventHandler
+    public void onShutdown(ServerShutdownEvent event) {
+        instance = null;
+        commandManager = null;
     }
 
     private void registerEvents(Listener... listeners) {
         for (Listener listener : listeners) {
             this.getServer().getPluginManager().registerEvents(listener, this);
         }
-    }
-
-    private void registerCommands() {
-
     }
 
 }

@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
+import redis.clients.jedis.Jedis;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -226,14 +227,16 @@ public class GuildData implements SessionData {
     }
 
     public static void setGuildForPlayer(String name, String uuid) {
-        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), new Runnable() {
-            @Override
-            public void run() {
-                PlayerMongoData mongoData = new PlayerMongoData(uuid);
-                mongoData.set("guild", name);
-                mongoData.save();
-            }
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
+            PlayerMongoData mongoData = new PlayerMongoData(uuid);
+            mongoData.set("guild", name);
+            mongoData.save();
         });
+    }
+
+    @Override
+    public List<String> getFields() {
+        return null;
     }
 
     @Override
@@ -242,7 +245,17 @@ public class GuildData implements SessionData {
     }
 
     @Override
-    public void writeToMongo(PlayerMongoData playerMongoData, int... ints) {
+    public Map<String, String> getDataMapFromJedis(Jedis jedis, int... ints) {
+        return null;
+    }
 
+    @Override
+    public void writeToJedis(Jedis jedis, int... ints) {
+
+    }
+
+    @Override
+    public PlayerMongoData writeToMongo(PlayerMongoData playerMongoData, int... ints) {
+        return playerMongoData;
     }
 }

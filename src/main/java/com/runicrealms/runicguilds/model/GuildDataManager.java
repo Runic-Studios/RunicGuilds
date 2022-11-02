@@ -14,7 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 
-public class DataListener implements Listener {
+public class GuildDataManager implements Listener {
 
     @EventHandler
     public void onGuildCreation(GuildCreationEvent event) {

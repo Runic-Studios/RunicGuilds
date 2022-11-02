@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
+import com.runicrealms.runicguilds.guild.stage.StageReward;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicmounts.event.DismountedEvent;
@@ -37,7 +38,8 @@ public class RewardMountListener implements Listener {
         if (guildData == null) return previousSpeed;
         Guild guild = guildData.getData();
         if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.STAGE5.getExp()) return previousSpeed;
-        float bonusSpeed = (float) (previousSpeed * GuildRewardUtil.getGuildMountSpeedBonus());
+        StageReward stageReward = StageReward.MOUNT_SPEED_BONUS;
+        float bonusSpeed = (float) (previousSpeed * stageReward.getBuffPercent());
         return previousSpeed + bonusSpeed;
     }
 }
