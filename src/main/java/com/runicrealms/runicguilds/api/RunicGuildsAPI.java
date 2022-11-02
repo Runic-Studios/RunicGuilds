@@ -1,10 +1,10 @@
 package com.runicrealms.runicguilds.api;
 
-import com.runicrealms.runicguilds.event.GuildCreationEvent;
-import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildCreationResult;
-import com.runicrealms.runicguilds.guilds.GuildMember;
-import com.runicrealms.runicguilds.guilds.GuildStage;
+import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildCreationResult;
+import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.guild.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;

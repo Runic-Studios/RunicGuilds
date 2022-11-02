@@ -4,13 +4,13 @@ import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.PaperCommandManager;
 import com.runicrealms.RunicChat;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
-import com.runicrealms.runicguilds.command.GuildCommand;
-import com.runicrealms.runicguilds.command.GuildModCommand;
+import com.runicrealms.runicguilds.command.admin.GuildModCMD;
+import com.runicrealms.runicguilds.command.player.GuildCommand;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.guilds.BannerClickListener;
-import com.runicrealms.runicguilds.guilds.GuildBannerLoader;
-import com.runicrealms.runicguilds.guilds.GuildBannerUIListener;
-import com.runicrealms.runicguilds.guilds.PostedGuildBanner;
+import com.runicrealms.runicguilds.guild.BannerClickListener;
+import com.runicrealms.runicguilds.guild.GuildBannerLoader;
+import com.runicrealms.runicguilds.guild.GuildBannerUIListener;
+import com.runicrealms.runicguilds.guild.PostedGuildBanner;
 import com.runicrealms.runicguilds.listeners.GuildRewardDamageListener;
 import com.runicrealms.runicguilds.listeners.GuildRewardExpListener;
 import com.runicrealms.runicguilds.listeners.NpcClickListener;
@@ -86,7 +86,7 @@ public class Plugin extends JavaPlugin implements Listener {
                 throw new ConditionFailedException("You must be an operator to run this command!");
         });
         commandManager.registerCommand(new GuildCommand());
-        commandManager.registerCommand(new GuildModCommand());
+        commandManager.registerCommand(new GuildModCMD());
 
         // register placeholder tags
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {

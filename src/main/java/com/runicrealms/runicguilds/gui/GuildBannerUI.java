@@ -2,9 +2,9 @@ package com.runicrealms.runicguilds.gui;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildBanner;
-import com.runicrealms.runicguilds.guilds.GuildStage;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildBanner;
+import com.runicrealms.runicguilds.guild.GuildStage;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;

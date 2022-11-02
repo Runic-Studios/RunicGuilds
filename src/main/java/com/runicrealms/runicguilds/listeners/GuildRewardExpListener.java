@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.plugin.events.RunicExpEvent;
-import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildStage;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildRewardUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;

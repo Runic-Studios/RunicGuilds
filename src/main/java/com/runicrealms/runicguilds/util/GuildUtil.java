@@ -4,7 +4,7 @@ import com.mongodb.client.FindIterable;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.runicguilds.Plugin;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.guilds.*;
+import com.runicrealms.runicguilds.guild.*;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
 import org.bson.Document;

@@ -2,8 +2,8 @@ package com.runicrealms.runicguilds.gui;
 
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.Plugin;
-import com.runicrealms.runicguilds.guilds.Guild;
-import com.runicrealms.runicguilds.guilds.GuildRank;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicitems.RunicItemsAPI;
