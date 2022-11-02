@@ -55,10 +55,10 @@ public class GuildInfoGUI implements InventoryHolder {
         List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add(ColorUtil.format("&6&l" + guild.getGuildName()));
-        lore.add(ColorUtil.format("&eGuild Stage: " + guild.getGuildStage().getName()));
+        lore.add(ColorUtil.format("&eGuild Stage: [&f" + guild.getGuildStage().getRank() + "&e/" + GuildStage.getMaxStage().getRank() + "]"));
         lore.add(ColorUtil.format("&eGuild Exp: " + guild.getGuildExp()));
-        lore.add(ColorUtil.format("&eGuild Owner: [" + guild.getOwner().getScore() + "] " + guild.getOwner().getLastKnownName()));
-        lore.add(ColorUtil.format("&eMax Members: [" + guild.getGuildStage().getMaxMembers()));
+        lore.add(ColorUtil.format("&eGuild Owner: " + guild.getOwner().getLastKnownName()));
+        lore.add(ColorUtil.format("&eMax Members: " + guild.getGuildStage().getMaxMembers()));
         lore.add("");
         lore.add(ColorUtil.format("&6Unlocked Guild Perks:"));
         lore.addAll(guildPerks());
@@ -71,14 +71,19 @@ public class GuildInfoGUI implements InventoryHolder {
     }
 
     /**
-     * @return
+     * Get a list of perks that the guild has unlocked by leveling
+     *
+     * @return a list of string for UI
      */
     private List<String> guildPerks() {
         List<String> result = new ArrayList<>();
         for (GuildStage guildStage : GuildStage.values()) {
+            if (guildStage.getStageReward().getMessage().equalsIgnoreCase("")) continue;
             if (guildStage.getRank() <= this.guild.getGuildStage().getRank())
-                result.add(guildStage.getStageReward().getMessage());
+                result.add(ChatColor.GREEN + "- " + guildStage.getStageReward().getFormattedReward());
         }
+        if (result.isEmpty())
+            result.add(ChatColor.GRAY + "- None");
         return result;
     }
 

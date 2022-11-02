@@ -5,6 +5,7 @@ import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -147,23 +148,38 @@ public class Guild implements Cloneable {
             this.guildExp += guildExp;
         }
 
-        GuildStage stage = this.expToStage();
-        if (stage == this.getGuildStage()) return; // no level gained
+        GuildStage newStage = this.expToStage();
+        if (newStage == this.getGuildStage()) return;
+        this.setGuildStage(newStage); // gained a level!
 
         for (GuildMember member : this.getMembersWithOwner()) {
             Player player = Bukkit.getOfflinePlayer(member.getUUID()).getPlayer();
             if (player == null) continue;
-            player.sendMessage("");
-            ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lGUILD STAGE INCREASE"));
-            player.sendMessage("");
-            ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lYour guild has advanced to " + guildStage.getName() + "!"));
-            if (!stage.getStageReward().getMessage().equalsIgnoreCase("")) {
-                ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&l" + stage.getStageReward().getMessage()));
-            }
-            player.sendMessage("");
+            sendStageNotification(player, newStage);
         }
 
-        this.guildStage = stage;
+        this.guildStage = newStage;
+    }
+
+    /**
+     * @param player
+     * @param guildStage
+     */
+    private void sendStageNotification(Player player, GuildStage guildStage) {
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 0.5f);
+        player.sendMessage("");
+        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lGUILD STAGE INCREASE"));
+        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your guild has advanced to " + guildStage.getName() + "!"));
+        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your max guild size has risen " + guildStage.getMaxMembers() + "!"));
+        if (!guildStage.getStageReward().getMessage().equalsIgnoreCase("")) {
+            ChatUtils.sendCenteredMessage(player, ColorUtil.format("&a" + guildStage.getStageReward().getMessage()));
+        }
+        player.sendMessage("");
+        // todo: firework
+    }
+
+    private void setGuildStage(GuildStage guildStage) {
+        this.guildStage = guildStage;
     }
 
     public void transferOwnership(GuildMember member) {
