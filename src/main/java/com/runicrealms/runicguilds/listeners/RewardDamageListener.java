@@ -3,9 +3,8 @@ package com.runicrealms.runicguilds.listeners;
 import com.runicrealms.plugin.events.MagicDamageEvent;
 import com.runicrealms.plugin.events.PhysicalDamageEvent;
 import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildStage;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.util.GuildRewardUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -13,7 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
-public class GuildRewardDamageListener implements Listener {
+public class RewardDamageListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSpellDamage(MagicDamageEvent event) {

@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.api.event;
 
 import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildEXPSource;
+import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

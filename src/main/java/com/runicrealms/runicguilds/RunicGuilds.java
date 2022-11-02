@@ -11,10 +11,10 @@ import com.runicrealms.runicguilds.guild.BannerClickListener;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.GuildBannerUIListener;
 import com.runicrealms.runicguilds.guild.PostedGuildBanner;
-import com.runicrealms.runicguilds.listeners.GuildRewardDamageListener;
-import com.runicrealms.runicguilds.listeners.GuildRewardExpListener;
 import com.runicrealms.runicguilds.listeners.NpcClickListener;
 import com.runicrealms.runicguilds.listeners.PlayerJoinListener;
+import com.runicrealms.runicguilds.listeners.RewardDamageListener;
+import com.runicrealms.runicguilds.listeners.RewardExpListener;
 import com.runicrealms.runicguilds.model.DataListener;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -30,9 +30,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class Plugin extends JavaPlugin implements Listener {
+public class RunicGuilds extends JavaPlugin implements Listener {
 
-    private static Plugin instance;
+    private static RunicGuilds instance;
     private static PaperCommandManager commandManager;
     private static final Set<UUID> playersCreatingGuild = new HashSet<>();
     private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
@@ -69,8 +69,8 @@ public class Plugin extends JavaPlugin implements Listener {
                         new DataListener(),
                         new GuildBannerUIListener(),
                         new BannerClickListener(),
-                        new GuildRewardExpListener(),
-                        new GuildRewardDamageListener()
+                        new RewardExpListener(),
+                        new RewardDamageListener()
                 );
 
 		/*
@@ -118,7 +118,7 @@ public class Plugin extends JavaPlugin implements Listener {
         return postedGuildBanners;
     }
 
-    public static Plugin getInstance() {
+    public static RunicGuilds getInstance() {
         return instance;
     }
 

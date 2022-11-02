@@ -6,7 +6,7 @@ import com.runicrealms.plugin.item.shops.RunicShopItem;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicitems.RunicItemsAPI;
@@ -47,19 +47,19 @@ public class GuildShopManager {
         }
         shopItems.add(new RunicShopItem(1500, "Coin", purchaseGuildItemStack, runGuildHeraldBuy()));
         shopItems.forEach(runicShopItem -> runicShopItem.setRemovePayment(false));
-        return new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", Plugin.GUILD_HERALDS, shopItems, new int[]{13});
+        return new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", RunicGuilds.GUILD_HERALDS, shopItems, new int[]{13});
     }
 
     private RunicItemRunnable runGuildHeraldBuy() {
         return player -> {
             if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
-                if (!Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+                if (!RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
                     player.sendMessage
-                            (ChatColor.YELLOW + "Creating a guild will cost you " + Plugin.GUILD_COST +
+                            (ChatColor.YELLOW + "Creating a guild will cost you " + RunicGuilds.GUILD_COST +
                                     " gold. To confirm or cancel the purchasing of this guild, type " + ChatColor.GOLD +
                                     "/guild confirm" + ChatColor.YELLOW + " or " + ChatColor.GOLD + "/guild cancel"
                                     + ChatColor.YELLOW + " in chat.");
-                    Plugin.getPlayersCreatingGuild().add(player.getUniqueId());
+                    RunicGuilds.getPlayersCreatingGuild().add(player.getUniqueId());
                 } else {
                     player.sendMessage(
                             ChatColor.YELLOW + "Type " + ChatColor.GOLD + "/guild confirm" +
@@ -81,7 +81,7 @@ public class GuildShopManager {
         shopItems.add(new RunicShopItem(2000, "Coin", swiftBlackSteed, runGuildVendorBuy(swiftBlackSteed, 2000, 500)));
         shopItems.add(new RunicShopItem(2000, "Coin", swiftWhiteStallion, runGuildVendorBuy(swiftWhiteStallion, 2000, 500)));
         shopItems.forEach(runicShopItem -> runicShopItem.setRemovePayment(false));
-        return new RunicShopGeneric(9, ChatColor.YELLOW + "Guild Vendor", Plugin.GUILD_VENDORS, shopItems);
+        return new RunicShopGeneric(9, ChatColor.YELLOW + "Guild Vendor", RunicGuilds.GUILD_VENDORS, shopItems);
     }
 
     /**

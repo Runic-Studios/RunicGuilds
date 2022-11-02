@@ -7,7 +7,7 @@ import com.runicrealms.plugin.database.MongoData;
 import com.runicrealms.plugin.database.MongoDataSection;
 import com.runicrealms.plugin.database.PlayerMongoData;
 import com.runicrealms.plugin.model.SessionData;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
@@ -83,7 +83,7 @@ public class GuildData implements SessionData {
                 || !this.guildData.get("bank-type", String.class).equalsIgnoreCase("runicitems"))
                 && this.guildData.has("bank")) {
             this.guildData.remove("bank");
-            Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), this.guildData::save);
+            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), this.guildData::save);
         } else if (this.guildData.has("bank")) {
             for (int i = 0; i < this.guildData.get("bank-size", Integer.class); i++) {
                 if (this.guildData.has("bank." + i)) {
@@ -148,7 +148,7 @@ public class GuildData implements SessionData {
     public void save(Guild guild, boolean saveAsync) {
         this.guild = guild;
         if (saveAsync) {
-            Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
                 this.save(guild);
             });
         } else {
@@ -226,7 +226,7 @@ public class GuildData implements SessionData {
     }
 
     public static void setGuildForPlayer(String name, String uuid) {
-        Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), new Runnable() {
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), new Runnable() {
             @Override
             public void run() {
                 PlayerMongoData mongoData = new PlayerMongoData(uuid);

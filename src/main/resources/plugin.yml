@@ -1,9 +1,9 @@
 name: RunicGuilds
-description: Runic Realms Guilds Plugin, by Excel
+description: Runic Realms Guilds RunicGuilds, by Excel
 version: 1.0
-main: com.runicrealms.runicguilds.Plugin
+main: com.runicrealms.runicguilds.RunicGuilds
 api-version: 1.13
-softdepend: [PlaceholderAPI, RunicRestart, HolograpicDisplays, RunicChat]
+softdepend: [ PlaceholderAPI, RunicRestart, HolograpicDisplays, RunicChat ]
 Permissions:
   permissions.guild-mod:
     description: Allows a moderator to execute guildmod command
@@ -14,7 +14,7 @@ Permissions:
   permissions.guild-mod-reset:
     description: Allows a moderator to reset guild scores
   permissions.guild-mod-bank:
-     description: Allows a moderator to access a guild's bank
+    description: Allows a moderator to access a guild's bank
   permissions.guild-mod-giveexp:
     description: Allows a moderator to give a player guild exp
   permissions.guild-mod-givescore:

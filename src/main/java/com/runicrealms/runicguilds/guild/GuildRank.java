@@ -5,14 +5,14 @@ public enum GuildRank {
     OWNER("owner", "Owner", "Owners", 1, true),
     OFFICER("officer", "Officer", "Officers", 2, true),
     RECRUITER("recruiter", "Recruiter", "Recruiters", 3, true),
-    MEMBER("member", "Member", "Member", 4, true),
+    MEMBER("member", "Member", "Members", 4, true),
     RECRUIT("recruit", "Recruit", "Recruits", 5, false);
 
-    private String identifier;
-    private String name;
-    private String plural;
-    private Integer rank;
-    private Boolean defaultBankAccess;
+    private final String identifier;
+    private final String name;
+    private final String plural;
+    private final Integer rank;
+    private final Boolean defaultBankAccess;
 
     GuildRank(String identifier, String name, String plural, Integer rank, Boolean defaultBankAccess) {
         this.identifier = identifier;

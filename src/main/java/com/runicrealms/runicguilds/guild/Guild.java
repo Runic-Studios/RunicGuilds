@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.guild;
 
+import com.runicrealms.runicguilds.guild.stage.GuildStageProgress;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +11,7 @@ public class Guild implements Cloneable {
 
     private final Set<GuildMember> members;
     private final GuildBanner guildBanner;
-    private final GuildLevel guildLevel;
+    private final GuildStageProgress guildStageProgress;
     private GuildMember owner;
     private String guildName;
     private String guildPrefix;
@@ -29,7 +30,7 @@ public class Guild implements Cloneable {
         this.bankAccess = bankAccess;
         this.recalculateScore();
         this.guildBanner = new GuildBanner(this);
-        this.guildLevel = new GuildLevel(this, guildEXP);
+        this.guildStageProgress = new GuildStageProgress(this, guildEXP);
     }
 
     public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
@@ -40,7 +41,7 @@ public class Guild implements Cloneable {
         this.bank = bank;
         this.bankSize = bankSize;
         this.bankAccess = bankAccess;
-        this.guildLevel = new GuildLevel(this, guildEXP);
+        this.guildStageProgress = new GuildStageProgress(this, guildEXP);
         this.recalculateScore();
         this.guildBanner = new GuildBanner(this, guildBanner);
     }
@@ -53,8 +54,8 @@ public class Guild implements Cloneable {
         return this.guildBanner;
     }
 
-    public GuildLevel getGuildLevel() {
-        return this.guildLevel;
+    public GuildStageProgress getGuildLevel() {
+        return this.guildStageProgress;
     }
 
     public GuildMember getOwner() {
@@ -201,7 +202,7 @@ public class Guild implements Cloneable {
         for (GuildMember member : this.members) {
             newMembers.add(member.clone());
         }
-        return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankAccess, this.guildLevel.getGuildEXP());
+        return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankAccess, this.guildStageProgress.getGuildEXP());
     }
 
 }

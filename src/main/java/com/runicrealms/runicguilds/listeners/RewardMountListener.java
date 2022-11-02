@@ -1,9 +1,8 @@
 package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildStage;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.util.GuildRewardUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicmounts.event.DismountedEvent;
 import com.runicrealms.runicmounts.event.MountedEvent;
@@ -14,7 +13,7 @@ import org.bukkit.event.Listener;
 /**
  * This..
  */
-public class GuildRewardMountListener implements Listener {
+public class RewardMountListener implements Listener {
 
     @EventHandler
     public void onMount(MountedEvent e) {

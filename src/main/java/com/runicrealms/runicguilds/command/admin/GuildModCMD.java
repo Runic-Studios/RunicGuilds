@@ -3,14 +3,18 @@ package com.runicrealms.runicguilds.command.admin;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import com.runicrealms.plugin.utilities.ColorUtil;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.api.event.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.guild.*;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildBannerLoader;
+import com.runicrealms.runicguilds.guild.GuildCreationResult;
+import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
@@ -29,7 +33,7 @@ public class GuildModCMD extends BaseCommand {
     private final String prefix = "&r&6&lGuilds (Mod) »&r &e";
 
     public GuildModCMD() {
-        Plugin.getCommandManager().getCommandCompletions().registerAsyncCompletion("reasons", context -> {
+        RunicGuilds.getCommandManager().getCommandCompletions().registerAsyncCompletion("reasons", context -> {
             List<String> names = new ArrayList<>();
             for (GuildEXPSource source : GuildEXPSource.values()) {
                 String name = source.name().charAt(0) + source.name().substring(1).toLowerCase();
@@ -334,13 +338,13 @@ public class GuildModCMD extends BaseCommand {
             player.getWorld().playSound(event.getEntity().getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 0.5f, 1.0f);
             player.sendTitle(ChatColor.GREEN + "Guild Boss Slain!",
                     ChatColor.GREEN + "Your party has earned an extra " +
-                            ChatColor.YELLOW + Plugin.getGuildBossManager().getKillPoints() +
+                            ChatColor.YELLOW + RunicGuilds.getGuildBossManager().getKillPoints() +
                             ChatColor.GREEN + " points!",
                     20, 100, 20);
             // distribute the extra 20 points
             for (Player mem : RunicCore.getPartyManager().getPlayerParty(player).getMembersWithLeader()) {
                 RunicGuildsAPI.addPlayerScore(mem.getUniqueId(),
-                        Plugin.getGuildBossManager().getKillPoints() / RunicCore.getPartyManager().getPlayerParty(player).getSize());
+                        RunicGuilds.getGuildBossManager().getKillPoints() / RunicCore.getPartyManager().getPlayerParty(player).getSize());
             }
             // todo: guildmod give partyscore <caster.uuid> 100
             // todo: make 'damage table' a modular class in core

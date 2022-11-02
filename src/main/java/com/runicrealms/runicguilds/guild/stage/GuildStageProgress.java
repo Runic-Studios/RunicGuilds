@@ -1,16 +1,29 @@
-package com.runicrealms.runicguilds.guild;
+package com.runicrealms.runicguilds.guild.stage;
 
 import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class GuildLevel {
+/**
+ * A wrapper class that holds a guild, its exp, and its current stage
+ *
+ * @author Skyfallin
+ */
+public class GuildStageProgress {
     private final Guild guild;
     private int guildEXP;
     private GuildStage guildStage;
 
-    public GuildLevel(Guild guild, int guildEXP) {
+    /**
+     * Initialize a stage progress wrapper with the guild and its current exp
+     *
+     * @param guild    any guild
+     * @param guildEXP the current exp of the guild
+     */
+    public GuildStageProgress(Guild guild, int guildEXP) {
         this.guild = guild;
         this.guildEXP = guildEXP;
         this.guildStage = this.expToStage();
@@ -28,6 +41,9 @@ public class GuildLevel {
         return this.guildStage;
     }
 
+    /**
+     * @param guildEXP
+     */
     public void addGuildEXP(int guildEXP) {
         if (guildEXP + this.guildEXP > GuildStage.getMaxStage().getExp()) {
             this.guildEXP = GuildStage.getMaxStage().getExp();
@@ -53,8 +69,8 @@ public class GuildLevel {
             ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lLEVEL UP"));
             player.sendMessage("");
             ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lYour guild has advanced to stage " + stageNumber + "!"));
-            for (String message : stage.getPerkInfo()) {
-                ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&l" + message));
+            if (!stage.getStageReward().getMessage().equalsIgnoreCase("")) {
+                ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&l" + stage.getStageReward().getMessage()));
             }
             player.sendMessage("");
         }
@@ -62,6 +78,9 @@ public class GuildLevel {
         this.guildStage = stage;
     }
 
+    /**
+     * @return
+     */
     private GuildStage expToStage() {
         for (GuildStage stage : GuildStage.values()) {
             if (this.guildEXP >= stage.getExp()) {

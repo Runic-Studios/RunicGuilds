@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.listeners;
 
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerJoinListener implements Listener {
 
-    // todo: move these to character
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         GuildData guildData = GuildUtil.getGuildData(event.getPlayer().getUniqueId());
@@ -29,7 +28,7 @@ public class PlayerJoinListener implements Listener {
         GuildUtil.getPlayerCache().remove(event.getPlayer().getUniqueId());
         GuildCommandMapManager.getTransferOwnership().remove(event.getPlayer().getUniqueId());
         GuildCommandMapManager.getDisbanding().remove(event.getPlayer().getUniqueId());
-        Plugin.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
+        RunicGuilds.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
     }
 
     public static void initializePlayerCache() {

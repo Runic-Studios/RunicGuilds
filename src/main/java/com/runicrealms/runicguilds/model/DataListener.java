@@ -3,7 +3,7 @@ package com.runicrealms.runicguilds.model;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.redis.RedisUtil;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.guild.Guild;
@@ -27,7 +27,7 @@ public class DataListener implements Listener {
      */
     @EventHandler
     public void onGuildDisband(GuildDisbandEvent event) {
-        Bukkit.getScheduler().runTaskLater(Plugin.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
             Player whoDisbanded = Bukkit.getPlayer(event.getDisbander());
             syncDisplays(whoDisbanded);
             for (GuildMember member : event.getGuild().getMembersWithOwner()) {

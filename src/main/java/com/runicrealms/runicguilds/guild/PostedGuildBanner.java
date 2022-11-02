@@ -3,7 +3,7 @@ package com.runicrealms.runicguilds.guild;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.runicrealms.plugin.utilities.ColorUtil;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -17,7 +17,7 @@ public class PostedGuildBanner {
     private final ArmorStand[] banner;
     private final Hologram hologram;
 
-    public static final NamespacedKey KEY = new NamespacedKey(Plugin.getInstance(), "bannerKey");
+    public static final NamespacedKey KEY = new NamespacedKey(RunicGuilds.getInstance(), "bannerKey");
 
     public PostedGuildBanner(Guild guild, Location location) {
         this.guild = guild;
@@ -30,7 +30,7 @@ public class PostedGuildBanner {
         for (ArmorStand entity : this.banner) {
             entity.remove();
         }
-        Plugin.getPostedGuildBanners().remove(this);
+        RunicGuilds.getPostedGuildBanners().remove(this);
     }
 
     public Guild getGuild() {
@@ -80,7 +80,7 @@ public class PostedGuildBanner {
         double y = location.getY();
         double z = location.getZ();
 
-        Hologram hologram = HologramsAPI.createHologram(Plugin.getInstance(), new Location(world, x - .5, y + 2.85, z + .5));
+        Hologram hologram = HologramsAPI.createHologram(RunicGuilds.getInstance(), new Location(world, x - .5, y + 2.85, z + .5));
         hologram.appendTextLine(ColorUtil.format("&r&6&l" + ChatColor.stripColor(this.guild.getGuildName())));
         hologram.appendTextLine(ColorUtil.format("&r&6&lScore: " + this.guild.getScore()));
         return hologram;

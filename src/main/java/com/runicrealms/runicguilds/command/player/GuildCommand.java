@@ -5,13 +5,17 @@ import co.aikar.commands.annotation.*;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.gui.GuildBannerUI;
-import com.runicrealms.runicguilds.guild.*;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildCreationResult;
+import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
@@ -423,7 +427,7 @@ public class GuildCommand extends BaseCommand {
             GuildData guildData = GuildUtil.getGuildData(prefix);
             Guild guild = guildData.getData();
             this.transferOwnership(player, guild, guildData);
-        } else if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+        } else if (RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
             // Creating guild
             this.createGuild(player, args);
         } else {
@@ -436,9 +440,9 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildCancelCommand(Player player) {
-        if (Plugin.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+        if (RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(this.prefix + "Canceled creating guild."));
-            Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+            RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
             return;
         }
 
@@ -495,7 +499,7 @@ public class GuildCommand extends BaseCommand {
         GuildData guildData = GuildUtil.getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
         Guild guild = guildData.getData();
 
-        Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+        RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
 
         if (guild.getMembers().size() >= guild.getGuildLevel().getGuildStage().getMaxMembers()) {
             player.sendMessage(ColorUtil.format(this.prefix + "The guild has reached the maximum amount of members for their guild stage."));
@@ -576,9 +580,9 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!player.getInventory().contains(Material.GOLD_NUGGET, Plugin.GUILD_COST)) {
-            player.sendMessage(ColorUtil.format(this.prefix + "Put " + Plugin.GUILD_COST + " coins in your inventory, and speak with the guild herald again."));
-            Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+        if (!player.getInventory().contains(Material.GOLD_NUGGET, RunicGuilds.GUILD_COST)) {
+            player.sendMessage(ColorUtil.format(this.prefix + "Put " + RunicGuilds.GUILD_COST + " coins in your inventory, and speak with the guild herald again."));
+            RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
             return;
         }
 
@@ -589,8 +593,8 @@ public class GuildCommand extends BaseCommand {
         }
 
         GuildData.setGuildForPlayer(GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildName(), player.getUniqueId().toString());
-        ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), Plugin.GUILD_COST);
-        Plugin.getPlayersCreatingGuild().remove(player.getUniqueId());
+        ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), RunicGuilds.GUILD_COST);
+        RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(this.prefix + result.getMessage()));
     }
 

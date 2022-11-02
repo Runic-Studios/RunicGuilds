@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.util;
 
 import com.mongodb.client.FindIterable;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.guild.*;
 import com.runicrealms.runicguilds.model.GuildData;
@@ -31,7 +31,7 @@ public class GuildUtil {
     }
 
     public static void loadGuilds() {
-        Bukkit.getScheduler().runTaskAsynchronously(Plugin.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildData().find();
             for (Document guildData : iterable) {
                 guilds.put(guildData.getString("prefix"), new GuildData(guildData.getString("prefix")));

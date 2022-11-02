@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.listeners;
 
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -36,7 +36,7 @@ public class NpcClickListener implements Listener {
     }
 
     private static void runClickEvent(NpcClickEvent event) {
-        for (Integer bankerId : Plugin.GUILD_BANKERS) {
+        for (Integer bankerId : RunicGuilds.GUILD_BANKERS) {
             if (bankerId == event.getNpc().getId()) {
                 if (GuildUtil.getPlayerCache().get(event.getPlayer().getUniqueId()) != null) {
                     GuildData guildData = GuildUtil.getGuildDatas().get(GuildUtil.getPlayerCache().get(event.getPlayer().getUniqueId()));

@@ -1,10 +1,10 @@
 package com.runicrealms.runicguilds.gui;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildBanner;
-import com.runicrealms.runicguilds.guild.GuildStage;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -35,7 +35,7 @@ public class GuildBannerUI implements InventoryHolder {
     private int page;
 
     private final ItemStack background = this.background();
-    private final NamespacedKey key = new NamespacedKey(Plugin.getInstance(), "itemKey");
+    private final NamespacedKey key = new NamespacedKey(RunicGuilds.getInstance(), "itemKey");
 
     public GuildBannerUI(Guild guild) {
         this.inventory = Bukkit.createInventory(this, 54, ColorUtil.format("&r&6Guild Banner"));

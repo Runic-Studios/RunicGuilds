@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.gui;
 
 import com.runicrealms.plugin.item.util.ItemRemover;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildData;
@@ -43,7 +43,7 @@ public class GuildBankUtil implements Listener {
         if (page > 1) {
             inventory.setItem(0, new ItemBuilder(Material.ARROW, 1, "&6Previous Page").getItem());
         }
-        int maxBankPages = Plugin.getInstance().getConfig().getInt("max-bank-pages");
+        int maxBankPages = RunicGuilds.getInstance().getConfig().getInt("max-bank-pages");
         int pagePrice = (int) Math.pow(2, guild.getBankSize() / 45 + 8);
         if (guild.getBankSize() / 45 < maxBankPages) {
             if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
@@ -116,7 +116,7 @@ public class GuildBankUtil implements Listener {
                                 open(player, currentPage + 1);
                             } else if (event.getRawSlot() == 4 && event.getCurrentItem().getType() == Material.GOLD_INGOT) {
                                 if (guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
-                                    if (guild.getBankSize() / 45 < Plugin.getInstance().getConfig().getInt("max-bank-pages")) {
+                                    if (guild.getBankSize() / 45 < RunicGuilds.getInstance().getConfig().getInt("max-bank-pages")) {
                                         if (player.getInventory().contains(Material.GOLD_NUGGET, (int) Math.pow(2, guild.getBankSize() / 45 + 8))) {
                                             ItemRemover.takeItem(player, Material.GOLD_NUGGET, (int) Math.pow(2, guild.getBankSize() / 45 + 8));
                                             guild.setBankSize(guild.getBankSize() + 45);

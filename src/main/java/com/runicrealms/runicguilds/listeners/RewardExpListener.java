@@ -2,9 +2,8 @@ package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.plugin.events.RunicExpEvent;
 import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildStage;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.util.GuildRewardUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,7 +13,7 @@ import org.bukkit.event.Listener;
 /**
  * Listener for the guild stage exp bonus defined in the GuildStage enum
  */
-public class GuildRewardExpListener implements Listener {
+public class RewardExpListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerGainExperience(RunicExpEvent event) {

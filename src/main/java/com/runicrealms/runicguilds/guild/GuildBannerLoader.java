@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.guild;
 
 import com.google.common.collect.Lists;
-import com.runicrealms.runicguilds.Plugin;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,7 +16,7 @@ import java.util.List;
 public class GuildBannerLoader extends BukkitRunnable {
     @Override
     public void run() {
-        List<PostedGuildBanner> posted = Lists.newArrayList(Plugin.getPostedGuildBanners());
+        List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
         posted.forEach(PostedGuildBanner::remove);
 
         List<Guild> ordering = new ArrayList<>(GuildUtil.getAllGuilds());
@@ -34,13 +34,13 @@ public class GuildBannerLoader extends BukkitRunnable {
             }
         }
 
-        Bukkit.getScheduler().runTask(Plugin.getInstance(), () -> this.makeBanners(guilds));
+        Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guilds));
     }
 
     private void makeBanners(List<Guild> guilds) {
         for (int i = 1; i <= guilds.size(); i++) {
             String path = "banners.number" + i;
-            FileConfiguration config = Plugin.getInstance().getConfig();
+            FileConfiguration config = RunicGuilds.getInstance().getConfig();
             World world = Bukkit.getWorld(config.getString(path + ".world"));
             double x = config.getDouble(path + ".x");
             double y = config.getDouble(path + ".y");
@@ -50,7 +50,7 @@ public class GuildBannerLoader extends BukkitRunnable {
             location.setYaw(yaw);
             location.getChunk().setForceLoaded(true);
             PostedGuildBanner banner = new PostedGuildBanner(guilds.get(i - 1), location);
-            Plugin.getPostedGuildBanners().add(banner);
+            RunicGuilds.getPostedGuildBanners().add(banner);
         }
     }
 }
