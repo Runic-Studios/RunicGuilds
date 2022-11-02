@@ -1,8 +1,11 @@
 package com.runicrealms.runicguilds.guild;
 
-import com.runicrealms.runicguilds.guild.stage.GuildStageProgress;
+import com.runicrealms.plugin.utilities.ChatUtils;
+import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -11,7 +14,6 @@ public class Guild implements Cloneable {
 
     private final Set<GuildMember> members;
     private final GuildBanner guildBanner;
-    private final GuildStageProgress guildStageProgress;
     private GuildMember owner;
     private String guildName;
     private String guildPrefix;
@@ -19,8 +21,21 @@ public class Guild implements Cloneable {
     private List<ItemStack> bank;
     private Integer bankSize;
     private final Map<GuildRank, Boolean> bankAccess;
+    private int guildExp;
+    private GuildStage guildStage;
 
-    public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+    /**
+     * @param members
+     * @param owner
+     * @param guildName
+     * @param guildPrefix
+     * @param bank
+     * @param bankSize
+     * @param bankAccess
+     * @param guildEXP
+     */
+    public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix,
+                 List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
         this.members = members;
         this.owner = owner;
         this.guildName = guildName;
@@ -30,10 +45,23 @@ public class Guild implements Cloneable {
         this.bankAccess = bankAccess;
         this.recalculateScore();
         this.guildBanner = new GuildBanner(this);
-        this.guildStageProgress = new GuildStageProgress(this, guildEXP);
+        this.guildExp = guildEXP;
+        this.guildStage = this.expToStage();
     }
 
-    public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix, List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+    /**
+     * @param members
+     * @param guildBanner
+     * @param owner
+     * @param guildName
+     * @param guildPrefix
+     * @param bank
+     * @param bankSize
+     * @param bankAccess
+     * @param guildEXP
+     */
+    public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix,
+                 List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
         this.members = members;
         this.owner = owner;
         this.guildName = guildName;
@@ -41,9 +69,10 @@ public class Guild implements Cloneable {
         this.bank = bank;
         this.bankSize = bankSize;
         this.bankAccess = bankAccess;
-        this.guildStageProgress = new GuildStageProgress(this, guildEXP);
         this.recalculateScore();
         this.guildBanner = new GuildBanner(this, guildBanner);
+        this.guildExp = guildEXP;
+        this.guildStage = this.expToStage();
     }
 
     public Set<GuildMember> getMembers() {
@@ -52,10 +81,6 @@ public class Guild implements Cloneable {
 
     public GuildBanner getGuildBanner() {
         return this.guildBanner;
-    }
-
-    public GuildStageProgress getGuildLevel() {
-        return this.guildStageProgress;
     }
 
     public GuildMember getOwner() {
@@ -86,6 +111,14 @@ public class Guild implements Cloneable {
         return this.bankAccess;
     }
 
+    public int getGuildExp() {
+        return guildExp;
+    }
+
+    public GuildStage getGuildStage() {
+        return guildStage;
+    }
+
     public List<GuildMember> getMembersWithOwner() {
         List<GuildMember> membersWithOwner = new ArrayList<>(this.members);
         membersWithOwner.add(this.owner);
@@ -104,11 +137,52 @@ public class Guild implements Cloneable {
         this.bankAccess.put(rank, canAccess);
     }
 
+    /**
+     * @param guildExp
+     */
+    public void setGuildExp(int guildExp) {
+        if (guildExp + this.guildExp > GuildStage.getMaxStage().getExp()) {
+            this.guildExp = GuildStage.getMaxStage().getExp();
+        } else {
+            this.guildExp += guildExp;
+        }
+
+        GuildStage stage = this.expToStage();
+        if (stage == this.getGuildStage()) return; // no level gained
+
+        for (GuildMember member : this.getMembersWithOwner()) {
+            Player player = Bukkit.getOfflinePlayer(member.getUUID()).getPlayer();
+            if (player == null) continue;
+            player.sendMessage("");
+            ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lGUILD STAGE INCREASE"));
+            player.sendMessage("");
+            ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lYour guild has advanced to " + guildStage.getName() + "!"));
+            if (!stage.getStageReward().getMessage().equalsIgnoreCase("")) {
+                ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&l" + stage.getStageReward().getMessage()));
+            }
+            player.sendMessage("");
+        }
+
+        this.guildStage = stage;
+    }
+
     public void transferOwnership(GuildMember member) {
         this.members.add(new GuildMember(this.owner.getUUID(), GuildRank.OFFICER, this.owner.getScore(), this.owner.getLastKnownName()));
         this.owner = null;
         this.owner = member;
         this.members.remove(member);
+    }
+
+    /**
+     * @return
+     */
+    private GuildStage expToStage() {
+        for (GuildStage stage : GuildStage.values()) {
+            if (this.guildExp >= stage.getExp()) {
+                return stage;
+            }
+        }
+        return GuildStage.STAGE0;
     }
 
     public boolean hasMinRank(UUID player, GuildRank rank) {
@@ -202,7 +276,7 @@ public class Guild implements Cloneable {
         for (GuildMember member : this.members) {
             newMembers.add(member.clone());
         }
-        return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankAccess, this.guildStageProgress.getGuildEXP());
+        return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankAccess, this.guildExp);
     }
 
 }

@@ -11,6 +11,7 @@ import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
 import com.runicrealms.runicguilds.gui.GuildBannerUI;
+import com.runicrealms.runicguilds.gui.GuildInfoGUI;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildMember;
@@ -23,7 +24,6 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 @CommandAlias("guild")
@@ -45,30 +45,8 @@ public class GuildCommand extends BaseCommand {
             player.sendMessage(ColorUtil.format(this.prefix + "You are not in a guild!"));
             return;
         }
-
         Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
-        player.sendMessage(ColorUtil.format("&6[" + guild.getScore() + "]&r &e&l" + guild.getGuildName()));
-        player.sendMessage(ColorUtil.format("&6Guild Experience: " + guild.getGuildLevel().getGuildEXP()));
-        player.sendMessage(ColorUtil.format("&6Guild Owner: &7[" + guild.getOwner().getScore() + "] &e" + guild.getOwner().getLastKnownName()));
-
-        HashMap<GuildRank, StringBuilder> members = new HashMap<>();
-        for (GuildMember member : guild.getMembers()) {
-            if (!members.containsKey(member.getRank())) {
-                members.put(member.getRank(), new StringBuilder());
-            }
-            members.get(member.getRank())
-                    .append("&7[")
-                    .append(member.getScore())
-                    .append("] &e")
-                    .append(member.getLastKnownName())
-                    .append("&r, ");
-        }
-
-        for (GuildRank rank : GuildRank.values()) {
-            if (members.containsKey(rank)) {
-                player.sendMessage(ColorUtil.format("&6Guild " + rank.getPlural() + ": &r" + members.get(rank).substring(0, members.get(rank).toString().length() - 2)));
-            }
-        }
+        player.openInventory(new GuildInfoGUI(player, guild).getInventory());
     }
 
     @Subcommand("invite")
@@ -94,7 +72,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (guild.getMembers().size() >= guild.getGuildLevel().getGuildStage().getMaxMembers()) {
+        if (guild.getMembers().size() >= guild.getGuildStage().getMaxMembers()) {
             player.sendMessage(ColorUtil.format(this.prefix + "You have reached your guild stages maximum amount of members."));
             return;
         }
@@ -501,7 +479,7 @@ public class GuildCommand extends BaseCommand {
 
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
 
-        if (guild.getMembers().size() >= guild.getGuildLevel().getGuildStage().getMaxMembers()) {
+        if (guild.getMembers().size() >= guild.getGuildStage().getMaxMembers()) {
             player.sendMessage(ColorUtil.format(this.prefix + "The guild has reached the maximum amount of members for their guild stage."));
             return;
         }
@@ -546,7 +524,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (guild.getGuildLevel().getGuildEXP() < GuildStage.STAGE2.getExp()) {
+        if (guild.getGuildExp() < GuildStage.STAGE2.getExp()) {
             player.sendMessage(ColorUtil.format(this.prefix + "You must be at least guild stage two to execute this command!"));
             return;
         }

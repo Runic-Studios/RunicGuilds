@@ -46,7 +46,7 @@ public class RunicGuildsAPI {
     public static GuildStage getGuildStage(UUID uuid) {
         GuildData data = GuildUtil.getGuildData(uuid);
         if (data != null) {
-            return data.getData().getGuildLevel().getGuildStage();
+            return data.getData().getGuildStage();
         }
         return null;
     }
@@ -54,7 +54,7 @@ public class RunicGuildsAPI {
     public static GuildStage getGuildStage(String prefix) {
         GuildData data = GuildUtil.getGuildData(prefix);
         if (data != null) {
-            return data.getData().getGuildLevel().getGuildStage();
+            return data.getData().getGuildStage();
         }
         return null;
     }

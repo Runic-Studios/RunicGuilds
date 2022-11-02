@@ -7,6 +7,7 @@ import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
 import com.runicrealms.runicguilds.gui.GuildBankUtil;
+import com.runicrealms.runicguilds.gui.GuildInfoGUIListener;
 import com.runicrealms.runicguilds.guild.BannerClickListener;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.GuildBannerUIListener;
@@ -88,7 +89,8 @@ public class RunicGuilds extends JavaPlugin implements Listener {
                         new GuildBannerUIListener(),
                         new BannerClickListener(),
                         new RewardExpListener(),
-                        new RewardDamageListener()
+                        new RewardDamageListener(),
+                        new GuildInfoGUIListener()
                 );
 
 		/*

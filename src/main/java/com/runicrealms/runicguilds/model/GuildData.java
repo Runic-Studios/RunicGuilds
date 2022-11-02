@@ -187,7 +187,7 @@ public class GuildData implements SessionData {
         for (GuildRank rank : this.guild.getBankAccess().keySet()) {
             guildData.set("settings.bank-access." + rank.getIdentifier(), this.guild.canAccessBank(rank));
         }
-        guildData.set("guild-exp", guild.getGuildLevel().getGuildEXP());
+        guildData.set("guild-exp", guild.getGuildExp());
         guildData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
         guildData.save();
     }

@@ -143,7 +143,7 @@ public class GuildBannerUI implements InventoryHolder {
             PatternType pattern = types[i];
             ItemStack item;
 
-            if (this.restrictedPattern(pattern) && this.guild.getGuildLevel().getGuildEXP() < GuildStage.STAGE3.getExp()) {
+            if (this.restrictedPattern(pattern) && this.guild.getGuildExp() < GuildStage.STAGE3.getExp()) {
                 item = this.blocked(pattern);
             } else {
                 item = this.getPattern(pattern);

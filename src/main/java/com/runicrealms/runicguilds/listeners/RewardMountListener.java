@@ -37,7 +37,7 @@ public class RewardMountListener implements Listener {
         GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
         if (guildData == null) return previousSpeed;
         Guild guild = guildData.getData();
-        if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.STAGE5.getExp()) return previousSpeed;
+        if (guild.getGuildStage().getExp() < GuildStage.STAGE5.getExp()) return previousSpeed;
         StageReward stageReward = StageReward.MOUNT_SPEED_BONUS;
         float bonusSpeed = (float) (previousSpeed * stageReward.getBuffPercent());
         return previousSpeed + bonusSpeed;

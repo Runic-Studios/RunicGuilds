@@ -319,7 +319,7 @@ public class GuildModCMD extends BaseCommand {
 
         amount = event.getAmount();
 
-        guild.getGuildLevel().addGuildEXP(amount);
+        guild.setGuildExp(amount);
         // guildData.queueToSave();
         target.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &eYou received " + amount + " guild experience!"));
         if (sender instanceof Player) {

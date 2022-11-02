@@ -37,7 +37,8 @@ public class RewardDamageListener implements Listener {
         GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
         if (guildData == null) return damageBeforeBonus;
         Guild guild = guildData.getData();
-        if (guild.getGuildLevel().getGuildStage().getExp() < GuildStage.STAGE4.getExp()) return damageBeforeBonus;
+        if (guild.getGuildStage().getExp() < GuildStage.STAGE4.getExp())
+            return damageBeforeBonus;
         // todo: ensure any hard reference to stage has correct reward
         StageReward stageReward = StageReward.COMBAT_BONUS;
         int bonusDamage = (int) (damageBeforeBonus * stageReward.getBuffPercent());
