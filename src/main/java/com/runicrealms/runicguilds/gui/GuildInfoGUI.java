@@ -7,12 +7,15 @@ import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -45,6 +48,14 @@ public class GuildInfoGUI implements InventoryHolder {
         GUIUtil.fillInventoryBorders(this.inventory);
         this.inventory.setItem(8, GUIUtil.closeButton());
         this.inventory.setItem(21, guildInfoItem());
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(this.guild.getOwner().getUUID());
+        this.inventory.setItem(23, guildMemberItem
+                (
+                        owner.getPlayer(),
+                        Material.PLAYER_HEAD,
+                        ChatColor.GOLD + "View Members",
+                        ChatColor.GRAY + "View your guild members!"
+                ));
     }
 
     private ItemStack guildInfoItem() {
@@ -68,6 +79,38 @@ public class GuildInfoGUI implements InventoryHolder {
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         menuItem.setItemMeta(meta);
         return menuItem;
+    }
+
+    /**
+     * @param player
+     * @param material
+     * @param name
+     * @param description
+     * @return
+     */
+    private ItemStack guildMemberItem(Player player, Material material, String name, String description) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        assert meta != null;
+
+        if (material == Material.PLAYER_HEAD) {
+            SkullMeta skullMeta = (SkullMeta) meta;
+            skullMeta.setOwningPlayer(player);
+        }
+
+        ArrayList<String> lore = new ArrayList<>();
+        meta.setDisplayName(ColorUtil.format(name));
+        String[] desc = description.split("\n");
+        for (String line : desc) {
+            lore.add(ColorUtil.format(line));
+        }
+        meta.setLore(lore);
+        ((Damageable) meta).setDamage(5);
+        meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        item.setItemMeta(meta);
+        return item;
     }
 
     /**

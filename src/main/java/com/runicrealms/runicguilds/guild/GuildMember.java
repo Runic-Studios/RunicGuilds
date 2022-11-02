@@ -4,10 +4,10 @@ import java.util.UUID;
 
 public class GuildMember implements Cloneable {
 
-    private UUID uuid;
+    private final UUID uuid;
     private GuildRank rank;
     private Integer score;
-    private String name;
+    private final String name;
 
     public GuildMember(UUID uuid, GuildRank rank, Integer score, String name) {
         this.uuid = uuid;

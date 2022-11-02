@@ -3,11 +3,11 @@ package com.runicrealms.runicguilds.guild;
 import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.*;
 
@@ -162,8 +162,10 @@ public class Guild implements Cloneable {
     }
 
     /**
-     * @param player
-     * @param guildStage
+     * Sends a notification when a guild advances a stage
+     *
+     * @param player     to send the message / firework to
+     * @param guildStage that the guild has just reached
      */
     private void sendStageNotification(Player player, GuildStage guildStage) {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 0.5f);
@@ -175,7 +177,11 @@ public class Guild implements Cloneable {
             ChatUtils.sendCenteredMessage(player, ColorUtil.format("&a" + guildStage.getStageReward().getMessage()));
         }
         player.sendMessage("");
-        // todo: firework
+        Firework firework = player.getWorld().spawn(player.getEyeLocation(), Firework.class);
+        FireworkMeta meta = firework.getFireworkMeta();
+        meta.setPower(0);
+        meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.ORANGE).build());
+        firework.setFireworkMeta(meta);
     }
 
     private void setGuildStage(GuildStage guildStage) {
