@@ -15,12 +15,12 @@ import org.bukkit.event.Listener;
 
 public class RewardDamageListener implements Listener {
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST) // last
     public void onSpellDamage(MagicDamageEvent event) {
         event.setAmount(guildCombatBonus(event.getPlayer(), event.getVictim(), event.getAmount()));
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST) // last
     public void onWeaponDamage(PhysicalDamageEvent event) {
         event.setAmount(guildCombatBonus(event.getPlayer(), event.getVictim(), event.getAmount()));
     }
@@ -34,14 +34,15 @@ public class RewardDamageListener implements Listener {
      */
     private int guildCombatBonus(Player player, LivingEntity victim, int damageBeforeBonus) {
         if (victim instanceof Player) return damageBeforeBonus;
+        StageReward damageReward = StageReward.COMBAT_BONUS;
+        GuildStage requiredStage = GuildStage.getFromReward(damageReward);
+        if (requiredStage == null) return damageBeforeBonus;
         GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
         if (guildData == null) return damageBeforeBonus;
         Guild guild = guildData.getData();
-        if (guild.getGuildStage().getExp() < GuildStage.STAGE4.getExp())
+        if (guild.getGuildStage().getRank() < requiredStage.getRank())
             return damageBeforeBonus;
-        // todo: ensure any hard reference to stage has correct reward
-        StageReward stageReward = StageReward.COMBAT_BONUS;
-        int bonusDamage = (int) (damageBeforeBonus * stageReward.getBuffPercent());
+        int bonusDamage = (int) (damageBeforeBonus * damageReward.getBuffPercent());
         return damageBeforeBonus + bonusDamage;
     }
 }
