@@ -525,7 +525,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         if (guild.getGuildExp() < GuildStage.STAGE2.getExp()) {
-            player.sendMessage(ColorUtil.format(this.prefix + "You must be at least guild stage two to execute this command!"));
+            player.sendMessage(ColorUtil.format(this.prefix + "You must be at least guild stage two to create a banner!"));
             return;
         }
 

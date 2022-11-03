@@ -66,6 +66,7 @@ public class GuildInfoGUI implements InventoryHolder {
         List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add(ColorUtil.format("&6&l" + guild.getGuildName()));
+        lore.add(ColorUtil.format("&6Total Score: [" + guild.getScore() + "]"));
         lore.add(ColorUtil.format("&eGuild Stage: [&f" + guild.getGuildStage().getRank() + "&e/" + GuildStage.getMaxStage().getRank() + "]"));
         lore.add(ColorUtil.format("&eGuild Exp: " + guild.getGuildExp()));
         lore.add(ColorUtil.format("&eGuild Owner: " + guild.getOwner().getLastKnownName()));

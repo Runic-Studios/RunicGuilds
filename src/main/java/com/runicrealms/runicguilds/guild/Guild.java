@@ -172,7 +172,7 @@ public class Guild implements Cloneable {
         player.sendMessage("");
         ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lGUILD STAGE INCREASE"));
         ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your guild has advanced to " + guildStage.getName() + "!"));
-        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your max guild size has risen " + guildStage.getMaxMembers() + "!"));
+        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your max guild size has risen to " + guildStage.getMaxMembers() + "!"));
         if (!guildStage.getStageReward().getMessage().equalsIgnoreCase("")) {
             ChatUtils.sendCenteredMessage(player, ColorUtil.format("&a" + guildStage.getStageReward().getMessage()));
         }
