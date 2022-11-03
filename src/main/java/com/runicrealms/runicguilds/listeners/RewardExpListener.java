@@ -6,7 +6,6 @@ import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.guild.stage.StageReward;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,7 +37,6 @@ public class RewardExpListener implements Listener {
         int eventExperience = event.getOriginalAmount(); // exp before other bonuses so we don't apply compound bonuses
         eventExperience *= stageReward.getBuffPercent(); // determine bonus amount
 
-        Bukkit.broadcastMessage("old was: " + event.getFinalAmount() + " and new is " + (event.getFinalAmount() + eventExperience));
         event.setFinalAmount(event.getFinalAmount() + eventExperience);
     }
 

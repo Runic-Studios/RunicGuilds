@@ -296,7 +296,7 @@ public class GuildModCMD extends BaseCommand {
         GuildEXPSource source = this.getGuildExpSource(args[1]);
         if (source == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cYou have entered an invalid source, here is a list of sources that you can use to execute this command!"));
-            sender.sendMessage(ColorUtil.format(this.prefix + "&cHere are the valid sources: Kill, Quest, Brawl, Other"));
+            sender.sendMessage(ColorUtil.format(this.prefix + "&cHere are the valid sources: Order, Other"));
             sender.sendMessage(ColorUtil.format(this.prefix + "&c/giveguildexp <player> <source> <amount>"));
             return;
         }
@@ -411,7 +411,7 @@ public class GuildModCMD extends BaseCommand {
 
     private GuildEXPSource getGuildExpSource(String name) {
         for (GuildEXPSource source : GuildEXPSource.values()) {
-            if (source.name().equalsIgnoreCase(name)) {
+            if (source.name().replace("_", " ").equalsIgnoreCase(name)) {
                 return source;
             }
         }
