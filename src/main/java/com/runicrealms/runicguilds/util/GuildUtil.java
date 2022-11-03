@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 public class GuildUtil {
 
+    public static final String PREFIX = "&r&6&lGuilds »&r &e";
     private static final Map<String, GuildData> guilds = new HashMap<>();
     private static final Map<UUID, String> players = new HashMap<>();
 

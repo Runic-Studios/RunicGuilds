@@ -12,29 +12,29 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
-public class GuildInfoGUIListener implements Listener {
+public class GuildMembersGUIListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         if (e.getClickedInventory() == null) return;
-        if (!(e.getView().getTopInventory().getHolder() instanceof GuildInfoGUI)) return;
+        if (!(e.getView().getTopInventory().getHolder() instanceof GuildMembersGUI)) return;
         // prevent clicking items in player inventory
         if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
             e.setCancelled(true);
             return;
         }
-        GuildInfoGUI guildInfoGUI = (GuildInfoGUI) e.getClickedInventory().getHolder();
-        if (guildInfoGUI == null) return;
+        GuildMembersGUI guildMembersGUI = (GuildMembersGUI) e.getClickedInventory().getHolder();
+        if (guildMembersGUI == null) return;
 
         // insurance
-        if (!e.getWhoClicked().equals(guildInfoGUI.getPlayer())) {
+        if (!e.getWhoClicked().equals(guildMembersGUI.getPlayer())) {
             e.setCancelled(true);
             e.getWhoClicked().closeInventory();
             return;
         }
         Player player = (Player) e.getWhoClicked();
         if (e.getCurrentItem() == null) return;
-        if (guildInfoGUI.getInventory().getItem(e.getRawSlot()) == null) return;
+        if (guildMembersGUI.getInventory().getItem(e.getRawSlot()) == null) return;
         ItemStack item = e.getCurrentItem();
         Material material = item.getType();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
@@ -43,8 +43,8 @@ public class GuildInfoGUIListener implements Listener {
         Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
         if (material == GUIUtil.closeButton().getType())
             player.closeInventory();
-        else if (material == Material.PLAYER_HEAD)
-            player.openInventory(new GuildMembersGUI(player, guild).getInventory());
+        else if (material == GUIUtil.backButton().getType())
+            e.getWhoClicked().openInventory(new GuildInfoGUI(player, guild).getInventory());
     }
 
 }

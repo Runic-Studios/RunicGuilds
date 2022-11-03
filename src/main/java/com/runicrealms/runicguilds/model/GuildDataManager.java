@@ -3,12 +3,15 @@ package com.runicrealms.runicguilds.model;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.redis.RedisUtil;
+import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,6 +55,8 @@ public class GuildDataManager implements Listener {
     @EventHandler
     public void onKick(GuildMemberKickedEvent event) {
         Player whoWasKicked = Bukkit.getPlayer(event.getKicked());
+        if (whoWasKicked == null) return;
+        whoWasKicked.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
         syncDisplays(whoWasKicked);
         for (GuildMember member : event.getGuild().getMembersWithOwner()) {
             Player playerMember = Bukkit.getPlayer(member.getUUID());

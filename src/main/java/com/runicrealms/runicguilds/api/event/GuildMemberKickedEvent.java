@@ -8,10 +8,10 @@ import java.util.UUID;
 
 public class GuildMemberKickedEvent extends Event {
 
-    private Guild guild;
-    private UUID kicked;
-    private UUID kicker;
-    private boolean modKicked;
+    private final Guild guild;
+    private final UUID kicked;
+    private final UUID kicker;
+    private final boolean modKicked;
 
     private static final HandlerList handlers = new HandlerList();
 
