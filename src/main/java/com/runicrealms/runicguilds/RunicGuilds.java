@@ -6,16 +6,16 @@ import com.runicrealms.RunicChat;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
-import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.gui.GuildInfoGUIListener;
-import com.runicrealms.runicguilds.gui.GuildMembersGUIListener;
 import com.runicrealms.runicguilds.guild.BannerClickListener;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
-import com.runicrealms.runicguilds.guild.GuildBannerUIListener;
 import com.runicrealms.runicguilds.guild.PostedGuildBanner;
 import com.runicrealms.runicguilds.listeners.*;
 import com.runicrealms.runicguilds.model.GuildDataManager;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
+import com.runicrealms.runicguilds.ui.GuildBankUtil;
+import com.runicrealms.runicguilds.ui.GuildBannerUIListener;
+import com.runicrealms.runicguilds.ui.GuildInfoUIListener;
+import com.runicrealms.runicguilds.ui.GuildMembersUIListener;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicrestart.event.ServerShutdownEvent;
@@ -89,8 +89,8 @@ public class RunicGuilds extends JavaPlugin implements Listener {
                         new RewardExpListener(),
                         new RewardDamageListener(),
                         new RewardMountListener(),
-                        new GuildInfoGUIListener(),
-                        new GuildMembersGUIListener()
+                        new GuildInfoUIListener(),
+                        new GuildMembersUIListener()
                 );
 
 		/*

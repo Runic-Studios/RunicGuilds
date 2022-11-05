@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.gui;
+package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuildMembersGUI implements InventoryHolder {
+public class GuildMembersUI implements InventoryHolder {
 
     private final Inventory inventory;
     private final Player player;
@@ -34,7 +34,7 @@ public class GuildMembersGUI implements InventoryHolder {
      * @param player who entered the command
      * @param guild  of the player
      */
-    public GuildMembersGUI(Player player, Guild guild) {
+    public GuildMembersUI(Player player, Guild guild) {
         this.player = player;
         this.guild = guild;
         this.inventory = Bukkit.createInventory(this, 54, ChatColor.GOLD + this.guild.getGuildName());
@@ -47,8 +47,8 @@ public class GuildMembersGUI implements InventoryHolder {
     private void openMenu() {
         this.inventory.clear();
         GUIUtil.fillInventoryBorders(this.inventory);
-        this.inventory.setItem(0, GUIUtil.backButton());
-        this.inventory.setItem(8, GUIUtil.closeButton());
+        this.inventory.setItem(0, GUIUtil.BACK_BUTTON);
+        this.inventory.setItem(8, GUIUtil.CLOSE_BUTTON);
         List<GuildMember> sortedByRank = new ArrayList<>(this.guild.getMembersWithOwner());
         sortedByRank.sort(new RankCompare());
         for (GuildMember guildMember : sortedByRank) {

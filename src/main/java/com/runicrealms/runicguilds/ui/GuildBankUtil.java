@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.gui;
+package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.RunicGuilds;

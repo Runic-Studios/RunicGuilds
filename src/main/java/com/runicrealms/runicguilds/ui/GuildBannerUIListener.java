@@ -1,7 +1,7 @@
-package com.runicrealms.runicguilds.guild;
+package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
-import com.runicrealms.runicguilds.gui.GuildBannerUI;
+import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.ChatColor;
@@ -25,51 +25,76 @@ public class GuildBannerUIListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inventory = event.getClickedInventory();
 
-        if (inventory == null) {
-            return;
-        }
-
-        if (!(inventory.getHolder() instanceof GuildBannerUI)) {
-            return;
-        }
-
-        if (event.getCurrentItem() == null) {
-            return;
-        }
+        if (inventory == null) return;
+        if (!(inventory.getHolder() instanceof GuildBannerUI)) return;
+        if (event.getCurrentItem() == null) return;
 
         event.setCancelled(true);
 
-        GuildBannerUI ui = (GuildBannerUI) inventory.getHolder();
-        BannerMeta meta = (BannerMeta) ui.getDummyBanner().getItemMeta();
+        GuildBannerUI guildBannerUI = (GuildBannerUI) inventory.getHolder();
+        BannerMeta meta = (BannerMeta) guildBannerUI.getDummyBanner().getItemMeta();
+        assert meta != null;
         ItemStack item = event.getCurrentItem();
         ItemMeta itemMeta = item.getItemMeta();
         Material material = item.getType();
 
+        if (material == GUIUtil.CLOSE_BUTTON.getType()) {
+            event.getWhoClicked().closeInventory();
+            return;
+        }
+
+        if (material == GUIUtil.BACK_BUTTON.getType()) {
+            guildBannerUI.setupColorMenu();
+            return;
+        }
+
         if (meta.getPatterns().size() >= 6) {
-            this.finish(ui, event.getWhoClicked(), ui.getDummyBanner(), meta);
+            this.finish(guildBannerUI, event.getWhoClicked(), guildBannerUI.getDummyBanner(), meta);
             return;
         }
 
         if (material == Material.SLIME_BALL) {
-            this.confirm(ui, meta);
+            this.confirm(guildBannerUI, meta);
             return;
         }
 
-        if (itemMeta.getPersistentDataContainer().has(ui.getKey(), PersistentDataType.STRING) && this.isConcrete(ui, item)) {
-            this.selectColor(ui, meta, itemMeta);
+        if (itemMeta.getPersistentDataContainer().has(guildBannerUI.getKey(), PersistentDataType.STRING) && this.isConcrete(guildBannerUI, item)) {
+            this.selectColor(guildBannerUI, meta, itemMeta);
             return;
         }
 
         if (material == Material.PAINTING) {
-            this.selectPattern(ui, item, meta);
+            this.selectPattern(guildBannerUI, item, meta);
             return;
         }
 
-        if (itemMeta.getPersistentDataContainer().has(ui.getKey(), PersistentDataType.STRING) && this.isBanner(ui, item)) {
-            this.finish(ui, event.getWhoClicked(), ui.getDummyBanner(), meta);
+        if (itemMeta.getPersistentDataContainer().has(guildBannerUI.getKey(), PersistentDataType.STRING) && this.isBanner(guildBannerUI, item)) {
+            this.finish(guildBannerUI, event.getWhoClicked(), guildBannerUI.getDummyBanner(), meta);
         }
     }
 
+    /**
+     * @param ui
+     * @param meta
+     */
+    private void selectColor(GuildBannerUI ui, BannerMeta meta) {
+        DyeColor color = DyeColor.WHITE;
+        if (ui.getChosenPattern() == null) {
+            ui.getDummyBanner().setType(Material.valueOf(color.name() + "_BANNER"));
+        } else {
+            meta.removePattern(meta.getPatterns().size() - 1);
+            meta.addPattern(new Pattern(color, ui.getChosenPattern()));
+            ui.getDummyBanner().setItemMeta(meta);
+        }
+        ui.setSelectedColor(color);
+        ui.setupColorMenu();
+    }
+
+    /**
+     * @param ui
+     * @param meta
+     * @param itemMeta
+     */
     private void selectColor(GuildBannerUI ui, BannerMeta meta, ItemMeta itemMeta) {
         DyeColor color = DyeColor.valueOf(itemMeta.getPersistentDataContainer().get(ui.getKey(), PersistentDataType.STRING));
         if (ui.getChosenPattern() == null) {
@@ -80,9 +105,14 @@ public class GuildBannerUIListener implements Listener {
             ui.getDummyBanner().setItemMeta(meta);
         }
         ui.setSelectedColor(color);
-        ui.openColorMenu();
+        ui.setupColorMenu();
     }
 
+    /**
+     * @param ui
+     * @param item
+     * @param meta
+     */
     private void selectPattern(GuildBannerUI ui, ItemStack item, BannerMeta meta) {
         String name = item.getItemMeta().getDisplayName();
         String[] stitch = name.split(" ");
@@ -118,6 +148,10 @@ public class GuildBannerUIListener implements Listener {
         ui.openPatternMenu();
     }
 
+    /**
+     * @param ui
+     * @param meta
+     */
     private void confirm(GuildBannerUI ui, BannerMeta meta) {
         if (ui.getPage() == 1 && ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() == null) {
             ui.setSelectedColor(null);
@@ -133,10 +167,20 @@ public class GuildBannerUIListener implements Listener {
         } else if (ui.getPage() == 2 && ui.getSelectedColor() == null && ui.getSelectedPattern() != null && ui.getChosenPattern() == null) {
             ui.setChosenPattern(ui.getSelectedPattern());
             ui.setSelectedPattern(null);
-            ui.openColorMenu();
+            ui.setupColorMenu();
+        } else {
+            selectColor(ui, meta);
+            ui.setSelectedColor(null);
+            ui.openPatternMenu();
         }
     }
 
+    /**
+     * @param ui
+     * @param player
+     * @param dummy
+     * @param meta
+     */
     private void finish(GuildBannerUI ui, HumanEntity player, ItemStack dummy, BannerMeta meta) {
         if (ui.getSelectedPattern() != null) {
             meta.removePattern(meta.getPatterns().size() - 1);
@@ -165,6 +209,11 @@ public class GuildBannerUIListener implements Listener {
         player.closeInventory();
     }
 
+    /**
+     * @param ui
+     * @param item
+     * @return
+     */
     private boolean isConcrete(GuildBannerUI ui, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
         String name = meta.getPersistentDataContainer().get(ui.getKey(), PersistentDataType.STRING);
@@ -176,12 +225,14 @@ public class GuildBannerUIListener implements Listener {
         return false;
     }
 
+    /**
+     * @param ui
+     * @param item
+     * @return
+     */
     private boolean isBanner(GuildBannerUI ui, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
         String name = meta.getPersistentDataContainer().get(ui.getKey(), PersistentDataType.STRING);
-        if (name.equals("banner")) {
-            return true;
-        }
-        return false;
+        return name.equals("banner");
     }
 }

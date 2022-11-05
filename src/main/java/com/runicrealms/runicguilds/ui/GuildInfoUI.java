@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.gui;
+package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuildInfoGUI implements InventoryHolder {
+public class GuildInfoUI implements InventoryHolder {
 
     private final Inventory inventory;
     private final Player player;
@@ -33,7 +33,7 @@ public class GuildInfoGUI implements InventoryHolder {
      * @param player who entered the command
      * @param guild  of the player
      */
-    public GuildInfoGUI(Player player, Guild guild) {
+    public GuildInfoUI(Player player, Guild guild) {
         this.player = player;
         this.guild = guild;
         this.inventory = Bukkit.createInventory(this, 54, ChatColor.GOLD + this.guild.getGuildName());
@@ -46,7 +46,7 @@ public class GuildInfoGUI implements InventoryHolder {
     private void openMenu() {
         this.inventory.clear();
         GUIUtil.fillInventoryBorders(this.inventory);
-        this.inventory.setItem(8, GUIUtil.closeButton());
+        this.inventory.setItem(8, GUIUtil.CLOSE_BUTTON);
         this.inventory.setItem(21, guildInfoItem());
         OfflinePlayer owner = Bukkit.getOfflinePlayer(this.guild.getOwner().getUUID());
         this.inventory.setItem(23, guildMemberItem

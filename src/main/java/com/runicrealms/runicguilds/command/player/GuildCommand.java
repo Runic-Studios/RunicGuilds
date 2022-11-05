@@ -9,15 +9,15 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
-import com.runicrealms.runicguilds.gui.GuildBankUtil;
-import com.runicrealms.runicguilds.gui.GuildBannerUI;
-import com.runicrealms.runicguilds.gui.GuildInfoGUI;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.ui.GuildBankUtil;
+import com.runicrealms.runicguilds.ui.GuildBannerUI;
+import com.runicrealms.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,7 +44,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
         Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
-        player.openInventory(new GuildInfoGUI(player, guild).getInventory());
+        player.openInventory(new GuildInfoUI(player, guild).getInventory());
     }
 
     @Subcommand("invite")
@@ -527,10 +527,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildBannerUI ui = new GuildBannerUI(guild);
-        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Initializing user interface..."));
-        player.openInventory(ui.getInventory());
-        ui.openColorMenu();
+        player.openInventory(new GuildBannerUI(guild).getInventory());
     }
 
     private void sendHelpMessage(CommandSender sender) {
