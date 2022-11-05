@@ -9,11 +9,19 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
+/**
+ *
+ */
 public class GuildBannerLoader extends BukkitRunnable {
+
+    private static final int MAX_POSTED_BANNERS = 3; // how many banners display?
+
+    /**
+     * A runnable (which can be called async) to sort the guilds, then calls a sync task to spawn
+     * banners based on the top sorted guilds
+     */
     @Override
     public void run() {
         List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
@@ -26,10 +34,10 @@ public class GuildBannerLoader extends BukkitRunnable {
 
         ordering.sort(comparator);
 
-        if (ordering.size() < 3) {
+        if (ordering.size() < MAX_POSTED_BANNERS) {
             guilds.addAll(ordering);
         } else {
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < MAX_POSTED_BANNERS; i++) {
                 guilds.add(ordering.get(i));
             }
         }
@@ -37,8 +45,11 @@ public class GuildBannerLoader extends BukkitRunnable {
         Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guilds));
     }
 
-    private void makeBanners(List<Guild> guilds) {
-        for (int i = 1; i <= guilds.size(); i++) {
+    private static final Map<String, Location> BANNER_LOCATIONS;
+
+    static {
+        BANNER_LOCATIONS = new HashMap<>();
+        for (int i = 1; i <= MAX_POSTED_BANNERS; i++) {
             String path = "banners.number" + i;
             FileConfiguration config = RunicGuilds.getInstance().getConfig();
             World world = Bukkit.getWorld(config.getString(path + ".world"));
@@ -49,6 +60,19 @@ public class GuildBannerLoader extends BukkitRunnable {
             Location location = new Location(world, x, y, z);
             location.setYaw(yaw);
             location.getChunk().setForceLoaded(true);
+            BANNER_LOCATIONS.put(path, location);
+        }
+    }
+
+    /**
+     * Creates guild banners for display in the guild quarter of 'hub' cities
+     *
+     * @param guilds a filtered list of the top ordered guilds (by guild score)
+     */
+    private void makeBanners(List<Guild> guilds) {
+        for (int i = 1; i <= guilds.size(); i++) {
+            String path = "banners.number" + i;
+            Location location = BANNER_LOCATIONS.get(path);
             PostedGuildBanner banner = new PostedGuildBanner(guilds.get(i - 1), location);
             RunicGuilds.getPostedGuildBanners().add(banner);
         }

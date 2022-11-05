@@ -12,6 +12,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Class to spawn the guild banners in hub cities for display
+ */
 public class PostedGuildBanner {
     private final Guild guild;
     private final ArmorStand[] banner;
@@ -79,7 +82,6 @@ public class PostedGuildBanner {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
-
         Hologram hologram = HologramsAPI.createHologram(RunicGuilds.getInstance(), new Location(world, x - .5, y + 2.85, z + .5));
         hologram.appendTextLine(ColorUtil.format("&r&6&l" + ChatColor.stripColor(this.guild.getGuildName())));
         hologram.appendTextLine(ColorUtil.format("&r&6&lScore: " + this.guild.getScore()));

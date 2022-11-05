@@ -113,7 +113,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
             new PlaceholderAPI().register();
         }
         RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel()); // register channels after place holders
-        new GuildBannerLoader().runTaskTimerAsynchronously(this, 1200, 72000);
+        new GuildBannerLoader().runTaskTimerAsynchronously(this, 10 * 20L, 60 * 20L); // 1 min
 		/*
 		Shops
 		 */
