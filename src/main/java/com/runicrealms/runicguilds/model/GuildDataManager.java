@@ -19,7 +19,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import redis.clients.jedis.Jedis;
 
@@ -57,6 +59,34 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
                 RunicRestartApi.markPluginLoaded("guilds");
             });
         }
+        /*
+        Tab update task
+         */
+        Bukkit.getScheduler().runTaskTimerAsynchronously(RunicGuilds.getInstance(), this::updateGuildTabs, 100L, 20L);
+    }
+
+    @Override
+    public boolean addPlayerScore(UUID player, Integer score) {
+        if (isInGuild(player)) {
+            GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player);
+            if (guildData != null) {
+                guildData.getGuild().increasePlayerScore(player, score);
+                guildData.getGuild().recalculateScore();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public GuildCreationResult createGuild(Player owner, String name, String prefix, boolean modCreated) {
+        GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
+        if (result == GuildCreationResult.SUCCESSFUL) {
+            owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
+            GuildData.setGuildForPlayer(name, owner.toString());
+            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(RunicGuilds.getRunicGuildsAPI().getGuildData(prefix).getGuild(), modCreated));
+        }
+        return result;
     }
 
 //    @EventHandler
@@ -82,30 +112,6 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
 //            RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(player.getUniqueId(), RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildPrefix());
 //        }
 //    }
-
-    @Override
-    public boolean addPlayerScore(UUID player, Integer score) {
-        if (isInGuild(player)) {
-            GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player);
-            if (guildData != null) {
-                guildData.getGuild().increasePlayerScore(player, score);
-                guildData.getGuild().recalculateScore();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public GuildCreationResult createGuild(Player owner, String name, String prefix, boolean modCreated) {
-        GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
-        if (result == GuildCreationResult.SUCCESSFUL) {
-            owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-            GuildData.setGuildForPlayer(name, owner.toString());
-            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(RunicGuilds.getRunicGuildsAPI().getGuildData(prefix).getGuild(), modCreated));
-        }
-        return result;
-    }
 
     @Override
     public List<Guild> getAllGuilds() {
@@ -328,6 +334,11 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH) // late
+    public void onJoin(PlayerJoinEvent event) {
+        syncDisplays(event.getPlayer());
+    }
+
     @EventHandler
     public void onKick(GuildMemberKickedEvent event) {
         Player whoWasKicked = Bukkit.getPlayer(event.getKicked());
@@ -384,7 +395,15 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
                 jedis.expire(key, RedisUtil.EXPIRE_TIME);
             }
         }
-        RunicCore.getTabListManager().setupTab(player);
         RunicCoreAPI.updatePlayerScoreboard(player);
+    }
+
+    /**
+     * Updates the guild section of tab for all online players
+     */
+    private void updateGuildTabs() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            GuildUtil.updateGuildTabColumn(player);
+        }
     }
 }

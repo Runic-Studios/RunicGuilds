@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -59,6 +59,11 @@
     </build>
 
     <repositories>
+        <!-- JitPack/Github Repo (Tabbed, other things) -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
         <!-- Spigot Repo -->
         <repository>
             <id>spigotmc-repo</id>
@@ -175,6 +180,12 @@
             <version>1.16.4</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/../lib/RunicRestart-1.16.4.jar</systemPath>
+        </dependency>
+        <!-- Tabbed API -->
+        <dependency>
+            <groupId>com.github.thekeenant</groupId>
+            <artifactId>tabbed</artifactId>
+            <version>v1.8</version>
         </dependency>
         <!-- ACF -->
         <dependency>
