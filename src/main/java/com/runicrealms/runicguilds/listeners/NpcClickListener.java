@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.ui.GuildBankUtil;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;

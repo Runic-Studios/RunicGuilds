@@ -7,19 +7,15 @@ import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
-import com.runicrealms.runicguilds.guild.BannerClickListener;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.PostedGuildBanner;
-import com.runicrealms.runicguilds.listeners.NpcClickListener;
-import com.runicrealms.runicguilds.listeners.RewardDamageListener;
-import com.runicrealms.runicguilds.listeners.RewardExpListener;
-import com.runicrealms.runicguilds.listeners.RewardMountListener;
+import com.runicrealms.runicguilds.listeners.*;
 import com.runicrealms.runicguilds.model.GuildDataManager;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
-import com.runicrealms.runicguilds.ui.GuildBankUtil;
 import com.runicrealms.runicguilds.ui.GuildBannerUIListener;
 import com.runicrealms.runicguilds.ui.GuildInfoUIListener;
 import com.runicrealms.runicguilds.ui.GuildMembersUIListener;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicrestart.event.ServerShutdownEvent;
 import org.bukkit.Bukkit;
@@ -84,17 +80,16 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         this.registerEvents
                 (
                         this,
-                        // new PlayerJoinListener(),
                         new GuildBankUtil(),
                         new NpcClickListener(),
-                        new GuildDataManager(),
                         new GuildBannerUIListener(),
                         new BannerClickListener(),
                         new RewardExpListener(),
                         new RewardDamageListener(),
                         new RewardMountListener(),
                         new GuildInfoUIListener(),
-                        new GuildMembersUIListener()
+                        new GuildMembersUIListener(),
+                        new GuildEventListener()
                 );
 
 		/*

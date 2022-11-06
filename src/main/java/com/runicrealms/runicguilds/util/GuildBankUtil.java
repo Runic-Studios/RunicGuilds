@@ -1,10 +1,12 @@
-package com.runicrealms.runicguilds.ui;
+package com.runicrealms.runicguilds.util;
 
+import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.ui.ItemBuilder;
 import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicitems.item.RunicItem;
 import org.bukkit.Bukkit;
@@ -21,6 +23,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import redis.clients.jedis.Jedis;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -77,16 +80,33 @@ public class GuildBankUtil implements Listener {
             bank.set(i, inventory.getItem(i - ((page - 1) * 45)));
         }
         guildData.getGuild().setBank(bank);
-        // guildData.queueToSave();
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            guildData.writeToJedis(jedis);
+        }
     }
 
     public static boolean isViewingBank(UUID uuid) {
         return viewers.containsKey(uuid);
     }
 
+    private static void refreshViewers(ViewerInfo viewer) {
+        Map<UUID, Integer> playersToRefresh = new HashMap<>();
+        for (Entry<UUID, ViewerInfo> entry : viewers.entrySet()) {
+            if (entry.getValue().getGuildPrefix().equalsIgnoreCase(viewer.getGuildPrefix())) {
+                playersToRefresh.put(entry.getKey(), entry.getValue().getPage());
+            }
+        }
+        for (Entry<UUID, Integer> playerToRefresh : playersToRefresh.entrySet()) {
+            Player otherPlayer = Bukkit.getPlayer(playerToRefresh.getKey());
+            open(otherPlayer, playerToRefresh.getValue());
+        }
+    }
+
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        viewers.remove(event.getPlayer().getUniqueId());
+    public void onDropItemEvent(PlayerDropItemEvent event) {
+        if (viewers.containsKey(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -122,7 +142,9 @@ public class GuildBankUtil implements Listener {
                                             for (int i = 0; i < 45; i++) {
                                                 guild.getBank().add(null);
                                             }
-                                            // guildData.queueToSave();
+                                            try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+                                                guildData.writeToJedis(jedis);
+                                            }
                                             refreshViewers(viewer);
                                         } else {
                                             event.setCancelled(true);
@@ -177,23 +199,8 @@ public class GuildBankUtil implements Listener {
     }
 
     @EventHandler
-    public void onDropItemEvent(PlayerDropItemEvent event) {
-        if (viewers.containsKey(event.getPlayer().getUniqueId())) {
-            event.setCancelled(true);
-        }
-    }
-
-    private static void refreshViewers(ViewerInfo viewer) {
-        Map<UUID, Integer> playersToRefresh = new HashMap<>();
-        for (Entry<UUID, ViewerInfo> entry : viewers.entrySet()) {
-            if (entry.getValue().getGuildPrefix().equalsIgnoreCase(viewer.getGuildPrefix())) {
-                playersToRefresh.put(entry.getKey(), entry.getValue().getPage());
-            }
-        }
-        for (Entry<UUID, Integer> playerToRefresh : playersToRefresh.entrySet()) {
-            Player otherPlayer = Bukkit.getPlayer(playerToRefresh.getKey());
-            open(otherPlayer, playerToRefresh.getValue());
-        }
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        viewers.remove(event.getPlayer().getUniqueId());
     }
 
     private static class ViewerInfo {
@@ -206,12 +213,12 @@ public class GuildBankUtil implements Listener {
             this.guildPrefix = guildPrefix;
         }
 
-        public Integer getPage() {
-            return this.currentPage;
-        }
-
         public String getGuildPrefix() {
             return this.guildPrefix;
+        }
+
+        public Integer getPage() {
+            return this.currentPage;
         }
 
     }

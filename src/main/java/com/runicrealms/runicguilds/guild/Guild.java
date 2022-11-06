@@ -6,7 +6,7 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.ui.GuildBankUtil;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import org.bukkit.*;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;

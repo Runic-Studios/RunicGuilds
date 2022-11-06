@@ -1,8 +1,12 @@
-package com.runicrealms.runicguilds.guild;
+package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.ClickGuildBannerEvent;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.guild.PostedGuildBanner;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;

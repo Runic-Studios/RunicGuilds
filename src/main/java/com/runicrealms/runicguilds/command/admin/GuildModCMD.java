@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.command.admin;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
@@ -15,11 +16,12 @@ import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.ui.GuildBankUtil;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -270,7 +272,9 @@ public class GuildModCMD extends BaseCommand {
         }
 
         guild.increasePlayerScore(target.getUniqueId(), amount);
-        // guildData.queueToSave();
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            guildData.writeToJedis(jedis);
+        }
         sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
     }
 
@@ -304,18 +308,12 @@ public class GuildModCMD extends BaseCommand {
             GuildBankUtil.close(Bukkit.getPlayer(args[0]));
         }
 
-//        if (RunicGuilds.getRunicGuildsAPI().getPlayerCache().containsKey(uuid)) {
-//            RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(uuid, null);
-//        }
-
         GuildData.setGuildForPlayer("None", uuid.toString());
         guild.removeMember(uuid);
         // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, uuid, player.getUniqueId(), true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
     }
-
-    // todo: adapt to use as a MM command
 
     @Subcommand("forceloadbanners")
     @Conditions("is-op")

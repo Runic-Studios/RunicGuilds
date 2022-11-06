@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.command.player;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
@@ -14,14 +15,15 @@ import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.ui.GuildBankUtil;
 import com.runicrealms.runicguilds.ui.GuildBannerUI;
 import com.runicrealms.runicguilds.ui.GuildInfoUI;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
 
@@ -95,8 +97,9 @@ public class GuildCommand extends BaseCommand {
         GuildData.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation."));
 
-        // guildData.queueToSave();
-        // RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(player.getUniqueId(), guild.getGuildPrefix());
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            guildData.writeToJedis(jedis);
+        }
         Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
         GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
@@ -251,7 +254,9 @@ public class GuildCommand extends BaseCommand {
 
         member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + member.getLastKnownName() + " has been demoted."));
-        // guildData.queueToSave();
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            guildData.writeToJedis(jedis);
+        }
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, member.getUUID(), player.getUniqueId()));
     }
 
@@ -414,7 +419,6 @@ public class GuildCommand extends BaseCommand {
         guild.removeMember(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
 
-        // RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(player.getUniqueId(), null);
         // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guild, player.getUniqueId()));
 
