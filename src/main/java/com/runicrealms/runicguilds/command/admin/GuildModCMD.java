@@ -146,17 +146,10 @@ public class GuildModCMD extends BaseCommand {
 
         for (GuildMember member : guild.getMembers()) {
             GuildData.setGuildForPlayer("None", member.getUUID().toString());
-//            if (RunicGuilds.getRunicGuildsAPI().getPlayerCache().containsKey(member.getUUID())) {
-//                RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(member.getUUID(), null);
-//            }
             if (GuildBankUtil.isViewingBank(member.getUUID())) {
                 GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
             }
         }
-
-//        if (RunicGuilds.getRunicGuildsAPI().getPlayerCache().containsKey(guild.getOwner().getUUID())) {
-//            RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(guild.getOwner().getUUID(), null);
-//        }
 
         Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, null, true));
         //RunicGuilds.getRunicGuildsAPI().getGuildDatas().get(args[0]).deleteData();

@@ -384,9 +384,6 @@ public class GuildCommand extends BaseCommand {
         guild.removeMember(otherPlayer);
         GuildData.setGuildForPlayer("None", otherPlayer.toString());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
-//        if (RunicGuilds.getRunicGuildsAPI().getPlayerCache().containsKey(otherPlayer)) {
-//            RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(otherPlayer, null);
-//        }
 
         // guildData.queueToSave();
         Player target = Bukkit.getPlayerExact(args[0]);

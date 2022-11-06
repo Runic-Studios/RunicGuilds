@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class RunicGuilds extends JavaPlugin implements Listener {
 
@@ -73,14 +72,11 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         instance = this;
         this.saveDefaultConfig();
         runicGuildsAPI = new GuildDataManager();
-        // RunicGuilds.getRunicGuildsAPI().loadGuilds(); // marks plugin loaded for RunicRestart
-        Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
         GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
         GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
         GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");
         GUILD_COST = this.getConfig().getInt("guild-cost");
         MAX_BANK_PAGES = this.getConfig().getInt("max-bank-pages");
-        // PlayerJoinListener.initializePlayerCache();
 
 		/*
 		Events

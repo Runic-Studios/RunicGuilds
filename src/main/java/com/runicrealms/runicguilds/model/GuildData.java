@@ -150,6 +150,7 @@ public class GuildData implements SessionData {
         return null;
     }
 
+    // todo: investigate this method
     public static void setGuildForPlayer(String name, String uuid) {
         // todo: update redis as well
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {

@@ -24,10 +24,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,6 +57,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
         Tab update task
          */
         Bukkit.getScheduler().runTaskTimerAsynchronously(RunicGuilds.getInstance(), this::updateGuildTabs, 100L, 20L);
+        Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
     }
 
     @Override
@@ -89,14 +92,6 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
         }
         return allGuilds;
     }
-
-//    @EventHandler
-//    public void onQuit(PlayerQuitEvent event) {
-//        RunicGuilds.getRunicGuildsAPI().getPlayerCache().remove(event.getPlayer().getUniqueId());
-//        GuildCommandMapManager.getTransferOwnership().remove(event.getPlayer().getUniqueId());
-//        GuildCommandMapManager.getDisbanding().remove(event.getPlayer().getUniqueId());
-//        RunicGuilds.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
-//    }
 
     @Override
     public Guild getGuild(UUID uuid) {
@@ -274,7 +269,6 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
             GuildData data = new GuildData(guild.getGuildPrefix(), guildMongoData, jedis);
             guildDataMap.put(prefix, data);
         }
-        // players.put(owner, prefix);
         // data.queueToSave();
         return GuildCreationResult.SUCCESSFUL;
     }
@@ -379,6 +373,16 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
             if (playerMember == null) continue;
             syncDisplays(playerMember);
         }
+    }
+
+    /**
+     * Clears player from in-memory command maps
+     */
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        GuildCommandMapManager.getTransferOwnership().remove(event.getPlayer().getUniqueId());
+        GuildCommandMapManager.getDisbanding().remove(event.getPlayer().getUniqueId());
+        RunicGuilds.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
