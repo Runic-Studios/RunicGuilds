@@ -34,6 +34,7 @@ import java.util.logging.Level;
  */
 public class GuildData implements SessionData {
 
+    private static final String DATA_PATH = "guilds";
     private final String prefix; // of the GUILD
     private Guild guild;
 
@@ -129,6 +130,10 @@ public class GuildData implements SessionData {
         }
     }
 
+    public GuildData(String prefix, Jedis jedis) {
+        this.prefix = prefix;
+    }
+
     /**
      * @param item
      * @return
@@ -145,11 +150,8 @@ public class GuildData implements SessionData {
         return null;
     }
 
-    public GuildData(String prefix, Jedis jedis) {
-        this.prefix = prefix;
-    }
-
     public static void setGuildForPlayer(String name, String uuid) {
+        // todo: update redis as well
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             PlayerMongoData mongoData = new PlayerMongoData(uuid);
             mongoData.set("guild", name);
@@ -157,7 +159,29 @@ public class GuildData implements SessionData {
         });
     }
 
-    public void deleteData() {
+    /**
+     * @param item
+     * @return
+     */
+    private static String serializeItemStack(ItemStack item) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
+            dataOutput.writeObject(item);
+            dataOutput.close();
+            return Base64Coder.encodeLines(outputStream.toByteArray());
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * @param jedis
+     */
+    public void delete(Jedis jedis) {
+        RunicGuilds.getRunicGuildsAPI().getGuildDataMap().remove(this.prefix);
+        jedis.del(DATA_PATH + ":" + this.prefix);
         RunicCore.getDatabaseManager().getGuildData().deleteOne(Filters.eq("prefix", this.guild.getGuildPrefix()));
     }
 
@@ -212,23 +236,6 @@ public class GuildData implements SessionData {
         guildMongoData.set("guild-exp", guild.getGuildExp());
         guildMongoData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
         return mongoData;
-    }
-
-    /**
-     * @param item
-     * @return
-     */
-    private static String serializeItemStack(ItemStack item) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
-            dataOutput.writeObject(item);
-            dataOutput.close();
-            return Base64Coder.encodeLines(outputStream.toByteArray());
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-        return null;
     }
 
     public Guild getGuild() {

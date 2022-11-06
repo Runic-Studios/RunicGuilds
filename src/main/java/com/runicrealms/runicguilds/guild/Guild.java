@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds.guild;
 import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.ui.GuildBankUtil;
@@ -55,26 +56,6 @@ public class Guild implements Cloneable {
         this.guildStage = this.expToStage();
     }
 
-    public void recalculateScore() {
-        this.score = 0;
-        for (GuildMember member : members) {
-            score += member.getScore();
-        }
-        score += owner.getScore();
-    }
-
-    /**
-     * @return
-     */
-    private GuildStage expToStage() {
-        for (GuildStage stage : GuildStage.values()) {
-            if (this.guildExp >= stage.getExp()) {
-                return stage;
-            }
-        }
-        return GuildStage.STAGE0;
-    }
-
     /**
      * @param members
      * @param guildBanner
@@ -120,6 +101,28 @@ public class Guild implements Cloneable {
             newMembers.add(member.clone());
         }
         return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankAccess, this.guildExp);
+    }
+
+    /**
+     * Disbands this guild, removing its data
+     *
+     * @param player    who disbanded the guild
+     * @param guildData the data object wrapper
+     */
+    public void disband(Player player, GuildData guildData) {
+        Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(this, player, false));
+    }
+
+    /**
+     * @return
+     */
+    private GuildStage expToStage() {
+        for (GuildStage stage : GuildStage.values()) {
+            if (this.guildExp >= stage.getExp()) {
+                return stage;
+            }
+        }
+        return GuildStage.STAGE0;
     }
 
     public List<ItemStack> getBank() {
@@ -173,45 +176,50 @@ public class Guild implements Cloneable {
         this.guildStage = newStage;
     }
 
+    public String getGuildName() {
+        return this.guildName;
+    }
+
+    public void setGuildName(String name) {
+        this.guildName = name;
+    }
+
+    public String getGuildPrefix() {
+        return this.guildPrefix;
+    }
+
+    public void setGuildPrefix(String prefix) {
+        this.guildPrefix = prefix;
+    }
+
     public GuildStage getGuildStage() {
         return guildStage;
-    }
-
-    public List<GuildMember> getMembersWithOwner() {
-        List<GuildMember> membersWithOwner = new ArrayList<>(this.members);
-        membersWithOwner.add(this.owner);
-        return membersWithOwner;
-    }
-
-    /**
-     * Sends a notification when a guild advances a stage
-     *
-     * @param player     to send the message / firework to
-     * @param guildStage that the guild has just reached
-     */
-    private void sendStageNotification(Player player, GuildStage guildStage) {
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 0.5f);
-        player.sendMessage("");
-        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lGUILD STAGE INCREASE"));
-        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your guild has advanced to " + guildStage.getName() + "!"));
-        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your max guild size has risen to " + guildStage.getMaxMembers() + "!"));
-        if (!guildStage.getStageReward().getMessage().equalsIgnoreCase("")) {
-            ChatUtils.sendCenteredMessage(player, ColorUtil.format("&a" + guildStage.getStageReward().getMessage()));
-        }
-        player.sendMessage("");
-        Firework firework = player.getWorld().spawn(player.getEyeLocation(), Firework.class);
-        FireworkMeta meta = firework.getFireworkMeta();
-        meta.setPower(0);
-        meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.ORANGE).build());
-        firework.setFireworkMeta(meta);
     }
 
     private void setGuildStage(GuildStage guildStage) {
         this.guildStage = guildStage;
     }
 
+    public GuildMember getMember(UUID player) {
+        if (this.owner.getUUID().toString().equalsIgnoreCase(player.toString())) {
+            return this.owner;
+        }
+        for (GuildMember member : this.members) {
+            if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
+                return member;
+            }
+        }
+        return null;
+    }
+
     public Set<GuildMember> getMembers() {
         return this.members;
+    }
+
+    public List<GuildMember> getMembersWithOwner() {
+        List<GuildMember> membersWithOwner = new ArrayList<>(this.members);
+        membersWithOwner.add(this.owner);
+        return membersWithOwner;
     }
 
     public GuildMember getOwner() {
@@ -243,18 +251,6 @@ public class Guild implements Cloneable {
         this.recalculateScore();
     }
 
-    public GuildMember getMember(UUID player) {
-        if (this.owner.getUUID().toString().equalsIgnoreCase(player.toString())) {
-            return this.owner;
-        }
-        for (GuildMember member : this.members) {
-            if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
-                return member;
-            }
-        }
-        return null;
-    }
-
     public boolean isInGuild(String playerName) {
         @SuppressWarnings("deprecation")
         OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
@@ -264,6 +260,14 @@ public class Guild implements Cloneable {
         return false;
     }
 
+    public void recalculateScore() {
+        this.score = 0;
+        for (GuildMember member : members) {
+            score += member.getScore();
+        }
+        score += owner.getScore();
+    }
+
     public void removeMember(UUID uuid) {
         for (GuildMember member : members) {
             if (member.getUUID().toString().equalsIgnoreCase(uuid.toString())) {
@@ -271,6 +275,29 @@ public class Guild implements Cloneable {
                 break;
             }
         }
+    }
+
+    /**
+     * Sends a notification when a guild advances a stage
+     *
+     * @param player     to send the message / firework to
+     * @param guildStage that the guild has just reached
+     */
+    private void sendStageNotification(Player player, GuildStage guildStage) {
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 0.5f);
+        player.sendMessage("");
+        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6&lGUILD STAGE INCREASE"));
+        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your guild has advanced to " + guildStage.getName() + "!"));
+        ChatUtils.sendCenteredMessage(player, ColorUtil.format("&6Your max guild size has risen to " + guildStage.getMaxMembers() + "!"));
+        if (!guildStage.getStageReward().getMessage().equalsIgnoreCase("")) {
+            ChatUtils.sendCenteredMessage(player, ColorUtil.format("&a" + guildStage.getStageReward().getMessage()));
+        }
+        player.sendMessage("");
+        Firework firework = player.getWorld().spawn(player.getEyeLocation(), Firework.class);
+        FireworkMeta meta = firework.getFireworkMeta();
+        meta.setPower(0);
+        meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.ORANGE).build());
+        firework.setFireworkMeta(meta);
     }
 
     public void setBankAccess(GuildRank rank, Boolean canAccess) {
@@ -333,22 +360,6 @@ public class Guild implements Cloneable {
             return GuildReprefixResult.INTERNAL_ERROR;
         }
         return GuildReprefixResult.SUCCESSFUL;
-    }
-
-    public String getGuildName() {
-        return this.guildName;
-    }
-
-    public String getGuildPrefix() {
-        return this.guildPrefix;
-    }
-
-    public void setGuildPrefix(String prefix) {
-        this.guildPrefix = prefix;
-    }
-
-    public void setGuildName(String name) {
-        this.guildName = name;
     }
 
 }

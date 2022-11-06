@@ -9,8 +9,10 @@ import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.*;
+import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.*;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
+import com.runicrealms.runicguilds.ui.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicrestart.api.RunicRestartApi;
 import org.bson.Document;
@@ -36,28 +38,18 @@ import java.util.regex.Pattern;
  */
 public class GuildDataManager implements Listener, RunicGuildsAPI {
 
-    private final Map<String, GuildData> guildDataMap = new HashMap<>();
+    private final Map<String, GuildData> guildDataMap;
 
     /**
      * Initializes guilds and adds them to memory on plugin startup
      */
     public GuildDataManager() {
+        this.guildDataMap = new HashMap<>();
+        /*
+        Load guilds into memory from mongo / jedis on startup
+         */
         try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-                FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildData().find();
-                for (Document guildDocument : iterable) {
-                    String prefix = guildDocument.getString("prefix");
-                    GuildMongoData guildMongoData = new GuildMongoData(prefix);
-                    guildDataMap.put(prefix,
-                            new GuildData
-                                    (
-                                            prefix,
-                                            guildMongoData,
-                                            jedis
-                                    ));
-                }
-                RunicRestartApi.markPluginLoaded("guilds");
-            });
+            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> loadGuildIntoMemory(jedis));
         }
         /*
         Tab update task
@@ -66,7 +58,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
     }
 
     @Override
-    public boolean addPlayerScore(UUID player, Integer score) {
+    public boolean addGuildScore(UUID player, Integer score) {
         if (isInGuild(player)) {
             GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player);
             if (guildData != null) {
@@ -89,30 +81,6 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
         return result;
     }
 
-//    @EventHandler
-//    public void onJoin(PlayerJoinEvent event) {
-//        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(event.getPlayer().getUniqueId());
-//        if (guildData != null) {
-//            RunicGuilds.getRunicGuildsAPI().put(event.getPlayer().getUniqueId(), guildData.getGuild().getGuildPrefix());
-//        } else {
-//            RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(event.getPlayer().getUniqueId(), null);
-//        }
-//    }
-//
-//    @EventHandler
-//    public void onQuit(PlayerQuitEvent event) {
-//        RunicGuilds.getRunicGuildsAPI().getPlayerCache().remove(event.getPlayer().getUniqueId());
-//        GuildCommandMapManager.getTransferOwnership().remove(event.getPlayer().getUniqueId());
-//        GuildCommandMapManager.getDisbanding().remove(event.getPlayer().getUniqueId());
-//        RunicGuilds.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
-//    }
-//
-//    public static void initializePlayerCache() {
-//        for (Player player : Bukkit.getOnlinePlayers()) {
-//            RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(player.getUniqueId(), RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildPrefix());
-//        }
-//    }
-
     @Override
     public List<Guild> getAllGuilds() {
         List<Guild> allGuilds = new ArrayList<>();
@@ -121,6 +89,14 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
         }
         return allGuilds;
     }
+
+//    @EventHandler
+//    public void onQuit(PlayerQuitEvent event) {
+//        RunicGuilds.getRunicGuildsAPI().getPlayerCache().remove(event.getPlayer().getUniqueId());
+//        GuildCommandMapManager.getTransferOwnership().remove(event.getPlayer().getUniqueId());
+//        GuildCommandMapManager.getDisbanding().remove(event.getPlayer().getUniqueId());
+//        RunicGuilds.getPlayersCreatingGuild().remove(event.getPlayer().getUniqueId());
+//    }
 
     @Override
     public Guild getGuild(UUID uuid) {
@@ -141,13 +117,13 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
     }
 
     @Override
-    public GuildData getGuildData(UUID player) {
+    public GuildData getGuildData(UUID playerUuid) {
         for (Map.Entry<String, GuildData> entry : guildDataMap.entrySet()) {
-            if (entry.getValue().getGuild().getOwner().getUUID().toString().equalsIgnoreCase(player.toString())) {
+            if (entry.getValue().getGuild().getOwner().getUUID().toString().equalsIgnoreCase(playerUuid.toString())) {
                 return entry.getValue();
             }
             for (GuildMember member : entry.getValue().getGuild().getMembers()) {
-                if (member.getUUID().toString().equalsIgnoreCase(player.toString())) {
+                if (member.getUUID().toString().equalsIgnoreCase(playerUuid.toString())) {
                     return entry.getValue();
                 }
             }
@@ -247,10 +223,12 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
     }
 
     /**
-     * @param owner
-     * @param name
-     * @param prefix
-     * @return
+     * Attempts to create a guild
+     *
+     * @param owner  of the guild
+     * @param name   of the guild
+     * @param prefix of the guild
+     * @return the creation result
      */
     private GuildCreationResult createGuild(UUID owner, String name, String prefix) {
         if (prefix.length() < 3 || prefix.length() > 4 || prefix.equalsIgnoreCase("None")) {
@@ -284,7 +262,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
         for (int i = 0; i < 45; i++) {
             bank.add(null);
         }
-        Map<GuildRank, Boolean> bankPermissions = new HashMap<GuildRank, Boolean>();
+        Map<GuildRank, Boolean> bankPermissions = new HashMap<>();
         for (GuildRank rank : GuildRank.values()) {
             if (rank != GuildRank.OWNER && !bankPermissions.containsKey(rank)) {
                 bankPermissions.put(rank, rank.canAccessBankByDefault());
@@ -301,6 +279,22 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
         return GuildCreationResult.SUCCESSFUL;
     }
 
+    private void loadGuildIntoMemory(Jedis jedis) {
+        FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildData().find();
+        for (Document guildDocument : iterable) {
+            String prefix = guildDocument.getString("prefix");
+            GuildMongoData guildMongoData = new GuildMongoData(prefix);
+            guildDataMap.put(prefix,
+                    new GuildData
+                            (
+                                    prefix,
+                                    guildMongoData,
+                                    jedis
+                            ));
+        }
+        RunicRestartApi.markPluginLoaded("guilds");
+    }
+
     @EventHandler
     public void onGuildCreation(GuildCreationEvent event) {
         Player owner = Bukkit.getPlayer(event.getGuild().getOwner().getUUID());
@@ -308,19 +302,43 @@ public class GuildDataManager implements Listener, RunicGuildsAPI {
     }
 
     /**
-     * Delayed by 1s, as this event is called BEFORE the guild is removed.
+     * Handles logic for removing guild data from memory on guild disband
      */
     @EventHandler
     public void onGuildDisband(GuildDisbandEvent event) {
-        Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
-            Player whoDisbanded = Bukkit.getPlayer(event.getDisbander());
-            syncDisplays(whoDisbanded);
-            for (GuildMember member : event.getGuild().getMembersWithOwner()) {
-                Player playerMember = Bukkit.getPlayer(member.getUUID());
-                if (playerMember == null) continue;
-                syncDisplays(playerMember);
+        // set guild data to "None" in redis / mongo, close guild bank
+        Player player = event.getWhoDisbanded();
+        Guild guild = event.getGuild();
+        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(guild.getGuildPrefix());
+        for (GuildMember member : guild.getMembers()) {
+            GuildData.setGuildForPlayer("None", member.getUUID().toString());
+            Player playerMember = Bukkit.getPlayer(member.getUUID());
+            if (playerMember == null) continue;
+            if (GuildBankUtil.isViewingBank(member.getUUID())) {
+                GuildBankUtil.close(playerMember);
             }
-        }, 20L);
+        }
+
+        // remove guild for owner
+        GuildData.setGuildForPlayer("None", guild.getOwner().getUUID().toString());
+        if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
+            Player playerOwner = Bukkit.getPlayer(guild.getOwner().getUUID());
+            if (playerOwner != null)
+                GuildBankUtil.close(playerOwner);
+        }
+
+        // remove from jedis, mongo, and memory
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            guildData.delete(jedis);
+        }
+        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully disbanded guild."));
+        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
+        syncDisplays(event.getWhoDisbanded());
+        for (GuildMember member : event.getGuild().getMembersWithOwner()) {
+            Player playerMember = Bukkit.getPlayer(member.getUUID());
+            if (playerMember == null) continue;
+            syncDisplays(playerMember);
+        }
     }
 
     @EventHandler

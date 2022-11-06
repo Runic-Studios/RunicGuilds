@@ -16,11 +16,13 @@ import java.util.UUID;
 public interface RunicGuildsAPI {
 
     /**
+     * Attempts to add guild score to the given player
+     *
      * @param player to add score
      * @param score  int score to add
      * @return true if successful
      */
-    boolean addPlayerScore(UUID player, Integer score);
+    boolean addGuildScore(UUID player, Integer score);
 
     /**
      * Attempts to create a guild
@@ -34,7 +36,7 @@ public interface RunicGuildsAPI {
     GuildCreationResult createGuild(Player owner, String name, String prefix, boolean modCreated);
 
     /**
-     * @return a list of all guilds
+     * @return a list of all guilds in the guildDataMap
      */
     List<Guild> getAllGuilds();
 
@@ -51,19 +53,19 @@ public interface RunicGuildsAPI {
     Guild getGuild(String prefix);
 
     /**
-     * @param player
-     * @return
+     * @param playerUuid uuid of player to lookup
+     * @return the GuildData object (or null if not found)
      */
-    GuildData getGuildData(UUID player);
+    GuildData getGuildData(UUID playerUuid);
 
     /**
-     * @param prefix
-     * @return
+     * @param prefix of the GUILD
+     * @return the GuildData object (or null if not found)
      */
     GuildData getGuildData(String prefix);
 
     /**
-     * @return
+     * @return a map of guild redis/mongo data, keyed by prefix
      */
     Map<String, GuildData> getGuildDataMap();
 
@@ -88,8 +90,10 @@ public interface RunicGuildsAPI {
     GuildStage getGuildStage(String prefix);
 
     /**
-     * @param guild
-     * @return
+     * Gets a list of online guild members, including the guild owner
+     *
+     * @param guild to check
+     * @return a list of members
      */
     List<GuildMember> getOnlineMembersWithOwner(Guild guild);
 
@@ -100,9 +104,11 @@ public interface RunicGuildsAPI {
     boolean isInGuild(UUID uuid);
 
     /**
-     * @param guildData
-     * @param name
-     * @return
+     * Attempts to rename the given guild
+     *
+     * @param guildData the in-memory data of the guild
+     * @param name      the intended new name
+     * @return a rename result
      */
     GuildRenameResult renameGuild(GuildData guildData, String name);
 }

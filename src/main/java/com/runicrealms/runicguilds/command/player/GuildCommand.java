@@ -67,31 +67,6 @@ public class GuildCommand extends BaseCommand {
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage()));
     }
 
-    private void disbandGuild(Player player, Guild guild, GuildData guildData) {
-        for (GuildMember member : guild.getMembers()) {
-            GuildData.setGuildForPlayer("None", member.getUUID().toString());
-//            if (RunicGuilds.getRunicGuildsAPI().getPlayerCache().containsKey(member.getUUID())) {
-//                RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(member.getUUID(), null);
-//            }
-            if (GuildBankUtil.isViewingBank(member.getUUID())) {
-                GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
-            }
-        }
-
-        // RunicGuilds.getRunicGuildsAPI().getPlayerCache().put(guild.getOwner().getUUID(), null);
-        GuildData.setGuildForPlayer("None", guild.getOwner().getUUID().toString());
-        if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
-            GuildBankUtil.close(Bukkit.getPlayer(guild.getOwner().getUUID()));
-        }
-
-        Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, player.getUniqueId(), false));
-        guildData.deleteData();
-        // RunicGuilds.getRunicGuildsAPI().getGuildDatas().remove(guild.getGuildPrefix());
-        // todo: ensure data removes together
-        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully disbanded guild."));
-        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
-    }
-
     @Subcommand("accept")
     @Conditions("is-player")
     @CommandCompletion("@nothing")
@@ -187,13 +162,12 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildConfirmCommand(Player player, String[] args) {
-
         if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
             // Disbanding
             String prefix = RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
             GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(prefix);
             Guild guild = guildData.getGuild();
-            this.disbandGuild(player, guild, guildData);
+            guild.disband(player, guildData);
         } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
             // Transferring ownership
             String prefix = RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
