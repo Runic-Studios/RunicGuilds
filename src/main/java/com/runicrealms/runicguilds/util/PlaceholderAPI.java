@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.util;
 
-import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -14,11 +14,6 @@ public class PlaceholderAPI extends PlaceholderExpansion {
     }
 
     @Override
-    public boolean persist() {
-        return true;
-    }
-
-    @Override
     public String getAuthor() {
         return "Excel";
     }
@@ -29,12 +24,17 @@ public class PlaceholderAPI extends PlaceholderExpansion {
     }
 
     @Override
+    public boolean persist() {
+        return true;
+    }
+
+    @Override
     public String onPlaceholderRequest(Player player, String arg) {
 
         if (player == null) return null;
 
         String lowerArg = arg.toLowerCase();
-        Guild guild = RunicGuildsAPI.getGuild(player.getUniqueId());
+        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId());
 
         switch (lowerArg) {
             case "name":

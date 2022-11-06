@@ -5,7 +5,6 @@ import com.runicrealms.plugin.item.shops.RunicShopGeneric;
 import com.runicrealms.plugin.item.shops.RunicShopItem;
 import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -47,7 +46,7 @@ public class GuildShopManager {
 
     private RunicItemRunnable runGuildHeraldBuy() {
         return player -> {
-            if (GuildUtil.getPlayerCache().get(player.getUniqueId()) == null) {
+            if (RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
                 if (!RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
                     player.sendMessage
                             (ChatColor.YELLOW + "Creating a guild will cost you " + RunicGuilds.GUILD_COST +

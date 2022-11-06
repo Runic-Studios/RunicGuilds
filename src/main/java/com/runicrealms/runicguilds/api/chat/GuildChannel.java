@@ -1,8 +1,7 @@
 package com.runicrealms.runicguilds.api.chat;
 
 import com.runicrealms.api.chat.ChatChannel;
-import com.runicrealms.runicguilds.api.RunicGuildsAPI;
-import com.runicrealms.runicguilds.util.GuildUtil;
+import com.runicrealms.runicguilds.RunicGuilds;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -15,6 +14,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GuildChannel extends ChatChannel {
+
+    /**
+     * Displays the guild score of the given player, or 0
+     *
+     * @param player to check
+     * @return their guild score
+     */
+    private String displayScore(Player player) {
+        if (RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()) != null
+                && RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
+            return String.valueOf(RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
+        } else {
+            return "0";
+        }
+    }
 
     @Override
     public String getPrefix() {
@@ -29,11 +43,12 @@ public class GuildChannel extends ChatChannel {
     @Override
     public List<Player> getRecipients(Player player) {
         List<Player> recipients = new ArrayList<>();
-        if (GuildUtil.getPlayerCache().get(player.getUniqueId()) != null) {
+        if (RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
             for (Player target : Bukkit.getOnlinePlayers()) {
                 if (target != null) {
-                    if (GuildUtil.getPlayerCache().get(target.getUniqueId()) != null) {
-                        if (GuildUtil.getPlayerCache().get(player.getUniqueId()).equalsIgnoreCase(GuildUtil.getPlayerCache().get(target.getUniqueId()))) {
+                    if (RunicGuilds.getRunicGuildsAPI().isInGuild(target.getUniqueId())) {
+                        if (RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId())
+                                .equals(RunicGuilds.getRunicGuildsAPI().getGuild(target.getUniqueId()))) {
                             recipients.add(target);
                         }
                     }
@@ -63,14 +78,5 @@ public class GuildChannel extends ChatChannel {
                 )
         );
         return textComponent;
-    }
-
-    private String displayScore(Player player) {
-        if (RunicGuildsAPI.getGuild(player.getUniqueId()) != null
-                && RunicGuildsAPI.getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
-            return String.valueOf(RunicGuildsAPI.getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
-        } else {
-            return "0";
-        }
     }
 }

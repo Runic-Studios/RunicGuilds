@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.guild;
 
 import com.google.common.collect.Lists;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -27,7 +26,7 @@ public class GuildBannerLoader extends BukkitRunnable {
         List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
         posted.forEach(PostedGuildBanner::remove);
 
-        List<Guild> ordering = new ArrayList<>(GuildUtil.getAllGuilds());
+        List<Guild> ordering = new ArrayList<>(RunicGuilds.getRunicGuildsAPI().getAllGuilds());
         List<Guild> guilds = new ArrayList<>();
 
         Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();

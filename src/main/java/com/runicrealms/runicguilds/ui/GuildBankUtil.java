@@ -5,7 +5,6 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicitems.item.RunicItem;
 import org.bukkit.Bukkit;
@@ -31,11 +30,11 @@ public class GuildBankUtil implements Listener {
     private static final Map<UUID, ViewerInfo> viewers = new HashMap<>();
 
     public static void open(Player player, Integer page) {
-        open(player, page, GuildUtil.getGuildData(player.getUniqueId()).getData().getGuildPrefix());
+        open(player, page, RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildPrefix());
     }
 
     public static void open(Player player, Integer page, String prefix) {
-        Guild guild = GuildUtil.getGuildData(prefix).getData();
+        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(prefix).getGuild();
         Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
         if (guild.getBankSize() > 45 && page != guild.getBankSize() / 45) {
             inventory.setItem(8, new ItemBuilder(Material.ARROW, 1, "&6Next Page").getItem());
@@ -72,12 +71,12 @@ public class GuildBankUtil implements Listener {
     }
 
     private static void saveToBank(Inventory inventory, Integer page, UUID uuid) {
-        GuildData guildData = GuildUtil.getGuildData(uuid);
-        List<ItemStack> bank = new ArrayList<>(guildData.getData().getBank());
+        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid);
+        List<ItemStack> bank = new ArrayList<>(guildData.getGuild().getBank());
         for (int i = (page - 1) * 45; i < page * 45; i++) {
             bank.set(i, inventory.getItem(i - ((page - 1) * 45)));
         }
-        guildData.getData().setBank(bank);
+        guildData.getGuild().setBank(bank);
         // guildData.queueToSave();
     }
 
@@ -99,8 +98,8 @@ public class GuildBankUtil implements Listener {
                     Player player = (Player) event.getWhoClicked();
                     if (viewers.containsKey(player.getUniqueId())) {
                         ItemStack clickedItem = event.getCurrentItem().clone();
-                        GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
-                        Guild guild = guildData.getData();
+                        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+                        Guild guild = guildData.getGuild();
                         Inventory bankInventory = Bukkit.createInventory(null, 45, "");
                         Integer currentPage = viewers.get(player.getUniqueId()).getPage();
                         for (int i = 0; i < 45; i++) {

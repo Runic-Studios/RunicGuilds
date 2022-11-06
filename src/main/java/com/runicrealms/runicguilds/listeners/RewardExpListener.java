@@ -1,11 +1,11 @@
 package com.runicrealms.runicguilds.listeners;
 
 import com.runicrealms.plugin.events.RunicExpEvent;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.guild.stage.StageReward;
 import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -27,11 +27,11 @@ public class RewardExpListener implements Listener {
         if (guildStage == null) return;
 
         // ensure there is a guild
-        GuildData guildData = GuildUtil.getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
         if (guildData == null) return;
 
         // ensure guild has perk unlocked
-        Guild guild = guildData.getData();
+        Guild guild = guildData.getGuild();
         if (guild.getGuildStage().getRank() < guildStage.getRank()) return;
 
         int eventExperience = event.getOriginalAmount(); // exp before other bonuses so we don't apply compound bonuses

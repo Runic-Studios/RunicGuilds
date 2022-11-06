@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.utilities.GUIUtil;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -39,8 +39,8 @@ public class GuildMembersUIListener implements Listener {
         Material material = item.getType();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
         e.setCancelled(true);
-        if (GuildUtil.getGuildData(player.getUniqueId()) == null) return;
-        Guild guild = GuildUtil.getGuildData(player.getUniqueId()).getData();
+        if (RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()) == null) return;
+        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
         if (material == GUIUtil.CLOSE_BUTTON.getType())
             player.closeInventory();
         else if (material == GUIUtil.BACK_BUTTON.getType())

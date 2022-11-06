@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.guild;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.ClickGuildBannerEvent;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -32,7 +32,7 @@ public class BannerClickListener implements Listener {
 
         String result = event.getRightClicked().getPersistentDataContainer().get(PostedGuildBanner.KEY, PersistentDataType.STRING);
 
-        Guild guild = GuildUtil.getGuildData(result).getData();
+        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(result).getGuild();
 
         if (guild == null) {
             return;
@@ -41,9 +41,7 @@ public class BannerClickListener implements Listener {
         ClickGuildBannerEvent bannerEvent = new ClickGuildBannerEvent(guild);
         Bukkit.getPluginManager().callEvent(bannerEvent);
 
-        if (bannerEvent.isCancelled()) {
-            return;
-        }
+        if (bannerEvent.isCancelled()) return;
 
         Player player = event.getPlayer();
 

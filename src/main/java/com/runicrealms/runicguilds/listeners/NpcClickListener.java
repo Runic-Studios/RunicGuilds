@@ -3,7 +3,6 @@ package com.runicrealms.runicguilds.listeners;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.ui.GuildBankUtil;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicnpcs.api.NpcClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -19,29 +18,13 @@ public class NpcClickListener implements Listener {
 
     public static Map<UUID, Long> cooldowns = new HashMap<>();
 
-    @EventHandler
-    public void onRightClick(NpcClickEvent event) {
-        if (!cooldowns.containsKey(event.getPlayer().getUniqueId())) {
-            runClickEvent(event);
-            cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
-        } else if (cooldowns.get(event.getPlayer().getUniqueId()) + 1000 <= System.currentTimeMillis()) {
-            runClickEvent(event);
-            cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
-        }
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        cooldowns.remove(event.getPlayer().getUniqueId());
-    }
-
     private static void runClickEvent(NpcClickEvent event) {
         for (Integer bankerId : RunicGuilds.GUILD_BANKERS) {
             if (bankerId == event.getNpc().getId()) {
-                if (GuildUtil.getPlayerCache().get(event.getPlayer().getUniqueId()) != null) {
-                    GuildData guildData = GuildUtil.getGuildDatas().get(GuildUtil.getPlayerCache().get(event.getPlayer().getUniqueId()));
-                    if (guildData.getData().getOwner().getUUID() != event.getPlayer().getUniqueId()) {
-                        if (!guildData.getData().canAccessBank(guildData.getData().getMember(event.getPlayer().getUniqueId()).getRank())) {
+                if (RunicGuilds.getRunicGuildsAPI().isInGuild(event.getPlayer().getUniqueId())) {
+                    GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(event.getPlayer().getUniqueId());
+                    if (guildData.getGuild().getOwner().getUUID() != event.getPlayer().getUniqueId()) {
+                        if (!guildData.getGuild().canAccessBank(guildData.getGuild().getMember(event.getPlayer().getUniqueId()).getRank())) {
                             event.getPlayer().sendMessage(ChatColor.YELLOW + "Your guild rank does not have access to the guild bank!");
                             return;
                         }
@@ -53,6 +36,22 @@ public class NpcClickListener implements Listener {
                 }
                 return;
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        cooldowns.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onRightClick(NpcClickEvent event) {
+        if (!cooldowns.containsKey(event.getPlayer().getUniqueId())) {
+            runClickEvent(event);
+            cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
+        } else if (cooldowns.get(event.getPlayer().getUniqueId()) + 1000 <= System.currentTimeMillis()) {
+            runClickEvent(event);
+            cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
     }
 
