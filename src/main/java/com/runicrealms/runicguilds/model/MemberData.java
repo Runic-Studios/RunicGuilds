@@ -4,6 +4,7 @@ import com.runicrealms.plugin.database.GuildMongoData;
 import com.runicrealms.plugin.database.MongoData;
 import com.runicrealms.plugin.database.MongoDataSection;
 import com.runicrealms.plugin.model.SessionDataNested;
+import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -37,6 +38,14 @@ public class MemberData implements SessionDataNested {
         }
     }
 
+    /**
+     * @param guild
+     */
+    public MemberData(Guild guild) {
+        this.prefix = guild.getGuildPrefix();
+        this.members = guild.getMembers();
+    }
+
     @Override
     public Map<String, String> getDataMapFromJedis(Jedis jedis, Object nestedObject, int... ints) {
         return null;
@@ -54,7 +63,7 @@ public class MemberData implements SessionDataNested {
 
     @Override
     public void writeToJedis(Jedis jedis, int... slot) {
-        
+
     }
 
     @Override

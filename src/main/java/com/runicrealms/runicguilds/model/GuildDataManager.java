@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  * @author Skyfallin
  */
 public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataManager {
-    
+
     private final Map<Object, SessionData> guildDataMap; // maps prefix to data
 
     /**
@@ -333,6 +333,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
             GuildData guildData = (GuildData) this.guildDataMap.get(prefix);
             GuildMongoData guildMongoData = new GuildMongoData(guildData.getGuild().getGuildPrefix());
             guildData.writeToMongo(guildMongoData);
+            guildMongoData.save();
         }
         event.markPluginSaved("guilds");
     }

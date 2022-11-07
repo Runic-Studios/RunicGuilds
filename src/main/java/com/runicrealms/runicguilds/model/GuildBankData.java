@@ -56,33 +56,12 @@ public class GuildBankData implements SessionDataNested {
     /**
      * Builds the bank data using a guild (called during mongo save)
      *
-     * @param guild          the guild
-     * @param guildMongoData the guild mongo data
+     * @param guild the guild
      */
-    public GuildBankData(Guild guild, GuildMongoData guildMongoData) {
+    public GuildBankData(Guild guild) {
         this.prefix = guild.getGuildPrefix();
         this.guild = guild;
-        this.items = new ArrayList<>();
-        if (guildMongoData.has("bank")) {
-            for (int i = 0; i < guildMongoData.get("bank-size", Integer.class); i++) {
-                if (guildMongoData.has("bank." + i)) {
-                    try {
-                        RunicItem item = ItemLoader.loadItem(guildMongoData.getSection("bank." + i), DupeManager.getNextItemId());
-                        items.add(item.generateItem());
-                    } catch (Exception exception) {
-                        Bukkit.getLogger().warning("[RunicItems] ERROR loading item " + i + " for guild bank " + this.prefix);
-                        exception.printStackTrace();
-                        items.add(null);
-                    }
-                } else {
-                    items.add(null);
-                }
-            }
-        } else {
-            for (int i = 0; i < guildMongoData.get("bank-size", Integer.class); i++) {
-                items.add(null);
-            }
-        }
+        this.items = guild.getBank();
     }
 
     @Override

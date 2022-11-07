@@ -334,7 +334,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(target.getUniqueId())) {
+        if (RunicGuilds.getRunicGuildsAPI().isInGuild(target.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is already in a guild."));
             return;
         }

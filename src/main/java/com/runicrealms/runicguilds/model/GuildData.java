@@ -10,6 +10,7 @@ import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.plugin.redis.RedisUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -170,6 +171,12 @@ public class GuildData implements SessionData {
 
     @Override
     public void writeToJedis(Jedis jedis, int... ints) {
+        jedis.set(this.guild.getOwner().getUUID() + ":guild", this.guild.getGuildName());
+        jedis.expire(this.guild.getOwner().getUUID() + ":guild", RedisUtil.EXPIRE_TIME);
+        for (GuildMember guildMember : this.guild.getMembers()) {
+            jedis.set(guildMember.getUUID() + ":guild", this.guild.getGuildName());
+            jedis.expire(guildMember.getUUID() + ":guild", RedisUtil.EXPIRE_TIME);
+        }
     }
 
     @Override
@@ -186,13 +193,13 @@ public class GuildData implements SessionData {
         guildMongoData.set("guild-exp", guild.getGuildExp());
         guildMongoData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
 
-        OwnerData ownerData = new OwnerData(guild.getGuildPrefix(), guild.getOwner().getUUID(), guild.getScore());
+        OwnerData ownerData = new OwnerData(guild);
         ownerData.writeToMongo(guildMongoData);
-        MemberData memberData = new MemberData(guild.getGuildPrefix(), guildMongoData);
+        MemberData memberData = new MemberData(guild);
         memberData.writeToMongo(guildMongoData);
-        SettingsData settingsData = new SettingsData(guild, guildMongoData);
+        SettingsData settingsData = new SettingsData(guild);
         settingsData.writeToMongo(guildMongoData);
-        GuildBankData guildBankData = new GuildBankData(guild, guildMongoData);
+        GuildBankData guildBankData = new GuildBankData(guild);
         guildBankData.writeToMongo(guildMongoData);
 
         return mongoData;

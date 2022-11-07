@@ -46,28 +46,12 @@ public class SettingsData implements SessionData {
     /**
      * Builds the data object from mongo using a guild (called during mongo save)
      *
-     * @param guild     the guild
-     * @param mongoData the guild's mongo data
+     * @param guild the guild
      */
-    public SettingsData(Guild guild, MongoData mongoData) {
+    public SettingsData(Guild guild) {
         this.prefix = guild.getGuildPrefix();
         this.guild = guild;
-        bankSettings = new HashMap<>();
-        if (mongoData.has("settings")) {
-            if (mongoData.getSection("settings").has("bank-access")) {
-                for (String key : mongoData.getSection("settings.bank-access").getKeys()) {
-                    GuildRank rank = GuildRank.getByIdentifier(key);
-                    if (rank != null && rank != GuildRank.OWNER) {
-                        bankSettings.put(rank, mongoData.get("settings.bank-access." + key, Boolean.class));
-                    }
-                }
-            }
-        }
-        for (GuildRank rank : GuildRank.values()) {
-            if (rank != GuildRank.OWNER && !bankSettings.containsKey(rank)) {
-                bankSettings.put(rank, rank.canAccessBankByDefault());
-            }
-        }
+        bankSettings = guild.getBankAccess();
     }
 
     public Map<GuildRank, Boolean> getBankSettings() {

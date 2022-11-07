@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds.model;
 import com.runicrealms.plugin.database.MongoData;
 import com.runicrealms.plugin.database.MongoDataSection;
 import com.runicrealms.plugin.model.SessionData;
+import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -48,6 +49,21 @@ public class OwnerData implements SessionData {
                         ownerUuid,
                         GuildRank.OWNER,
                         ownerSection.get(ownerUuid + ".score", Integer.class),
+                        GuildUtil.getOfflinePlayerName(ownerUuid)
+                );
+    }
+
+    /**
+     * @param guild
+     */
+    public OwnerData(Guild guild) {
+        this.prefix = guild.getGuildPrefix();
+        UUID ownerUuid = guild.getOwner().getUUID();
+        this.owner = new GuildMember
+                (
+                        ownerUuid,
+                        GuildRank.OWNER,
+                        guild.getOwner().getScore(),
                         GuildUtil.getOfflinePlayerName(ownerUuid)
                 );
     }
