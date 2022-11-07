@@ -40,7 +40,7 @@ public interface RunicGuildsAPI {
      * @return a list of all guilds in the guildDataMap
      */
     List<Guild> getAllGuilds();
-
+ 
     /**
      * @param uuid of the player
      * @return the guild of the player (or null)

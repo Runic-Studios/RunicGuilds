@@ -8,14 +8,11 @@ import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class OwnerData implements SessionData {
-    public static final List<String> FIELDS = new ArrayList<String>() {{
-        add(GuildDataField.MEMBER_UUID.getField());
-        add(GuildDataField.MEMBER_SCORE.getField());
-    }};
-    private static final String OWNER_DATA_KEY = "owner";
     private final String prefix; // of the guild
     private final GuildMember owner;
 
@@ -55,55 +52,24 @@ public class OwnerData implements SessionData {
                 );
     }
 
-//    /**
-//     * Builds the OwnerData from jedis
-//     *
-//     * @param prefix of the guild
-//     * @param jedis  the jedis resource
-//     */
-//    public OwnerData(String prefix, Jedis jedis) {
-//        this.prefix = prefix;
-//        Map<String, String> fieldsMap = getDataMapFromJedis(jedis);
-//        UUID ownerUuid = UUID.fromString(fieldsMap.get(GuildDataField.MEMBER_UUID.getField()));
-//        this.owner = new GuildMember
-//                (
-//                        ownerUuid,
-//                        GuildRank.OWNER,
-//                        Integer.parseInt(fieldsMap.get(GuildDataField.MEMBER_SCORE.getField())),
-//                        GuildUtil.getOfflinePlayerName(ownerUuid)
-//                );
-//    }
-
     @Override
     public Map<String, String> getDataMapFromJedis(Jedis jedis, int... slot) {
-        Map<String, String> fieldsMap = new HashMap<>();
-        List<String> fields = new ArrayList<>(getFields());
-        String[] fieldsToArray = fields.toArray(new String[0]);
-        String key = GuildData.DATA_PATH + ":" + this.prefix + ":" + OWNER_DATA_KEY;
-        List<String> values = jedis.hmget(key, fieldsToArray);
-        for (int i = 0; i < fieldsToArray.length; i++) {
-            fieldsMap.put(fieldsToArray[i], values.get(i));
-        }
-        return fieldsMap;
+        return null;
     }
 
     @Override
     public List<String> getFields() {
-        return FIELDS;
+        return null;
     }
 
     @Override
     public Map<String, String> toMap() {
-        return new HashMap<String, String>() {{
-            put(GuildDataField.MEMBER_UUID.getField(), String.valueOf(owner.getUUID()));
-            put(GuildDataField.MEMBER_SCORE.getField(), String.valueOf(owner.getScore()));
-        }};
+        return null;
     }
 
     @Override
     public void writeToJedis(Jedis jedis, int... slot) {
-        String key = GuildData.DATA_PATH + ":" + this.prefix + ":" + OWNER_DATA_KEY;
-        jedis.hmset(key, this.toMap());
+
     }
 
     @Override

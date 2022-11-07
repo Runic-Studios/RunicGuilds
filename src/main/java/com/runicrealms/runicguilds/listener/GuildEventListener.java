@@ -59,9 +59,7 @@ public class GuildEventListener implements Listener {
         }
 
         // remove from jedis, mongo, and memory
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            guildData.delete(jedis);
-        }
+        guildData.delete();
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully disbanded guild."));
         GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
         syncDisplays(event.getWhoDisbanded());

@@ -34,8 +34,7 @@ import java.util.regex.Pattern;
  * @author Skyfallin
  */
 public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataManager {
-
-    private static final String DATA_SECTION_KEY = "guilds";
+    
     private final Map<Object, SessionData> guildDataMap; // maps prefix to data
 
     /**
@@ -220,10 +219,6 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
 
     @Override
     public SessionData checkJedisForSessionData(Object object, Jedis jedis) {
-//        String guildPrefix = (String) object;
-//        if (!RedisUtil.getNestedKeys(DATA_SECTION_KEY + ":" + guildPrefix, jedis).isEmpty()) {
-//            return new GuildData(guildPrefix, jedis);
-//        }
         return null;
     }
 

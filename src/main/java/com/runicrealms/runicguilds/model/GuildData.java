@@ -23,8 +23,6 @@ import redis.clients.jedis.Jedis;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -99,54 +97,6 @@ public class GuildData implements SessionData {
         RunicGuilds.getRunicGuildsAPI().getGuildDataMap().put(this.prefix, this);
     }
 
-//    /**
-//     * Build a GuildData object from jedis, then cache in memory
-//     *
-//     * @param prefix of the guild
-//     * @param jedis  the jedis resource
-//     */
-//    public GuildData(String prefix, Jedis jedis) {
-//        this.prefix = prefix;
-//        Map<String, String> fieldsMap = getDataMapFromJedis(jedis);
-//        int bankSize = Integer.parseInt(fieldsMap.get(GuildDataField.BANK_SIZE.getField()));
-//        int guildEXP = Integer.parseInt(fieldsMap.get(GuildDataField.GUILD_EXP.getField()));
-//        String guildName = fieldsMap.get(GuildDataField.GUILD_NAME.getField());
-//
-//        OwnerData ownerData = new OwnerData(this.prefix, jedis);
-//        MemberData memberData = new MemberData(this.prefix, jedis);
-//        SettingsData settingsData = new SettingsData(this.prefix, jedis);
-//        GuildBankData guildBankData = new GuildBankData(this.prefix, jedis);
-//
-//        if (fieldsMap.get(GuildDataField.GUILD_BANNER.getField()) != null) {
-//            this.guild = new Guild
-//                    (
-//                            memberData.getMembers(),
-//                            ownerData.getOwner(),
-//                            guildName,
-//                            this.prefix,
-//                            guildBankData.getItems(),
-//                            bankSize,
-//                            settingsData.getBankSettings(),
-//                            guildEXP
-//                    );
-//        } else {
-//            this.guild = new Guild
-//                    (
-//                            memberData.getMembers(),
-//                            deserializeItemStack(fieldsMap.get(GuildDataField.GUILD_BANNER.getField())),
-//                            ownerData.getOwner(),
-//                            guildName,
-//                            this.prefix,
-//                            guildBankData.getItems(),
-//                            bankSize,
-//                            settingsData.getBankSettings(),
-//                            guildEXP
-//                    );
-//        }
-//
-//        RunicGuilds.getRunicGuildsAPI().getGuildDataMap().put(this.prefix, this);
-//    }
-
     /**
      * Retrieve an ItemStack from a base64 string (should be loss-less)
      *
@@ -200,51 +150,30 @@ public class GuildData implements SessionData {
     }
 
     /**
-     * Removes this GuildData object from memory, removes all associated jedis fields, and removes the guild document
-     * from memory
-     *
-     * @param jedis the jedis resource
+     * Removes this GuildData object from memory and removes the guild document from memory
      */
-    public void delete(Jedis jedis) {
+    public void delete() {
         RunicGuilds.getRunicGuildsAPI().getGuildDataMap().remove(this.prefix);
-        jedis.del(DATA_PATH + ":" + this.prefix);
         RunicCore.getDatabaseManager().getGuildData().deleteOne(Filters.eq("prefix", this.guild.getGuildPrefix()));
     }
 
     @Override
     public Map<String, String> getDataMapFromJedis(Jedis jedis, int... slot) {
-        Map<String, String> fieldsMap = new HashMap<>();
-        List<String> fields = new ArrayList<>(getFields());
-        String[] fieldsToArray = fields.toArray(new String[0]);
-        List<String> values = jedis.hmget(DATA_PATH + ":" + this.prefix, fieldsToArray);
-        for (int i = 0; i < fieldsToArray.length; i++) {
-            fieldsMap.put(fieldsToArray[i], values.get(i));
-        }
-        return fieldsMap;
+        return null;
     }
 
     @Override
     public List<String> getFields() {
-        return GuildDataField.FIELD_STRINGS;
+        return null;
     }
 
     @Override
     public Map<String, String> toMap() {
-        return new HashMap<String, String>() {{
-            put(GuildDataField.PREFIX.getField(), prefix);
-            put(GuildDataField.BANK_SIZE.getField(), String.valueOf(guild.getBankSize()));
-            put(GuildDataField.GUILD_BANNER.getField(), serializeItemStack(guild.getGuildBanner().getBannerItem()));
-            put(GuildDataField.GUILD_EXP.getField(), String.valueOf(guild.getGuildExp()));
-            put(GuildDataField.GUILD_NAME.getField(), guild.getGuildName());
-            put(GuildDataField.GUILD_SCORE.getField(), String.valueOf(guild.getScore()));
-        }};
+        return null;
     }
 
     @Override
     public void writeToJedis(Jedis jedis, int... ints) {
-        String key = DATA_PATH + ":" + this.prefix;
-        jedis.hmset(key, this.toMap());
-        jedis.expire(key, RedisUtil.EXPIRE_TIME);
     }
 
     @Override
