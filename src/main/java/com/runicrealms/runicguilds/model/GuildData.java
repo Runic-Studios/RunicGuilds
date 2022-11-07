@@ -10,9 +10,6 @@ import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.plugin.redis.RedisUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicitems.ItemManager;
-import com.runicrealms.runicitems.item.RunicItem;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -30,7 +27,6 @@ import java.util.Map;
  * A wrapper around a Guild object that is used to manage its data in redis / mongo
  */
 public class GuildData implements SessionData {
-    public static final String DATA_PATH = "guilds";
     private final String prefix; // of the GUILD
     private Guild guild;
 
@@ -183,9 +179,9 @@ public class GuildData implements SessionData {
         guildMongoData.remove("members");
         guildMongoData.remove("bank");
 
-        guildMongoData.set(GuildDataField.PREFIX.getField(), guild.getGuildPrefix());
-        guildMongoData.set(GuildDataField.GUILD_NAME.getField(), guild.getGuildName());
-        guildMongoData.set(GuildDataField.BANK_SIZE.getField(), guild.getBankSize());
+        guildMongoData.set("prefix", guild.getGuildPrefix());
+        guildMongoData.set("name", guild.getGuildName());
+        guildMongoData.set("bank-size", guild.getBankSize());
         guildMongoData.set("score", guild.getScore());
         guildMongoData.set("guild-exp", guild.getGuildExp());
         guildMongoData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
@@ -194,22 +190,11 @@ public class GuildData implements SessionData {
         ownerData.writeToMongo(guildMongoData);
         MemberData memberData = new MemberData(guild.getGuildPrefix(), guildMongoData);
         memberData.writeToMongo(guildMongoData);
-//        SettingsData settingsData = new SettingsData(guild.getGuildPrefix(), guildMongoData);
-//        settingsData.writeToMongo(guildMongoData);
-//        GuildBankData guildBankData = new GuildBankData(guild.getGuildPrefix(), guildMongoData);
-//        guildBankData.writeToMongo(guildMongoData);
+        SettingsData settingsData = new SettingsData(guild, guildMongoData);
+        settingsData.writeToMongo(guildMongoData);
+        GuildBankData guildBankData = new GuildBankData(guild, guildMongoData);
+        guildBankData.writeToMongo(guildMongoData);
 
-        for (int i = 0; i < guild.getBankSize(); i++) {
-            if (guild.getBank().get(i) != null) {
-                RunicItem runicItem = ItemManager.getRunicItemFromItemStack(guild.getBank().get(i));
-                if (runicItem != null) {
-                    runicItem.addToDataSection(guildMongoData, "bank." + i);
-                }
-            }
-        }
-        for (GuildRank rank : this.guild.getBankAccess().keySet()) {
-            guildMongoData.set("settings.bank-access." + rank.getIdentifier(), this.guild.canAccessBank(rank));
-        }
         return mongoData;
     }
 
