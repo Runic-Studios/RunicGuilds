@@ -4,6 +4,10 @@ import com.mongodb.client.FindIterable;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.database.GuildMongoData;
+import com.runicrealms.plugin.database.PlayerMongoData;
+import com.runicrealms.plugin.database.event.MongoSaveEvent;
+import com.runicrealms.plugin.model.SessionData;
+import com.runicrealms.plugin.model.SessionDataManager;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -15,11 +19,12 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,26 +33,26 @@ import java.util.regex.Pattern;
  *
  * @author Skyfallin
  */
-public class GuildDataManager implements RunicGuildsAPI {
+public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataManager {
 
-    private final Map<String, GuildData> guildDataMap;
+    private static final String DATA_SECTION_KEY = "guilds";
+    private final Map<Object, SessionData> guildDataMap; // maps prefix to data
 
     /**
      * Initializes guilds and adds them to memory on plugin startup
      */
     public GuildDataManager() {
         this.guildDataMap = new HashMap<>();
+        Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
         /*
         Load guilds into memory from mongo / jedis on startup
          */
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> loadGuildIntoMemory(jedis));
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), this::loadGuildsIntoMemory);
         /*
         Tab update task
          */
         Bukkit.getScheduler().runTaskTimerAsynchronously(RunicGuilds.getInstance(), this::updateGuildTabs, 100L, 20L);
-        Bukkit.getLogger().log(Level.INFO, "[RunicGuilds] All guilds have been loaded!");
+        Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
     }
 
     @Override
@@ -68,7 +73,7 @@ public class GuildDataManager implements RunicGuildsAPI {
         GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-            GuildData.setGuildForPlayer(name, owner.toString());
+            GuildData.updatePlayerJedisGuild(name, owner.toString());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(RunicGuilds.getRunicGuildsAPI().getGuildData(prefix).getGuild(), modCreated));
         }
         return result;
@@ -77,8 +82,10 @@ public class GuildDataManager implements RunicGuildsAPI {
     @Override
     public List<Guild> getAllGuilds() {
         List<Guild> allGuilds = new ArrayList<>();
-        for (String key : guildDataMap.keySet()) {
-            allGuilds.add(guildDataMap.get(key).getGuild());
+        for (Object obj : guildDataMap.keySet()) {
+            String key = (String) obj;
+            GuildData guildData = (GuildData) guildDataMap.get(key);
+            allGuilds.add(guildData.getGuild());
         }
         return allGuilds;
     }
@@ -103,13 +110,14 @@ public class GuildDataManager implements RunicGuildsAPI {
 
     @Override
     public GuildData getGuildData(UUID playerUuid) {
-        for (Map.Entry<String, GuildData> entry : guildDataMap.entrySet()) {
-            if (entry.getValue().getGuild().getOwner().getUUID().toString().equalsIgnoreCase(playerUuid.toString())) {
-                return entry.getValue();
+        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
+            GuildData guildData = (GuildData) entry.getValue();
+            if (guildData.getGuild().getOwner().getUUID().toString().equalsIgnoreCase(playerUuid.toString())) {
+                return guildData;
             }
-            for (GuildMember member : entry.getValue().getGuild().getMembers()) {
+            for (GuildMember member : guildData.getGuild().getMembers()) {
                 if (member.getUUID().toString().equalsIgnoreCase(playerUuid.toString())) {
-                    return entry.getValue();
+                    return guildData;
                 }
             }
         }
@@ -118,17 +126,18 @@ public class GuildDataManager implements RunicGuildsAPI {
 
     @Override
     public GuildData getGuildData(String prefix) {
-        for (Map.Entry<String, GuildData> entry : guildDataMap.entrySet()) {
-            if (entry.getValue().getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
-                return entry.getValue();
+        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
+            GuildData guildData = (GuildData) entry.getValue();
+            if (guildData.getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
+                return guildData;
             }
         }
         return null;
     }
 
     @Override
-    public Map<String, GuildData> getGuildDataMap() {
-        return guildDataMap;
+    public Map<Object, SessionData> getGuildDataMap() {
+        return this.guildDataMap;
     }
 
     @Override
@@ -188,23 +197,62 @@ public class GuildDataManager implements RunicGuildsAPI {
         if (name.length() > 16) {
             return GuildRenameResult.NAME_TOO_LONG;
         }
-        for (String otherGuildPrefix : guildDataMap.keySet()) {
-            if (guildDataMap.get(otherGuildPrefix).getGuild().getGuildName().equalsIgnoreCase(name)) {
+        for (Object obj : guildDataMap.keySet()) {
+            String otherGuildPrefix = (String) obj;
+            GuildData guildDataOther = (GuildData) guildDataMap.get(otherGuildPrefix);
+            if (guildDataOther.getGuild().getGuildName().equalsIgnoreCase(name)) {
                 return GuildRenameResult.NAME_NOT_UNIQUE;
             }
         }
         try {
             guildData.getGuild().setGuildName(name);
             for (GuildMember member : guildData.getGuild().getMembers()) {
-                GuildData.setGuildForPlayer(name, member.getUUID().toString());
+                GuildData.updatePlayerJedisGuild(name, member.getUUID().toString());
             }
-            GuildData.setGuildForPlayer(name, guildData.getGuild().getOwner().toString());
+            GuildData.updatePlayerJedisGuild(name, guildData.getGuild().getOwner().toString());
             // guildData.queueToSave();
         } catch (Exception exception) {
             exception.printStackTrace();
             return GuildRenameResult.INTERNAL_ERROR;
         }
         return GuildRenameResult.SUCCESSFUL;
+    }
+
+    @Override
+    public SessionData checkJedisForSessionData(Object object, Jedis jedis) {
+//        String guildPrefix = (String) object;
+//        if (!RedisUtil.getNestedKeys(DATA_SECTION_KEY + ":" + guildPrefix, jedis).isEmpty()) {
+//            return new GuildData(guildPrefix, jedis);
+//        }
+        return null;
+    }
+
+    @Override
+    public Map<Object, SessionData> getSessionDataMap() {
+        return this.guildDataMap;
+    }
+
+    @Override
+    public SessionData loadSessionData(Object object) {
+        String prefix = (String) object;
+        // Step 1: check if guild data is memoized
+        GuildData guildData = (GuildData) this.guildDataMap.get(prefix);
+        if (guildData != null) return guildData;
+        // Step 2: check if achievement data is cached in redis
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            return loadSessionData(prefix, jedis);
+        }
+    }
+
+    @Override
+    public SessionData loadSessionData(Object object, Jedis jedis) {
+        String prefix = (String) object;
+        // Step 2: check if achievement data is cached in redis
+        GuildData guildData = (GuildData) checkJedisForSessionData(prefix, jedis);
+        if (guildData != null) return guildData;
+        // Step 2: check mongo documents
+        GuildMongoData guildMongoData = new GuildMongoData(prefix);
+        return new GuildData(prefix, guildMongoData, jedis);
     }
 
     /**
@@ -227,14 +275,16 @@ public class GuildDataManager implements RunicGuildsAPI {
         if (name.length() > 16) {
             return GuildCreationResult.NAME_TOO_LONG;
         }
-        for (String guildPrefix : guildDataMap.keySet()) {
-            if (guildDataMap.get(guildPrefix).getGuild().getGuildName().equalsIgnoreCase(name)) {
+        for (Object obj : guildDataMap.keySet()) {
+            String guildPrefix = (String) obj;
+            GuildData guildData = (GuildData) guildDataMap.get(guildPrefix);
+            if (guildData.getGuild().getGuildName().equalsIgnoreCase(name)) {
                 return GuildCreationResult.NAME_NOT_UNIQUE;
             }
-            if (guildDataMap.get(guildPrefix).getGuild().getOwner().getUUID().toString().equalsIgnoreCase(owner.toString())) {
+            if (guildData.getGuild().getOwner().getUUID().toString().equalsIgnoreCase(owner.toString())) {
                 return GuildCreationResult.CREATOR_IN_GUILD;
             }
-            for (GuildMember member : guildDataMap.get(guildPrefix).getGuild().getMembers()) {
+            for (GuildMember member : guildData.getGuild().getMembers()) {
                 if (member.getUUID().toString().equalsIgnoreCase(owner.toString())) {
                     return GuildCreationResult.CREATOR_IN_GUILD;
                 }
@@ -263,20 +313,33 @@ public class GuildDataManager implements RunicGuildsAPI {
         return GuildCreationResult.SUCCESSFUL;
     }
 
-    private void loadGuildIntoMemory(Jedis jedis) {
+    /**
+     * On startup, we call this method to grab all guilds from our in-memory mongo documents, then
+     * cache them in jedis / memory for faster lookup during runtime
+     */
+    private void loadGuildsIntoMemory() {
         FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildData().find();
         for (Document guildDocument : iterable) {
             String prefix = guildDocument.getString("prefix");
-            GuildMongoData guildMongoData = new GuildMongoData(prefix);
-            guildDataMap.put(prefix,
-                    new GuildData
-                            (
-                                    prefix,
-                                    guildMongoData,
-                                    jedis
-                            ));
+            loadSessionData(prefix);
         }
         RunicRestartApi.markPluginLoaded("guilds");
+    }
+
+    @EventHandler
+    public void onMongoSave(MongoSaveEvent event) {
+        for (UUID uuid : event.getPlayersToSave().keySet()) {
+            PlayerMongoData playerMongoData = event.getPlayersToSave().get(uuid).getPlayerMongoData();
+            Guild guild = RunicGuilds.getRunicGuildsAPI().getGuild(uuid);
+            if (guild != null)
+                playerMongoData.set("guild", guild.getGuildName());
+        }
+        for (Object prefix : this.guildDataMap.keySet()) {
+            GuildData guildData = (GuildData) this.guildDataMap.get(prefix);
+            GuildMongoData guildMongoData = new GuildMongoData(guildData.getGuild().getGuildPrefix());
+            guildData.writeToMongo(guildMongoData);
+        }
+        event.markPluginSaved("guilds");
     }
 
     /**

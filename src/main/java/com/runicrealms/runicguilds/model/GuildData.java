@@ -2,19 +2,16 @@ package com.runicrealms.runicguilds.model;
 
 import com.mongodb.client.model.Filters;
 import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.database.GuildMongoData;
 import com.runicrealms.plugin.database.MongoData;
 import com.runicrealms.plugin.database.MongoDataSection;
-import com.runicrealms.plugin.database.PlayerMongoData;
 import com.runicrealms.plugin.model.SessionData;
+import com.runicrealms.plugin.redis.RedisUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.util.GuildUtil;
-import com.runicrealms.runicitems.DupeManager;
 import com.runicrealms.runicitems.ItemManager;
-import com.runicrealms.runicitems.config.ItemLoader;
 import com.runicrealms.runicitems.item.RunicItem;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -26,15 +23,16 @@ import redis.clients.jedis.Jedis;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- *
+ * A wrapper around a Guild object that is used to manage its data in redis / mongo
  */
 public class GuildData implements SessionData {
-
-    private static final String DATA_PATH = "guilds";
+    public static final String DATA_PATH = "guilds";
     private final String prefix; // of the GUILD
     private Guild guild;
 
@@ -52,71 +50,19 @@ public class GuildData implements SessionData {
 //    }
 
     /**
-     * @param prefix
-     * @param guildMongoData
-     * @param jedis
+     * Build a GuildData object from mongo, then cache in jedis / memory
+     *
+     * @param prefix         of the guild
+     * @param guildMongoData a GuildMongoData for the guild
+     * @param jedis          the jedis resource
      */
     public GuildData(String prefix, GuildMongoData guildMongoData, Jedis jedis) {
         this.prefix = prefix;
         MongoDataSection ownerSection = guildMongoData.getSection("owner");
-        UUID ownerUuid = UUID.fromString(ownerSection.getKeys().iterator().next());
-        GuildMember owner = new GuildMember
-                (
-                        ownerUuid,
-                        GuildRank.OWNER,
-                        ownerSection.get(ownerUuid + ".score", Integer.class),
-                        GuildUtil.getOfflinePlayerName(ownerUuid)
-                );
-        Set<GuildMember> members = new HashSet<>();
-        if (guildMongoData.has("members")) {
-            MongoDataSection membersSection = guildMongoData.getSection("members");
-            for (String key : membersSection.getKeys()) {
-                members.add(new GuildMember(UUID.fromString(key), GuildRank.getByName(membersSection.get(key + ".rank", String.class)), membersSection.get(key + ".score", Integer.class), GuildUtil.getOfflinePlayerName(UUID.fromString(key))));
-            }
-        }
-
-        List<ItemStack> items = new ArrayList<>();
-        if (((!guildMongoData.has("bank-type"))
-                || !guildMongoData.get("bank-type", String.class).equalsIgnoreCase("runicitems"))
-                && guildMongoData.has("bank")) {
-            guildMongoData.remove("bank");
-            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), guildMongoData::save);
-        } else if (guildMongoData.has("bank")) {
-            for (int i = 0; i < guildMongoData.get("bank-size", Integer.class); i++) {
-                if (guildMongoData.has("bank." + i)) {
-                    try {
-                        RunicItem item = ItemLoader.loadItem(guildMongoData.getSection("bank." + i), DupeManager.getNextItemId());
-                        items.add(item.generateItem());
-                    } catch (Exception exception) {
-                        Bukkit.getLogger().log(Level.WARNING, "[RunicItems] ERROR loading item " + i + " for guild bank " + this.guild.getGuildPrefix());
-                        exception.printStackTrace();
-                        items.add(null);
-                    }
-                } else {
-                    items.add(null);
-                }
-            }
-        } else {
-            for (int i = 0; i < guildMongoData.get("bank-size", Integer.class); i++) {
-                items.add(null);
-            }
-        }
-        Map<GuildRank, Boolean> bankPermissions = new HashMap<>();
-        if (guildMongoData.has("settings")) {
-            if (guildMongoData.getSection("settings").has("bank-access")) {
-                for (String key : guildMongoData.getSection("settings.bank-access").getKeys()) {
-                    GuildRank rank = GuildRank.getByIdentifier(key);
-                    if (rank != null && rank != GuildRank.OWNER) {
-                        bankPermissions.put(rank, guildMongoData.get("settings.bank-access." + key, Boolean.class));
-                    }
-                }
-            }
-        }
-        for (GuildRank rank : GuildRank.values()) {
-            if (rank != GuildRank.OWNER && !bankPermissions.containsKey(rank)) {
-                bankPermissions.put(rank, rank.canAccessBankByDefault());
-            }
-        }
+        OwnerData ownerData = new OwnerData(this.prefix, ownerSection);
+        MemberData memberData = new MemberData(this.prefix, guildMongoData);
+        SettingsData settingsData = new SettingsData(this.prefix, guildMongoData);
+        GuildBankData guildBankData = new GuildBankData(this.prefix, guildMongoData);
 
         int guildEXP = 0;
         if (guildMongoData.has("guild-exp")) {
@@ -124,19 +70,88 @@ public class GuildData implements SessionData {
         }
 
         if (!guildMongoData.has("guild-banner")) {
-            this.guild = new Guild(members, owner, guildMongoData.get("name", String.class), guildMongoData.get("prefix", String.class), items, guildMongoData.get("bank-size", Integer.class), bankPermissions, guildEXP);
+            this.guild = new Guild
+                    (
+                            memberData.getMembers(),
+                            ownerData.getOwner(),
+                            guildMongoData.get("name", String.class),
+                            guildMongoData.get("prefix", String.class),
+                            guildBankData.getItems(),
+                            guildMongoData.get("bank-size", Integer.class),
+                            settingsData.getBankSettings(),
+                            guildEXP
+                    );
         } else {
-            this.guild = new Guild(members, deserializeItemStack(guildMongoData.get("guild-banner", String.class)), owner, guildMongoData.get("name", String.class), guildMongoData.get("prefix", String.class), items, guildMongoData.get("bank-size", Integer.class), bankPermissions, guildEXP);
+            this.guild = new Guild
+                    (
+                            memberData.getMembers(),
+                            deserializeItemStack(guildMongoData.get("guild-banner", String.class)),
+                            ownerData.getOwner(),
+                            guildMongoData.get("name", String.class),
+                            guildMongoData.get("prefix", String.class),
+                            guildBankData.getItems(),
+                            guildMongoData.get("bank-size", Integer.class),
+                            settingsData.getBankSettings(),
+                            guildEXP
+                    );
         }
+        this.writeToJedis(jedis);
+        RunicGuilds.getRunicGuildsAPI().getGuildDataMap().put(this.prefix, this);
     }
 
-    public GuildData(String prefix, Jedis jedis) {
-        this.prefix = prefix;
-    }
+//    /**
+//     * Build a GuildData object from jedis, then cache in memory
+//     *
+//     * @param prefix of the guild
+//     * @param jedis  the jedis resource
+//     */
+//    public GuildData(String prefix, Jedis jedis) {
+//        this.prefix = prefix;
+//        Map<String, String> fieldsMap = getDataMapFromJedis(jedis);
+//        int bankSize = Integer.parseInt(fieldsMap.get(GuildDataField.BANK_SIZE.getField()));
+//        int guildEXP = Integer.parseInt(fieldsMap.get(GuildDataField.GUILD_EXP.getField()));
+//        String guildName = fieldsMap.get(GuildDataField.GUILD_NAME.getField());
+//
+//        OwnerData ownerData = new OwnerData(this.prefix, jedis);
+//        MemberData memberData = new MemberData(this.prefix, jedis);
+//        SettingsData settingsData = new SettingsData(this.prefix, jedis);
+//        GuildBankData guildBankData = new GuildBankData(this.prefix, jedis);
+//
+//        if (fieldsMap.get(GuildDataField.GUILD_BANNER.getField()) != null) {
+//            this.guild = new Guild
+//                    (
+//                            memberData.getMembers(),
+//                            ownerData.getOwner(),
+//                            guildName,
+//                            this.prefix,
+//                            guildBankData.getItems(),
+//                            bankSize,
+//                            settingsData.getBankSettings(),
+//                            guildEXP
+//                    );
+//        } else {
+//            this.guild = new Guild
+//                    (
+//                            memberData.getMembers(),
+//                            deserializeItemStack(fieldsMap.get(GuildDataField.GUILD_BANNER.getField())),
+//                            ownerData.getOwner(),
+//                            guildName,
+//                            this.prefix,
+//                            guildBankData.getItems(),
+//                            bankSize,
+//                            settingsData.getBankSettings(),
+//                            guildEXP
+//                    );
+//        }
+//
+//        RunicGuilds.getRunicGuildsAPI().getGuildDataMap().put(this.prefix, this);
+//    }
 
     /**
-     * @param item
-     * @return
+     * Retrieve an ItemStack from a base64 string (should be loss-less)
+     *
+     * @param item the base64 string
+     * @return an ItemStack to set as the guild banner
      */
     private static ItemStack deserializeItemStack(String item) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(item));
@@ -150,19 +165,26 @@ public class GuildData implements SessionData {
         return null;
     }
 
-    // todo: investigate this method
-    public static void setGuildForPlayer(String name, String uuid) {
-        // todo: update redis as well
-        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            PlayerMongoData mongoData = new PlayerMongoData(uuid);
-            mongoData.set("guild", name);
-            mongoData.save();
-        });
+    /**
+     * Updates the guild for the given player in jedis
+     *
+     * @param name of the guild
+     * @param uuid of the player
+     */
+    public static void updatePlayerJedisGuild(String name, String uuid) {
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
+                jedis.set(uuid + ":guild", name);
+                jedis.expire(uuid + ":guild", RedisUtil.EXPIRE_TIME);
+            });
+        }
     }
 
     /**
-     * @param item
-     * @return
+     * Convert a GuildBanner ItemStack into base64 for storage and retrieval (should be loss-less)
+     *
+     * @param item the item stack associated with the guild banner
+     * @return a string for jedis / mongo storage
      */
     private static String serializeItemStack(ItemStack item) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -178,7 +200,10 @@ public class GuildData implements SessionData {
     }
 
     /**
-     * @param jedis
+     * Removes this GuildData object from memory, removes all associated jedis fields, and removes the guild document
+     * from memory
+     *
+     * @param jedis the jedis resource
      */
     public void delete(Jedis jedis) {
         RunicGuilds.getRunicGuildsAPI().getGuildDataMap().remove(this.prefix);
@@ -187,41 +212,64 @@ public class GuildData implements SessionData {
     }
 
     @Override
+    public Map<String, String> getDataMapFromJedis(Jedis jedis, int... slot) {
+        Map<String, String> fieldsMap = new HashMap<>();
+        List<String> fields = new ArrayList<>(getFields());
+        String[] fieldsToArray = fields.toArray(new String[0]);
+        List<String> values = jedis.hmget(DATA_PATH + ":" + this.prefix, fieldsToArray);
+        for (int i = 0; i < fieldsToArray.length; i++) {
+            fieldsMap.put(fieldsToArray[i], values.get(i));
+        }
+        return fieldsMap;
+    }
+
+    @Override
     public List<String> getFields() {
-        return null;
+        return GuildDataField.FIELD_STRINGS;
     }
 
     @Override
     public Map<String, String> toMap() {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getDataMapFromJedis(Jedis jedis, int... ints) {
-        return null;
+        return new HashMap<String, String>() {{
+            put(GuildDataField.PREFIX.getField(), prefix);
+            put(GuildDataField.BANK_SIZE.getField(), String.valueOf(guild.getBankSize()));
+            put(GuildDataField.GUILD_BANNER.getField(), serializeItemStack(guild.getGuildBanner().getBannerItem()));
+            put(GuildDataField.GUILD_EXP.getField(), String.valueOf(guild.getGuildExp()));
+            put(GuildDataField.GUILD_NAME.getField(), guild.getGuildName());
+            put(GuildDataField.GUILD_SCORE.getField(), String.valueOf(guild.getScore()));
+        }};
     }
 
     @Override
     public void writeToJedis(Jedis jedis, int... ints) {
-
+        String key = DATA_PATH + ":" + this.prefix;
+        jedis.hmset(key, this.toMap());
+        jedis.expire(key, RedisUtil.EXPIRE_TIME);
     }
 
     @Override
     public MongoData writeToMongo(MongoData mongoData, int... ints) {
+
         GuildMongoData guildMongoData = (GuildMongoData) mongoData;
         guildMongoData.remove("members");
         guildMongoData.remove("bank");
-        if (guildMongoData.has("owner") && !guildMongoData.getSection("owner").getKeys().iterator().next().equalsIgnoreCase(guild.getOwner().getUUID().toString())) {
-            guildMongoData.remove("owner");
-        }
-        guildMongoData.set("owner." + guild.getOwner().getUUID().toString() + ".score", guild.getOwner().getScore());
-        for (GuildMember member : guild.getMembers()) {
-            guildMongoData.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
-            guildMongoData.set("members." + member.getUUID().toString() + ".score", member.getScore());
-        }
-        guildMongoData.set("prefix", guild.getGuildPrefix());
-        guildMongoData.set("name", guild.getGuildName());
-        guildMongoData.set("bank-size", guild.getBankSize());
+
+        guildMongoData.set(GuildDataField.PREFIX.getField(), guild.getGuildPrefix());
+        guildMongoData.set(GuildDataField.GUILD_NAME.getField(), guild.getGuildName());
+        guildMongoData.set(GuildDataField.BANK_SIZE.getField(), guild.getBankSize());
+        guildMongoData.set("score", guild.getScore());
+        guildMongoData.set("guild-exp", guild.getGuildExp());
+        guildMongoData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
+
+        OwnerData ownerData = new OwnerData(guild.getGuildPrefix(), guild.getOwner().getUUID(), guild.getScore());
+        ownerData.writeToMongo(guildMongoData);
+        MemberData memberData = new MemberData(guild.getGuildPrefix(), guildMongoData);
+        memberData.writeToMongo(guildMongoData);
+//        SettingsData settingsData = new SettingsData(guild.getGuildPrefix(), guildMongoData);
+//        settingsData.writeToMongo(guildMongoData);
+//        GuildBankData guildBankData = new GuildBankData(guild.getGuildPrefix(), guildMongoData);
+//        guildBankData.writeToMongo(guildMongoData);
+
         for (int i = 0; i < guild.getBankSize(); i++) {
             if (guild.getBank().get(i) != null) {
                 RunicItem runicItem = ItemManager.getRunicItemFromItemStack(guild.getBank().get(i));
@@ -230,12 +278,9 @@ public class GuildData implements SessionData {
                 }
             }
         }
-        guildMongoData.set("score", guild.getScore());
         for (GuildRank rank : this.guild.getBankAccess().keySet()) {
             guildMongoData.set("settings.bank-access." + rank.getIdentifier(), this.guild.canAccessBank(rank));
         }
-        guildMongoData.set("guild-exp", guild.getGuildExp());
-        guildMongoData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
         return mongoData;
     }
 

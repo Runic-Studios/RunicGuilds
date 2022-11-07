@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.guild;
 
+import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
@@ -331,10 +332,12 @@ public class Guild implements Cloneable {
         if (!matcher.find() || (prefix.length() > 6 || prefix.length() < 3)) {
             return GuildReprefixResult.BAD_PREFIX;
         }
-        Map<String, GuildData> guildDataMap = RunicGuilds.getRunicGuildsAPI().getGuildDataMap();
-        for (String otherGuild : guildDataMap.keySet()) {
-            if (otherGuild.equalsIgnoreCase(prefix)) {
-                if (!guildDataMap.get(otherGuild).getGuild().getGuildName().equalsIgnoreCase(guildData.getGuild().getGuildName())) {
+        Map<Object, SessionData> guildDataMap = RunicGuilds.getRunicGuildsAPI().getGuildDataMap();
+        for (Object otherGuildPrefix : guildDataMap.keySet()) {
+            String otherGuildPrefixStr = (String) otherGuildPrefix;
+            if (otherGuildPrefixStr.equalsIgnoreCase(prefix)) {
+                GuildData otherGuildData = (GuildData) guildDataMap.get(otherGuildPrefixStr);
+                if (!otherGuildData.getGuild().getGuildName().equalsIgnoreCase(guildData.getGuild().getGuildName())) {
                     return GuildReprefixResult.PREFIX_NOT_UNIQUE;
                 }
             }

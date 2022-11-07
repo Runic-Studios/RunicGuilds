@@ -68,7 +68,12 @@ public class GuildUtil {
                 if (j > 19) break;
                 Player playerMember = Bukkit.getPlayer(guildMember.getUUID());
                 if (playerMember == null) continue;
-                tableTabList.set(1, j + 1, new TextTabItem(playerMember.getName(), RunicCore.getTabAPI().getPing(playerMember), Skins.getPlayer(playerMember)));
+                tableTabList.set(1, j + 1, new TextTabItem
+                        (
+                                playerMember.getName(),
+                                RunicCore.getTabAPI().getPing(playerMember),
+                                Skins.getPlayer(playerMember)
+                        ));
                 j++;
             }
         }

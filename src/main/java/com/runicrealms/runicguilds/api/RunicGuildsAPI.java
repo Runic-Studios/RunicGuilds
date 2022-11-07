@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.api;
 
+import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildMember;
@@ -67,7 +68,7 @@ public interface RunicGuildsAPI {
     /**
      * @return a map of guild redis/mongo data, keyed by prefix
      */
-    Map<String, GuildData> getGuildDataMap();
+    Map<Object, SessionData> getGuildDataMap();
 
     /**
      * Used to determine which player will receive messages in guild chat

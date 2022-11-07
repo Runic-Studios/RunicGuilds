@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.listeners;
+package com.runicrealms.runicguilds.listener;
 
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildData;

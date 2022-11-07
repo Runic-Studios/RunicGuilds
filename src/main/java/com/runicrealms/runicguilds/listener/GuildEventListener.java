@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.listeners;
+package com.runicrealms.runicguilds.listener;
 
 import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.redis.RedisUtil;
@@ -42,7 +42,7 @@ public class GuildEventListener implements Listener {
         Guild guild = event.getGuild();
         GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(guild.getGuildPrefix());
         for (GuildMember member : guild.getMembers()) {
-            GuildData.setGuildForPlayer("None", member.getUUID().toString());
+            GuildData.updatePlayerJedisGuild("None", member.getUUID().toString());
             Player playerMember = Bukkit.getPlayer(member.getUUID());
             if (playerMember == null) continue;
             if (GuildBankUtil.isViewingBank(member.getUUID())) {
@@ -51,7 +51,7 @@ public class GuildEventListener implements Listener {
         }
 
         // remove guild for owner
-        GuildData.setGuildForPlayer("None", guild.getOwner().getUUID().toString());
+        GuildData.updatePlayerJedisGuild("None", guild.getOwner().getUUID().toString());
         if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
             Player playerOwner = Bukkit.getPlayer(guild.getOwner().getUUID());
             if (playerOwner != null)

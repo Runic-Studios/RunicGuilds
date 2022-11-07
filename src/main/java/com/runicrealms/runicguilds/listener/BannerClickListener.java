@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.listeners;
+package com.runicrealms.runicguilds.listener;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;

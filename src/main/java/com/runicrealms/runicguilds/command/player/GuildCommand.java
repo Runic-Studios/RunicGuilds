@@ -63,7 +63,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData.setGuildForPlayer(RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildName(), player.getUniqueId().toString());
+        GuildData.updatePlayerJedisGuild(RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildName(), player.getUniqueId().toString());
         ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), RunicGuilds.GUILD_COST);
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage()));
@@ -94,7 +94,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
-        GuildData.setGuildForPlayer(guild.getGuildName(), player.getUniqueId().toString());
+        GuildData.updatePlayerJedisGuild(guild.getGuildName(), player.getUniqueId().toString());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation."));
 
         try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
@@ -387,7 +387,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         guild.removeMember(otherPlayer);
-        GuildData.setGuildForPlayer("None", otherPlayer.toString());
+        GuildData.updatePlayerJedisGuild("None", otherPlayer.toString());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
 
         // guildData.queueToSave();
@@ -415,7 +415,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData.setGuildForPlayer("None", player.getUniqueId().toString());
+        GuildData.updatePlayerJedisGuild("None", player.getUniqueId().toString());
         guild.removeMember(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
 

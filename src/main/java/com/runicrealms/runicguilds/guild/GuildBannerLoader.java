@@ -16,34 +16,6 @@ import java.util.*;
 public class GuildBannerLoader extends BukkitRunnable {
 
     private static final int MAX_POSTED_BANNERS = 3; // how many banners display?
-
-    /**
-     * A runnable (which can be called async) to sort the guilds, then calls a sync task to spawn
-     * banners based on the top sorted guilds
-     */
-    @Override
-    public void run() {
-        List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
-        posted.forEach(PostedGuildBanner::remove);
-
-        List<Guild> ordering = new ArrayList<>(RunicGuilds.getRunicGuildsAPI().getAllGuilds());
-        List<Guild> guilds = new ArrayList<>();
-
-        Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();
-
-        ordering.sort(comparator);
-
-        if (ordering.size() < MAX_POSTED_BANNERS) {
-            guilds.addAll(ordering);
-        } else {
-            for (int i = 0; i < MAX_POSTED_BANNERS; i++) {
-                guilds.add(ordering.get(i));
-            }
-        }
-
-        Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guilds));
-    }
-
     private static final Map<String, Location> BANNER_LOCATIONS;
 
     static {
@@ -75,5 +47,30 @@ public class GuildBannerLoader extends BukkitRunnable {
             PostedGuildBanner banner = new PostedGuildBanner(guilds.get(i - 1), location);
             RunicGuilds.getPostedGuildBanners().add(banner);
         }
+    }
+
+    /**
+     * A runnable (which can be called async) to sort the guilds, then calls a sync task to spawn
+     * banners based on the top sorted guilds
+     */
+    @Override
+    public void run() {
+        List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
+        posted.forEach(PostedGuildBanner::remove);
+        
+        List<Guild> ordering = new ArrayList<>(RunicGuilds.getRunicGuildsAPI().getAllGuilds());
+        List<Guild> guilds = new ArrayList<>();
+        Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();
+        ordering.sort(comparator);
+
+        if (ordering.size() < MAX_POSTED_BANNERS) {
+            guilds.addAll(ordering);
+        } else {
+            for (int i = 0; i < MAX_POSTED_BANNERS; i++) {
+                guilds.add(ordering.get(i));
+            }
+        }
+
+        Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guilds));
     }
 }

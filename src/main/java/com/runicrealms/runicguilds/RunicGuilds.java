@@ -9,7 +9,7 @@ import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.PostedGuildBanner;
-import com.runicrealms.runicguilds.listeners.*;
+import com.runicrealms.runicguilds.listener.*;
 import com.runicrealms.runicguilds.model.GuildDataManager;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.ui.GuildBannerUIListener;

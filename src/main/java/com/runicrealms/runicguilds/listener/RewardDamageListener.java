@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.listeners;
+package com.runicrealms.runicguilds.listener;
 
 import com.runicrealms.plugin.events.MagicDamageEvent;
 import com.runicrealms.plugin.events.PhysicalDamageEvent;

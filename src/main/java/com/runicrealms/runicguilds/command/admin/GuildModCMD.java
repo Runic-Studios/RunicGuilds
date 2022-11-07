@@ -115,7 +115,7 @@ public class GuildModCMD extends BaseCommand {
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
             Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid).getGuild();
-            GuildData.setGuildForPlayer(guild.getGuildName(), uuid.toString());
+            GuildData.updatePlayerJedisGuild(guild.getGuildName(), uuid.toString());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, true));
         }
     }
@@ -147,7 +147,7 @@ public class GuildModCMD extends BaseCommand {
         }
 
         for (GuildMember member : guild.getMembers()) {
-            GuildData.setGuildForPlayer("None", member.getUUID().toString());
+            GuildData.updatePlayerJedisGuild("None", member.getUUID().toString());
             if (GuildBankUtil.isViewingBank(member.getUUID())) {
                 GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
             }
@@ -308,7 +308,7 @@ public class GuildModCMD extends BaseCommand {
             GuildBankUtil.close(Bukkit.getPlayer(args[0]));
         }
 
-        GuildData.setGuildForPlayer("None", uuid.toString());
+        GuildData.updatePlayerJedisGuild("None", uuid.toString());
         guild.removeMember(uuid);
         // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, uuid, player.getUniqueId(), true));
