@@ -339,19 +339,18 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-//        UUID targetUUID = target.getUniqueId();
-//        String targetCache = RunicGuilds.getRunicGuildsAPI().getPlayerCache().get(targetUUID);
-//
-//        if (targetCache == null) {
-//            player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
-//            return;
-//        }
-//
-//        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(RunicGuilds.getRunicGuildsAPI().getPlayerCache().get(targetUUID));
-//        Guild guild = guildData.getGuild();
-//        guild.setPlayerScore(targetUUID, 0);
-//        // guildData.queueToSave();
-//        player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
+        UUID targetUUID = target.getUniqueId();
+
+        if (RunicGuilds.getRunicGuildsAPI().getGuild(targetUUID) == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
+            return;
+        }
+
+        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(targetUUID);
+        Guild guild = guildData.getGuild();
+        guild.setPlayerScore(targetUUID, 0);
+        // guildData.queueToSave();
+        player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
     }
 
     @Subcommand("set name")
@@ -371,10 +370,10 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-//        if (RunicGuilds.getRunicGuildsAPI().getPlayerCache().get(target.getUniqueId()) == null) {
-//            player.sendMessage(ColorUtil.format(this.prefix + "The targeted player must be in a guild execute this command!"));
-//            return;
-//        }
+        if (RunicGuilds.getRunicGuildsAPI().getGuild(target.getUniqueId()) == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "The targeted player must be in a guild execute this command!"));
+            return;
+        }
 
         GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(target.getUniqueId());
 
@@ -397,10 +396,10 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-//        if (RunicGuilds.getRunicGuildsAPI().getPlayerCache().get(target.getUniqueId()) == null) {
-//            player.sendMessage(ColorUtil.format("&eYou are not in a guild!")); //change
-//            return;
-//        }
+        if (RunicGuilds.getRunicGuildsAPI().getGuild(target.getUniqueId()) == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&eYou are not in a guild!"));
+            return;
+        }
 
         GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(target.getUniqueId());
 
