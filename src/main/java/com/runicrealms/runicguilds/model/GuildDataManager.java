@@ -11,6 +11,7 @@ import com.runicrealms.plugin.model.SessionDataManager;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
+import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.guild.*;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -59,10 +60,15 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
         if (isInGuild(player)) {
             GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player);
             if (guildData != null) {
-                guildData.getGuild().increasePlayerScore(player, score);
-                guildData.getGuild().recalculateScore();
+                Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent
+                        (
+                                guildData,
+                                guildData.getGuild().getMember(player),
+                                score,
+                                false
+                        ));
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -111,11 +117,11 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
     public GuildData getGuildData(UUID playerUuid) {
         for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
             GuildData guildData = (GuildData) entry.getValue();
-            if (guildData.getGuild().getOwner().getUUID().toString().equalsIgnoreCase(playerUuid.toString())) {
+            if (guildData.getGuild().getOwner().getUUID().equals(playerUuid)) {
                 return guildData;
             }
             for (GuildMember member : guildData.getGuild().getMembers()) {
-                if (member.getUUID().toString().equalsIgnoreCase(playerUuid.toString())) {
+                if (member.getUUID().equals(playerUuid)) {
                     return guildData;
                 }
             }

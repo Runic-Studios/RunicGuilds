@@ -61,7 +61,7 @@ public class GuildBankData implements SessionDataNested {
     public GuildBankData(Guild guild) {
         this.prefix = guild.getGuildPrefix();
         this.guild = guild;
-        this.items = guild.getBank();
+        this.items = guild.getBankContents();
     }
 
     @Override
@@ -87,8 +87,8 @@ public class GuildBankData implements SessionDataNested {
     public MongoData writeToMongo(MongoData mongoData, int... ints) {
         GuildMongoData guildMongoData = (GuildMongoData) mongoData;
         for (int i = 0; i < guild.getBankSize(); i++) {
-            if (guild.getBank().get(i) != null) {
-                RunicItem runicItem = ItemManager.getRunicItemFromItemStack(guild.getBank().get(i));
+            if (guild.getBankContents().get(i) != null) {
+                RunicItem runicItem = ItemManager.getRunicItemFromItemStack(guild.getBankContents().get(i));
                 if (runicItem != null) {
                     runicItem.addToDataSection(guildMongoData, "bank." + i);
                 }

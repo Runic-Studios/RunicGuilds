@@ -51,7 +51,7 @@ public class SettingsData implements SessionData {
     public SettingsData(Guild guild) {
         this.prefix = guild.getGuildPrefix();
         this.guild = guild;
-        bankSettings = guild.getBankAccess();
+        bankSettings = guild.getBankSettingsMap();
     }
 
     public Map<GuildRank, Boolean> getBankSettings() {
@@ -80,7 +80,7 @@ public class SettingsData implements SessionData {
     @Override
     public MongoData writeToMongo(MongoData mongoData, int... ints) {
         GuildMongoData guildMongoData = (GuildMongoData) mongoData;
-        for (GuildRank rank : this.guild.getBankAccess().keySet()) {
+        for (GuildRank rank : this.guild.getBankSettingsMap().keySet()) {
             guildMongoData.set("settings.bank-access." + rank.getIdentifier(), this.guild.canAccessBank(rank));
         }
         return mongoData;

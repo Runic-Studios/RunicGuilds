@@ -97,10 +97,7 @@ public class GuildCommand extends BaseCommand {
         GuildData.updatePlayerJedisGuild(guild.getGuildName(), player.getUniqueId().toString());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation."));
 
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            guildData.writeToJedis(jedis);
-        }
-        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guild, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
+        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guildData, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
         GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
 
@@ -342,7 +339,6 @@ public class GuildCommand extends BaseCommand {
         target.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have been invited to join the guild " + guild.getGuildName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have invited a player to the guild. An invitation has been sent."));
         GuildCommandMapManager.getInvites().put(target.getUniqueId(), player.getUniqueId());
-        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guild, target.getUniqueId(), player.getUniqueId()));
     }
 

@@ -2,13 +2,9 @@ package com.runicrealms.runicguilds.command.admin;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
-import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
-import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
-import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
-import com.runicrealms.runicguilds.api.event.GuildMemberKickedEvent;
+import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
@@ -21,7 +17,6 @@ import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -271,10 +266,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        guild.increasePlayerScore(target.getUniqueId(), amount);
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            guildData.writeToJedis(jedis);
-        }
+        Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildData, guildData.getGuild().getMember(target.getUniqueId()), amount, false));
         sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
     }
 
@@ -348,8 +340,8 @@ public class GuildModCMD extends BaseCommand {
 
         GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(targetUUID);
         Guild guild = guildData.getGuild();
-        guild.setPlayerScore(targetUUID, 0);
-        // guildData.queueToSave();
+        GuildMember targetMember = guild.getMember(targetUUID);
+        Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildData, targetMember, targetMember.getScore(), true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
     }
 

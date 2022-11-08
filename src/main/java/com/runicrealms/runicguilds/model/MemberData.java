@@ -39,7 +39,9 @@ public class MemberData implements SessionDataNested {
     }
 
     /**
-     * @param guild
+     * Builds the MemberData object from some guild. Used during shutdown
+     *
+     * @param guild the guild to save
      */
     public MemberData(Guild guild) {
         this.prefix = guild.getGuildPrefix();

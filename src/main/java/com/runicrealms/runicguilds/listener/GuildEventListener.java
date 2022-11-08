@@ -74,10 +74,13 @@ public class GuildEventListener implements Listener {
     public void onGuildInvitationAccept(GuildInvitationAcceptedEvent event) {
         Player whoWasInvited = Bukkit.getPlayer(event.getInvited());
         syncDisplays(whoWasInvited);
-        for (GuildMember member : event.getGuild().getMembersWithOwner()) {
+        for (GuildMember member : event.getGuildData().getGuild().getMembersWithOwner()) {
             Player playerMember = Bukkit.getPlayer(member.getUUID());
             if (playerMember == null) continue;
             syncDisplays(playerMember);
+        }
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            event.getGuildData().writeToJedis(jedis);
         }
     }
 
@@ -102,6 +105,21 @@ public class GuildEventListener implements Listener {
             Player playerMember = Bukkit.getPlayer(member.getUUID());
             if (playerMember == null) continue;
             syncDisplays(playerMember);
+        }
+    }
+
+    /**
+     * Updates player score on change, recalculates guild's entire score
+     */
+    @EventHandler
+    public void onGuildScoreChange(GuildScoreChangeEvent event) {
+        Guild guild = event.getGuildData().getGuild();
+        GuildMember member = event.getGuildMember();
+        int score = member.getScore();
+        member.setScore(score + event.getScore());
+        guild.recalculateScore();
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            event.getGuildData().writeToJedis(jedis);
         }
     }
 

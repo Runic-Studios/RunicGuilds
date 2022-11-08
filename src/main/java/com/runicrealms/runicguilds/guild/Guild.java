@@ -22,35 +22,35 @@ public class Guild implements Cloneable {
 
     private final Set<GuildMember> members;
     private final GuildBanner guildBanner;
-    private final Map<GuildRank, Boolean> bankAccess;
+    private final Map<GuildRank, Boolean> bankSettingsMap;
     private GuildMember owner;
     private String guildName;
     private String guildPrefix;
     private Integer score;
-    private List<ItemStack> bank;
+    private List<ItemStack> bankContents;
     private Integer bankSize;
     private int guildExp;
     private GuildStage guildStage;
 
     /**
-     * @param members
-     * @param owner
-     * @param guildName
-     * @param guildPrefix
-     * @param bank
-     * @param bankSize
-     * @param bankAccess
-     * @param guildEXP
+     * @param members         of set of members in the guild
+     * @param owner           the owner of the guild
+     * @param guildName       the name of the guild
+     * @param guildPrefix     the prefix of the guild (used as its identifier in mongo)
+     * @param bankContents    a list of bank items
+     * @param bankSize        the size of the bank (in total slots)
+     * @param bankSettingsMap a map of which ranks can access the guild bank
+     * @param guildEXP        the total exp of the guild
      */
     public Guild(Set<GuildMember> members, GuildMember owner, String guildName, String guildPrefix,
-                 List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+                 List<ItemStack> bankContents, Integer bankSize, Map<GuildRank, Boolean> bankSettingsMap, int guildEXP) {
         this.members = members;
         this.owner = owner;
         this.guildName = guildName;
         this.guildPrefix = guildPrefix;
-        this.bank = bank;
+        this.bankContents = bankContents;
         this.bankSize = bankSize;
-        this.bankAccess = bankAccess;
+        this.bankSettingsMap = bankSettingsMap;
         this.recalculateScore();
         this.guildBanner = new GuildBanner(this);
         this.guildExp = guildEXP;
@@ -58,25 +58,17 @@ public class Guild implements Cloneable {
     }
 
     /**
-     * @param members
-     * @param guildBanner
-     * @param owner
-     * @param guildName
-     * @param guildPrefix
-     * @param bank
-     * @param bankSize
-     * @param bankAccess
-     * @param guildEXP
+     * @param guildBanner an ItemStack to represent the guild's banner
      */
     public Guild(Set<GuildMember> members, ItemStack guildBanner, GuildMember owner, String guildName, String guildPrefix,
-                 List<ItemStack> bank, Integer bankSize, Map<GuildRank, Boolean> bankAccess, int guildEXP) {
+                 List<ItemStack> bankContents, Integer bankSize, Map<GuildRank, Boolean> bankSettingsMap, int guildEXP) {
         this.members = members;
         this.owner = owner;
         this.guildName = guildName;
         this.guildPrefix = guildPrefix;
-        this.bank = bank;
+        this.bankContents = bankContents;
         this.bankSize = bankSize;
-        this.bankAccess = bankAccess;
+        this.bankSettingsMap = bankSettingsMap;
         this.recalculateScore();
         this.guildBanner = new GuildBanner(this, guildBanner);
         this.guildExp = guildEXP;
@@ -84,13 +76,13 @@ public class Guild implements Cloneable {
     }
 
     public boolean canAccessBank(GuildRank rank) {
-        return rank == GuildRank.OWNER || this.bankAccess.get(rank);
+        return rank == GuildRank.OWNER || this.bankSettingsMap.get(rank);
     }
 
     @Override
     public Guild clone() {
         List<ItemStack> newItems = new ArrayList<>();
-        for (ItemStack item : this.bank) {
+        for (ItemStack item : this.bankContents) {
             if (item != null) {
                 newItems.add(item.clone());
             } else {
@@ -101,7 +93,7 @@ public class Guild implements Cloneable {
         for (GuildMember member : this.members) {
             newMembers.add(member.clone());
         }
-        return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankAccess, this.guildExp);
+        return new Guild(newMembers, this.owner.clone(), this.guildName, this.guildPrefix, newItems, this.bankSize, this.bankSettingsMap, this.guildExp);
     }
 
     /**
@@ -115,7 +107,7 @@ public class Guild implements Cloneable {
     }
 
     /**
-     * @return
+     * @return the expected guild stage based on the guild's exp
      */
     private GuildStage expToStage() {
         for (GuildStage stage : GuildStage.values()) {
@@ -126,16 +118,16 @@ public class Guild implements Cloneable {
         return GuildStage.STAGE0;
     }
 
-    public List<ItemStack> getBank() {
-        return this.bank;
+    public List<ItemStack> getBankContents() {
+        return this.bankContents;
     }
 
-    public void setBank(List<ItemStack> bank) {
-        this.bank = bank;
+    public void setBankContents(List<ItemStack> bankContents) {
+        this.bankContents = bankContents;
     }
 
-    public Map<GuildRank, Boolean> getBankAccess() {
-        return this.bankAccess;
+    public Map<GuildRank, Boolean> getBankSettingsMap() {
+        return this.bankSettingsMap;
     }
 
     public Integer getBankSize() {
@@ -155,7 +147,7 @@ public class Guild implements Cloneable {
     }
 
     /**
-     * @param guildExp
+     * @param guildExp the new exp to set for the guild
      */
     public void setGuildExp(int guildExp) {
         if (guildExp + this.guildExp > GuildStage.getMaxStage().getExp()) {
@@ -246,12 +238,10 @@ public class Guild implements Cloneable {
         return false;
     }
 
-    public void increasePlayerScore(UUID player, Integer score) {
-        GuildMember member = getMember(player);
-        member.setScore(member.getScore() + score);
-        this.recalculateScore();
-    }
-
+    /**
+     * @param playerName
+     * @return
+     */
     public boolean isInGuild(String playerName) {
         @SuppressWarnings("deprecation")
         OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
@@ -261,6 +251,9 @@ public class Guild implements Cloneable {
         return false;
     }
 
+    /**
+     *
+     */
     public void recalculateScore() {
         this.score = 0;
         for (GuildMember member : members) {
@@ -269,6 +262,9 @@ public class Guild implements Cloneable {
         score += owner.getScore();
     }
 
+    /**
+     * @param uuid of the member to remove
+     */
     public void removeMember(UUID uuid) {
         for (GuildMember member : members) {
             if (member.getUUID().toString().equalsIgnoreCase(uuid.toString())) {
@@ -302,15 +298,12 @@ public class Guild implements Cloneable {
     }
 
     public void setBankAccess(GuildRank rank, Boolean canAccess) {
-        this.bankAccess.put(rank, canAccess);
+        this.bankSettingsMap.put(rank, canAccess);
     }
 
-    public void setPlayerScore(UUID player, Integer score) {
-        GuildMember member = getMember(player);
-        member.setScore(score);
-        this.recalculateScore();
-    }
-
+    /**
+     * @param member
+     */
     public void transferOwnership(GuildMember member) {
         this.members.add(new GuildMember(this.owner.getUUID(), GuildRank.OFFICER, this.owner.getScore(), this.owner.getLastKnownName()));
         this.owner = null;

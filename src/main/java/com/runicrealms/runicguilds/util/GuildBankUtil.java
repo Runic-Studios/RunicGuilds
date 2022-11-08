@@ -62,7 +62,7 @@ public class GuildBankUtil implements Listener {
             }
         }
         for (int i = (page - 1) * 45; i < page * 45; i++) {
-            inventory.setItem(i - (page - 1) * 45 + 9, guild.getBank().get(i));
+            inventory.setItem(i - (page - 1) * 45 + 9, guild.getBankContents().get(i));
         }
         player.openInventory(inventory);
         viewers.put(player.getUniqueId(), new ViewerInfo(page, guild.getGuildPrefix()));
@@ -75,11 +75,11 @@ public class GuildBankUtil implements Listener {
 
     private static void saveToBank(Inventory inventory, Integer page, UUID uuid) {
         GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid);
-        List<ItemStack> bank = new ArrayList<>(guildData.getGuild().getBank());
+        List<ItemStack> bank = new ArrayList<>(guildData.getGuild().getBankContents());
         for (int i = (page - 1) * 45; i < page * 45; i++) {
             bank.set(i, inventory.getItem(i - ((page - 1) * 45)));
         }
-        guildData.getGuild().setBank(bank);
+        guildData.getGuild().setBankContents(bank);
         try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
             guildData.writeToJedis(jedis);
         }
@@ -123,8 +123,8 @@ public class GuildBankUtil implements Listener {
                         Inventory bankInventory = Bukkit.createInventory(null, 45, "");
                         Integer currentPage = viewers.get(player.getUniqueId()).getPage();
                         for (int i = 0; i < 45; i++) {
-                            if (guild.getBank().get((currentPage - 1) * 45 + i) != null) {
-                                bankInventory.setItem(i, guild.getBank().get((currentPage - 1) * 45 + i));
+                            if (guild.getBankContents().get((currentPage - 1) * 45 + i) != null) {
+                                bankInventory.setItem(i, guild.getBankContents().get((currentPage - 1) * 45 + i));
                             }
                         }
                         ViewerInfo viewer = viewers.get(player.getUniqueId());
@@ -140,7 +140,7 @@ public class GuildBankUtil implements Listener {
                                             ItemRemover.takeItem(player, Material.GOLD_NUGGET, (int) Math.pow(2, guild.getBankSize() / 45 + 8));
                                             guild.setBankSize(guild.getBankSize() + 45);
                                             for (int i = 0; i < 45; i++) {
-                                                guild.getBank().add(null);
+                                                guild.getBankContents().add(null);
                                             }
                                             try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
                                                 guildData.writeToJedis(jedis);
