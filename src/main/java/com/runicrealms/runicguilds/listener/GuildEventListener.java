@@ -41,17 +41,19 @@ public class GuildEventListener implements Listener {
         Player player = event.getWhoDisbanded();
         Guild guild = event.getGuild();
         GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(guild.getGuildPrefix());
-        for (GuildMember member : guild.getMembers()) {
-            GuildData.updatePlayerJedisGuild("None", member.getUUID().toString());
-            Player playerMember = Bukkit.getPlayer(member.getUUID());
-            if (playerMember == null) continue;
-            if (GuildBankUtil.isViewingBank(member.getUUID())) {
-                GuildBankUtil.close(playerMember);
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            for (GuildMember member : guild.getMembers()) {
+                RunicGuilds.getRunicGuildsAPI().setJedisGuild(member.getUUID(), "None", jedis);
+                Player playerMember = Bukkit.getPlayer(member.getUUID());
+                if (playerMember == null) continue;
+                if (GuildBankUtil.isViewingBank(member.getUUID())) {
+                    GuildBankUtil.close(playerMember);
+                }
             }
+            // remove guild for owner
+            RunicGuilds.getRunicGuildsAPI().setJedisGuild(guild.getOwner().getUUID(), "None", jedis);
         }
 
-        // remove guild for owner
-        GuildData.updatePlayerJedisGuild("None", guild.getOwner().getUUID().toString());
         if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
             Player playerOwner = Bukkit.getPlayer(guild.getOwner().getUUID());
             if (playerOwner != null)
@@ -88,12 +90,16 @@ public class GuildEventListener implements Listener {
     public void onGuildKick(GuildMemberKickedEvent event) {
         Player whoWasKicked = Bukkit.getPlayer(event.getKicked());
         if (whoWasKicked == null) return;
+        event.getGuild().removeMember(whoWasKicked.getUniqueId());
         whoWasKicked.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
         syncDisplays(whoWasKicked);
         for (GuildMember member : event.getGuild().getMembersWithOwner()) {
             Player playerMember = Bukkit.getPlayer(member.getUUID());
             if (playerMember == null) continue;
             syncDisplays(playerMember);
+        }
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            RunicGuilds.getRunicGuildsAPI().setJedisGuild(whoWasKicked.getUniqueId(), "None", jedis);
         }
     }
 

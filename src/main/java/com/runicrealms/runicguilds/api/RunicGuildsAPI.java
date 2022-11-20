@@ -8,6 +8,7 @@ import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import org.bukkit.entity.Player;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public interface RunicGuildsAPI {
      * @return a list of all guilds in the guildDataMap
      */
     List<Guild> getAllGuilds();
- 
+
     /**
      * @param uuid of the player
      * @return the guild of the player (or null)
@@ -112,4 +113,17 @@ public interface RunicGuildsAPI {
      * @return a rename result
      */
     GuildRenameResult renameGuild(GuildData guildData, String name);
+
+    /**
+     * @param playerUuid of player to update
+     * @param guildName  of the guild, or "None"
+     */
+    void setJedisGuild(UUID playerUuid, String guildName);
+
+    /**
+     * @param playerUuid of player to update
+     * @param guildName  of the guild, or "None"
+     * @param jedis      the jedis resource
+     */
+    void setJedisGuild(UUID playerUuid, String guildName, Jedis jedis);
 }

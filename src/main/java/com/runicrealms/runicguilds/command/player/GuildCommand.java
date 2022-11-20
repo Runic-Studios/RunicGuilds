@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.command.player;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
-import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
@@ -23,7 +22,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
 
@@ -63,7 +61,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData.updatePlayerJedisGuild(RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildName(), player.getUniqueId().toString());
+        RunicGuilds.getRunicGuildsAPI().setJedisGuild(player.getUniqueId(), RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildName());
         ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), RunicGuilds.GUILD_COST);
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage()));
@@ -94,7 +92,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
-        GuildData.updatePlayerJedisGuild(guild.getGuildName(), player.getUniqueId().toString());
+        RunicGuilds.getRunicGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation."));
 
         Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guildData, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
@@ -251,9 +249,6 @@ public class GuildCommand extends BaseCommand {
 
         member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() + 1));
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + member.getLastKnownName() + " has been demoted."));
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            guildData.writeToJedis(jedis);
-        }
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guild, member.getUUID(), player.getUniqueId()));
     }
 
@@ -366,8 +361,8 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        UUID otherPlayer = GuildUtil.getOfflinePlayerUUID(args[0]);
-        if (otherPlayer.toString().equalsIgnoreCase(player.getUniqueId().toString())) {
+        UUID otherPlayerUuid = GuildUtil.getOfflinePlayerUUID(args[0]);
+        if (otherPlayerUuid.toString().equalsIgnoreCase(player.getUniqueId().toString())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can't remove yourself from the guild. To leave, type /guild leave."));
             return;
         }
@@ -377,19 +372,18 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() >= guild.getMember(otherPlayer).getRank().getRankNumber()) {
+        if (guild.getMember(player.getUniqueId()).getRank().getRankNumber() >= guild.getMember(otherPlayerUuid).getRank().getRankNumber()) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can only kick players that are of lower rank than you."));
             return;
         }
 
-        guild.removeMember(otherPlayer);
-        GuildData.updatePlayerJedisGuild("None", otherPlayer.toString());
+        guild.removeMember(otherPlayerUuid);
+        RunicGuilds.getRunicGuildsAPI().setJedisGuild(otherPlayerUuid, "None");
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
 
-        // guildData.queueToSave();
         Player target = Bukkit.getPlayerExact(args[0]);
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, target.getUniqueId(), player.getUniqueId(), false));
-        if (GuildBankUtil.isViewingBank(otherPlayer) && target != null) {
+        if (GuildBankUtil.isViewingBank(otherPlayerUuid) && target != null) {
             GuildBankUtil.close(target);
         }
     }
@@ -411,7 +405,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData.updatePlayerJedisGuild("None", player.getUniqueId().toString());
+        RunicGuilds.getRunicGuildsAPI().setJedisGuild(player.getUniqueId(), "None");
         guild.removeMember(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
 

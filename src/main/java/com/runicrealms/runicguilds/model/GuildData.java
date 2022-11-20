@@ -2,16 +2,13 @@ package com.runicrealms.runicguilds.model;
 
 import com.mongodb.client.model.Filters;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.database.GuildMongoData;
 import com.runicrealms.plugin.database.MongoData;
 import com.runicrealms.plugin.database.MongoDataSection;
 import com.runicrealms.plugin.model.SessionData;
-import com.runicrealms.plugin.redis.RedisUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -113,21 +110,6 @@ public class GuildData implements SessionData {
     }
 
     /**
-     * Updates the guild for the given player in jedis
-     *
-     * @param name of the guild
-     * @param uuid of the player
-     */
-    public static void updatePlayerJedisGuild(String name, String uuid) {
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-                jedis.set(uuid + ":guild", name);
-                jedis.expire(uuid + ":guild", RedisUtil.EXPIRE_TIME);
-            });
-        }
-    }
-
-    /**
      * Convert a GuildBanner ItemStack into base64 for storage and retrieval (should be loss-less)
      *
      * @param item the item stack associated with the guild banner
@@ -171,11 +153,11 @@ public class GuildData implements SessionData {
 
     @Override
     public void writeToJedis(Jedis jedis, int... ints) {
-        jedis.set(this.guild.getOwner().getUUID() + ":guild", this.guild.getGuildName());
-        jedis.expire(this.guild.getOwner().getUUID() + ":guild", RedisUtil.EXPIRE_TIME);
+        // Set guild for owner
+        RunicGuilds.getRunicGuildsAPI().setJedisGuild(this.guild.getOwner().getUUID(), this.guild.getGuildName(), jedis);
+        // Set guild for members
         for (GuildMember guildMember : this.guild.getMembers()) {
-            jedis.set(guildMember.getUUID() + ":guild", this.guild.getGuildName());
-            jedis.expire(guildMember.getUUID() + ":guild", RedisUtil.EXPIRE_TIME);
+            RunicGuilds.getRunicGuildsAPI().setJedisGuild(guildMember.getUUID(), this.guild.getGuildName(), jedis);
         }
     }
 

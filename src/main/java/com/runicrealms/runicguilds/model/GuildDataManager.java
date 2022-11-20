@@ -8,6 +8,7 @@ import com.runicrealms.plugin.database.PlayerMongoData;
 import com.runicrealms.plugin.database.event.MongoSaveEvent;
 import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.plugin.model.SessionDataManager;
+import com.runicrealms.plugin.redis.RedisUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -78,7 +79,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
         GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-            GuildData.updatePlayerJedisGuild(name, owner.toString());
+            RunicGuilds.getRunicGuildsAPI().setJedisGuild(owner.getUniqueId(), name);
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(RunicGuilds.getRunicGuildsAPI().getGuildData(prefix).getGuild(), modCreated));
         }
         return result;
@@ -209,18 +210,28 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
                 return GuildRenameResult.NAME_NOT_UNIQUE;
             }
         }
-        try {
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
             guildData.getGuild().setGuildName(name);
-            for (GuildMember member : guildData.getGuild().getMembers()) {
-                GuildData.updatePlayerJedisGuild(name, member.getUUID().toString());
-            }
-            GuildData.updatePlayerJedisGuild(name, guildData.getGuild().getOwner().toString());
-            // guildData.queueToSave();
+            guildData.writeToJedis(jedis);
         } catch (Exception exception) {
             exception.printStackTrace();
             return GuildRenameResult.INTERNAL_ERROR;
         }
         return GuildRenameResult.SUCCESSFUL;
+    }
+
+    @Override
+    public void setJedisGuild(UUID playerUuid, String guildName) {
+        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+            jedis.set(playerUuid + ":guild", guildName);
+            jedis.expire(playerUuid + ":guild", RedisUtil.EXPIRE_TIME);
+        }
+    }
+
+    @Override
+    public void setJedisGuild(UUID playerUuid, String guildName, Jedis jedis) {
+        jedis.set(playerUuid + ":guild", guildName);
+        jedis.expire(playerUuid + ":guild", RedisUtil.EXPIRE_TIME);
     }
 
     @Override

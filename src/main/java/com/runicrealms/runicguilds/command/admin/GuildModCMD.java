@@ -110,7 +110,7 @@ public class GuildModCMD extends BaseCommand {
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
             Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid).getGuild();
-            GuildData.updatePlayerJedisGuild(guild.getGuildName(), uuid.toString());
+            RunicGuilds.getRunicGuildsAPI().setJedisGuild(uuid, guild.getGuildName());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, true));
         }
     }
@@ -132,17 +132,11 @@ public class GuildModCMD extends BaseCommand {
         }
 
         Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(args[0]).getGuild();
-
-        if (GuildCommandMapManager.getTransferOwnership().containsKey(guild.getOwner().getUUID())) {
-            GuildCommandMapManager.getTransferOwnership().remove(guild.getOwner().getUUID());
-        }
-
-        if (GuildCommandMapManager.getDisbanding().contains(guild.getOwner().getUUID())) {
-            GuildCommandMapManager.getDisbanding().remove(guild.getOwner().getUUID());
-        }
+        GuildCommandMapManager.getTransferOwnership().remove(guild.getOwner().getUUID());
+        GuildCommandMapManager.getDisbanding().remove(guild.getOwner().getUUID());
 
         for (GuildMember member : guild.getMembers()) {
-            GuildData.updatePlayerJedisGuild("None", member.getUUID().toString());
+            RunicGuilds.getRunicGuildsAPI().setJedisGuild(member.getUUID(), "None");
             if (GuildBankUtil.isViewingBank(member.getUUID())) {
                 GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
             }
@@ -206,33 +200,12 @@ public class GuildModCMD extends BaseCommand {
         amount = event.getAmount();
 
         guild.setGuildExp(amount);
-        // guildData.queueToSave();
         target.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &eYou received " + amount + " guild experience!"));
         if (sender instanceof Player) {
             sender.sendMessage(ColorUtil.format(this.prefix + "You gave " + target.getName() + "'s guild " + amount + " guild experience!"));
         }
     }
 
-    /*
-
-
-            if (RunicGuildsAPIold.getGuild(player.getUniqueId()) != null
-                && RunicCore.getPartyManager().getPlayerParty(player) != null) {
-
-            player.getWorld().playSound(event.getEntity().getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 0.5f, 1.0f);
-            player.sendTitle(ChatColor.GREEN + "Guild Boss Slain!",
-                    ChatColor.GREEN + "Your party has earned an extra " +
-                            ChatColor.YELLOW + RunicGuilds.getGuildBossManager().getKillPoints() +
-                            ChatColor.GREEN + " points!",
-                    20, 100, 20);
-            // distribute the extra 20 points
-            for (Player mem : RunicCore.getPartyManager().getPlayerParty(player).getMembersWithLeader()) {
-                RunicGuildsAPIold.addPlayerScore(mem.getUniqueId(),
-                        RunicGuilds.getGuildBossManager().getKillPoints() / RunicCore.getPartyManager().getPlayerParty(player).getSize());
-            }
-            // todo: guildmod give partyscore <caster.uuid> 100
-            // todo: make 'damage table' a modular class in core
-     */
     @Subcommand("give score")
     @Syntax("<player> <amount>")
     @CommandPermission("runicadmin.guilds.givescore")
@@ -300,9 +273,6 @@ public class GuildModCMD extends BaseCommand {
             GuildBankUtil.close(Bukkit.getPlayer(args[0]));
         }
 
-        GuildData.updatePlayerJedisGuild("None", uuid.toString());
-        guild.removeMember(uuid);
-        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, uuid, player.getUniqueId(), true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
     }

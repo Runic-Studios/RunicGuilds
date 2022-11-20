@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.util;
 
-import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
@@ -23,7 +22,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import redis.clients.jedis.Jedis;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -32,10 +30,19 @@ public class GuildBankUtil implements Listener {
 
     private static final Map<UUID, ViewerInfo> viewers = new HashMap<>();
 
+    /**
+     * @param player
+     * @param page
+     */
     public static void open(Player player, Integer page) {
         open(player, page, RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildPrefix());
     }
 
+    /**
+     * @param player
+     * @param page
+     * @param prefix
+     */
     public static void open(Player player, Integer page, String prefix) {
         Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(prefix).getGuild();
         Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
@@ -73,6 +80,11 @@ public class GuildBankUtil implements Listener {
         viewers.remove(player.getUniqueId());
     }
 
+    /**
+     * @param inventory
+     * @param page
+     * @param uuid
+     */
     private static void saveToBank(Inventory inventory, Integer page, UUID uuid) {
         GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid);
         List<ItemStack> bank = new ArrayList<>(guildData.getGuild().getBankContents());
@@ -80,15 +92,19 @@ public class GuildBankUtil implements Listener {
             bank.set(i, inventory.getItem(i - ((page - 1) * 45)));
         }
         guildData.getGuild().setBankContents(bank);
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-            guildData.writeToJedis(jedis);
-        }
     }
 
+    /**
+     * @param uuid
+     * @return
+     */
     public static boolean isViewingBank(UUID uuid) {
         return viewers.containsKey(uuid);
     }
 
+    /**
+     * @param viewer
+     */
     private static void refreshViewers(ViewerInfo viewer) {
         Map<UUID, Integer> playersToRefresh = new HashMap<>();
         for (Entry<UUID, ViewerInfo> entry : viewers.entrySet()) {
@@ -141,9 +157,6 @@ public class GuildBankUtil implements Listener {
                                             guild.setBankSize(guild.getBankSize() + 45);
                                             for (int i = 0; i < 45; i++) {
                                                 guild.getBankContents().add(null);
-                                            }
-                                            try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
-                                                guildData.writeToJedis(jedis);
                                             }
                                             refreshViewers(viewer);
                                         } else {
