@@ -27,7 +27,7 @@ public class RewardExpListener implements Listener {
         if (guildStage == null) return;
 
         // ensure there is a guild
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         if (guildData == null) return;
 
         // ensure guild has perk unlocked

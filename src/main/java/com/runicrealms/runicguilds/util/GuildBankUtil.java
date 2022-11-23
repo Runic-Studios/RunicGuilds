@@ -35,7 +35,7 @@ public class GuildBankUtil implements Listener {
      * @param page
      */
     public static void open(Player player, Integer page) {
-        open(player, page, RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildPrefix());
+        open(player, page, RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildPrefix());
     }
 
     /**
@@ -44,7 +44,7 @@ public class GuildBankUtil implements Listener {
      * @param prefix
      */
     public static void open(Player player, Integer page, String prefix) {
-        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(prefix).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(prefix).getGuild();
         Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
         if (guild.getBankSize() > 45 && page != guild.getBankSize() / 45) {
             inventory.setItem(8, new ItemBuilder(Material.ARROW, 1, "&6Next Page").getItem());
@@ -86,7 +86,7 @@ public class GuildBankUtil implements Listener {
      * @param uuid
      */
     private static void saveToBank(Inventory inventory, Integer page, UUID uuid) {
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid);
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(uuid);
         List<ItemStack> bank = new ArrayList<>(guildData.getGuild().getBankContents());
         for (int i = (page - 1) * 45; i < page * 45; i++) {
             bank.set(i, inventory.getItem(i - ((page - 1) * 45)));
@@ -134,7 +134,7 @@ public class GuildBankUtil implements Listener {
                     Player player = (Player) event.getWhoClicked();
                     if (viewers.containsKey(player.getUniqueId())) {
                         ItemStack clickedItem = event.getCurrentItem().clone();
-                        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+                        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
                         Guild guild = guildData.getGuild();
                         Inventory bankInventory = Bukkit.createInventory(null, 45, "");
                         Integer currentPage = viewers.get(player.getUniqueId()).getPage();

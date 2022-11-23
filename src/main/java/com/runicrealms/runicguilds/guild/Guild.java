@@ -325,7 +325,7 @@ public class Guild implements Cloneable {
         if (!matcher.find() || (prefix.length() > 6 || prefix.length() < 3)) {
             return GuildReprefixResult.BAD_PREFIX;
         }
-        Map<Object, SessionData> guildDataMap = RunicGuilds.getRunicGuildsAPI().getGuildDataMap();
+        Map<Object, SessionData> guildDataMap = RunicGuilds.getGuildsAPI().getGuildDataMap();
         for (Object otherGuildPrefix : guildDataMap.keySet()) {
             String otherGuildPrefixStr = (String) otherGuildPrefix;
             if (otherGuildPrefixStr.equalsIgnoreCase(prefix)) {

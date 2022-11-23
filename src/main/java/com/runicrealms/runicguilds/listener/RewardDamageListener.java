@@ -27,7 +27,7 @@ public class RewardDamageListener implements Listener {
         StageReward damageReward = StageReward.COMBAT_BONUS;
         GuildStage requiredStage = GuildStage.getFromReward(damageReward);
         if (requiredStage == null) return damageBeforeBonus;
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         if (guildData == null) return damageBeforeBonus;
         Guild guild = guildData.getGuild();
         if (guild.getGuildStage().getRank() < requiredStage.getRank())

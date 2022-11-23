@@ -39,7 +39,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     public static List<Integer> GUILD_HERALDS;
     public static List<Integer> GUILD_VENDORS;
     private static RunicGuilds instance;
-    private static RunicGuildsAPI runicGuildsAPI;
+    private static RunicGuildsAPI guildsAPI;
     private static PaperCommandManager commandManager;
 
     public static Set<UUID> getPlayersCreatingGuild() {
@@ -58,8 +58,8 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         return commandManager;
     }
 
-    public static RunicGuildsAPI getRunicGuildsAPI() {
-        return runicGuildsAPI;
+    public static RunicGuildsAPI getGuildsAPI() {
+        return guildsAPI;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
 
         instance = this;
         this.saveDefaultConfig();
-        runicGuildsAPI = new GuildDataManager();
+        guildsAPI = new GuildDataManager();
         GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
         GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
         GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");
@@ -122,7 +122,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     @EventHandler
     public void onShutdown(ServerShutdownEvent event) {
         instance = null;
-        runicGuildsAPI = null;
+        guildsAPI = null;
         commandManager = null;
     }
 

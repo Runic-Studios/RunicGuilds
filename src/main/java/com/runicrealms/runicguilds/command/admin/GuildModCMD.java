@@ -77,7 +77,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(args[0]);
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(args[0]);
         if (guildData == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild prefix!"));
             return;
@@ -106,11 +106,11 @@ public class GuildModCMD extends BaseCommand {
 
         UUID uuid = owner.getUniqueId();
 
-        GuildCreationResult result = RunicGuilds.getRunicGuildsAPI().createGuild(owner, args[1], args[2], true);
+        GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(owner, args[1], args[2], true);
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
-            Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid).getGuild();
-            RunicGuilds.getRunicGuildsAPI().setJedisGuild(uuid, guild.getGuildName());
+            Guild guild = RunicGuilds.getGuildsAPI().getGuildData(uuid).getGuild();
+            RunicGuilds.getGuildsAPI().setJedisGuild(uuid, guild.getGuildName());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, true));
         }
     }
@@ -126,17 +126,17 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().getGuildDataMap().containsKey(args[0])) {
+        if (!RunicGuilds.getGuildsAPI().getGuildDataMap().containsKey(args[0])) {
             player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild!"));
             return;
         }
 
-        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(args[0]).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(args[0]).getGuild();
         GuildCommandMapManager.getTransferOwnership().remove(guild.getOwner().getUUID());
         GuildCommandMapManager.getDisbanding().remove(guild.getOwner().getUUID());
 
         for (GuildMember member : guild.getMembers()) {
-            RunicGuilds.getRunicGuildsAPI().setJedisGuild(member.getUUID(), "None");
+            RunicGuilds.getGuildsAPI().setJedisGuild(member.getUUID(), "None");
             if (GuildBankUtil.isViewingBank(member.getUUID())) {
                 GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
             }
@@ -165,7 +165,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(target.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
         if (guildData == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -223,7 +223,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(target.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
 
         Guild guild = guildData.getGuild();
         if (guild == null) {
@@ -255,7 +255,7 @@ public class GuildModCMD extends BaseCommand {
         }
 
         UUID uuid = GuildUtil.getOfflinePlayerUUID(args[0]);
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(uuid);
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(uuid);
 
         if (guildData.getGuild() == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
@@ -303,12 +303,12 @@ public class GuildModCMD extends BaseCommand {
 
         UUID targetUUID = target.getUniqueId();
 
-        if (RunicGuilds.getRunicGuildsAPI().getGuild(targetUUID) == null) {
+        if (RunicGuilds.getGuildsAPI().getGuild(targetUUID) == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(targetUUID);
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(targetUUID);
         Guild guild = guildData.getGuild();
         GuildMember targetMember = guild.getMember(targetUUID);
         Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildData, targetMember, targetMember.getScore(), true));
@@ -332,14 +332,14 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        if (RunicGuilds.getRunicGuildsAPI().getGuild(target.getUniqueId()) == null) {
+        if (RunicGuilds.getGuildsAPI().getGuild(target.getUniqueId()) == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The targeted player must be in a guild execute this command!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(target.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
 
-        player.sendMessage(ColorUtil.format(this.prefix + RunicGuilds.getRunicGuildsAPI().renameGuild(guildData, this.combineArgs(args, 1)).getMessage()));
+        player.sendMessage(ColorUtil.format(this.prefix + RunicGuilds.getGuildsAPI().renameGuild(guildData, this.combineArgs(args, 1)).getMessage()));
     }
 
     @Subcommand("set prefix")
@@ -358,12 +358,12 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        if (RunicGuilds.getRunicGuildsAPI().getGuild(target.getUniqueId()) == null) {
+        if (RunicGuilds.getGuildsAPI().getGuild(target.getUniqueId()) == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "&eYou are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(target.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
 
         player.sendMessage(ColorUtil.format(this.prefix + guildData.getGuild().updateGuildPrefix(guildData, args[1]).getMessage()));
     }

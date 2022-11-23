@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.model;
 
+import com.runicrealms.plugin.database.GuildMongoData;
 import com.runicrealms.plugin.database.MongoData;
-import com.runicrealms.plugin.database.MongoDataSection;
 import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
@@ -41,7 +41,7 @@ public class OwnerData implements SessionData {
      * @param prefix       of the guild
      * @param ownerSection the section of the guild's mongo data
      */
-    public OwnerData(String prefix, MongoDataSection ownerSection) {
+    public OwnerData(String prefix, GuildMongoData ownerSection) {
         this.prefix = prefix;
         UUID ownerUuid = UUID.fromString(ownerSection.getKeys().iterator().next());
         this.owner = new GuildMember

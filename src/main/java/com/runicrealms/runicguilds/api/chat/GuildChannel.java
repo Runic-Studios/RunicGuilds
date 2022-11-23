@@ -22,9 +22,9 @@ public class GuildChannel extends ChatChannel {
      * @return their guild score
      */
     private String displayScore(Player player) {
-        if (RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()) != null
-                && RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
-            return String.valueOf(RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
+        if (RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()) != null
+                && RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
+            return String.valueOf(RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
         } else {
             return "0";
         }
@@ -43,12 +43,12 @@ public class GuildChannel extends ChatChannel {
     @Override
     public List<Player> getRecipients(Player player) {
         List<Player> recipients = new ArrayList<>();
-        if (RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             for (Player target : Bukkit.getOnlinePlayers()) {
                 if (target != null) {
-                    if (RunicGuilds.getRunicGuildsAPI().isInGuild(target.getUniqueId())) {
-                        if (RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId())
-                                .equals(RunicGuilds.getRunicGuildsAPI().getGuild(target.getUniqueId()))) {
+                    if (RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) {
+                        if (RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId())
+                                .equals(RunicGuilds.getGuildsAPI().getGuild(target.getUniqueId()))) {
                             recipients.add(target);
                         }
                     }

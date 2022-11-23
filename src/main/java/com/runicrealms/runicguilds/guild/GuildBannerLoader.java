@@ -57,8 +57,8 @@ public class GuildBannerLoader extends BukkitRunnable {
     public void run() {
         List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
         posted.forEach(PostedGuildBanner::remove);
-        
-        List<Guild> ordering = new ArrayList<>(RunicGuilds.getRunicGuildsAPI().getAllGuilds());
+
+        List<Guild> ordering = new ArrayList<>(RunicGuilds.getGuildsAPI().getAllGuilds());
         List<Guild> guilds = new ArrayList<>();
         Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();
         ordering.sort(comparator);

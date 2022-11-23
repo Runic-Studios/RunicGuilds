@@ -23,7 +23,7 @@ public class RewardMountListener implements Listener {
      * @return their new correct speed
      */
     private double guildMountedSpeed(final Player player, double previousSpeed) {
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         if (guildData == null) return previousSpeed;
         Guild guild = guildData.getGuild();
         StageReward mountSpeedReward = StageReward.MOUNT_SPEED_BONUS;

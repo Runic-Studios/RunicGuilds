@@ -56,15 +56,15 @@ public class GuildUtil {
         if (tableTabList == null) {
             return; // tab not setup yet
         }
-        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId());
+        Guild guild = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId());
         if (guild == null) {
             tableTabList.set(1, 0, new TextTabItem
                     (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
         } else {
             tableTabList.set(1, 0, new TextTabItem
-                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + RunicGuilds.getRunicGuildsAPI().getOnlineMembersWithOwner(guild).size() + "]", 0, Skins.getDot(ChatColor.GOLD))); // +1 for owner
+                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + RunicGuilds.getGuildsAPI().getOnlineMembersWithOwner(guild).size() + "]", 0, Skins.getDot(ChatColor.GOLD))); // +1 for owner
             int j = 0;
-            for (GuildMember guildMember : RunicGuilds.getRunicGuildsAPI().getOnlineMembersWithOwner(guild)) {
+            for (GuildMember guildMember : RunicGuilds.getGuildsAPI().getOnlineMembersWithOwner(guild)) {
                 if (j > 19) break;
                 Player playerMember = Bukkit.getPlayer(guildMember.getUUID());
                 if (playerMember == null) continue;

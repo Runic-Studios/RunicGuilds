@@ -21,8 +21,8 @@ public class NpcClickListener implements Listener {
     private static void runClickEvent(NpcClickEvent event) {
         for (Integer bankerId : RunicGuilds.GUILD_BANKERS) {
             if (bankerId == event.getNpc().getId()) {
-                if (RunicGuilds.getRunicGuildsAPI().isInGuild(event.getPlayer().getUniqueId())) {
-                    GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(event.getPlayer().getUniqueId());
+                if (RunicGuilds.getGuildsAPI().isInGuild(event.getPlayer().getUniqueId())) {
+                    GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(event.getPlayer().getUniqueId());
                     if (guildData.getGuild().getOwner().getUUID() != event.getPlayer().getUniqueId()) {
                         if (!guildData.getGuild().canAccessBank(guildData.getGuild().getMember(event.getPlayer().getUniqueId()).getRank())) {
                             event.getPlayer().sendMessage(ChatColor.YELLOW + "Your guild rank does not have access to the guild bank!");

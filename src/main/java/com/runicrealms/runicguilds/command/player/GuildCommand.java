@@ -40,38 +40,42 @@ public class GuildCommand extends BaseCommand {
     }
 
     /**
-     * @param player
-     * @param args
+     * Attempts to create a guild with the given player as owner
+     *
+     * @param player to become owner
+     * @param args   the name and prefix of the guild
+     * @return true if successful, false if failed
      */
-    private void createGuild(Player player, String[] args) {
+    private boolean createGuild(Player player, String[] args) {
         if (args.length < 1) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "To confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of 3-6 english letters."));
-            return;
+            return false;
         }
 
         if (!player.getInventory().contains(Material.GOLD_NUGGET, RunicGuilds.GUILD_COST)) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Put " + RunicGuilds.GUILD_COST + " coins in your inventory, and speak with the guild herald again."));
             RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
-            return;
+            return false;
         }
 
-        GuildCreationResult result = RunicGuilds.getRunicGuildsAPI().createGuild(player, this.combineArgs(args, 1), args[0], false);
+        GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(player, this.combineArgs(args, 1), args[0], false);
         if (result != GuildCreationResult.SUCCESSFUL) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage() + " Try again, or type &6/guild cancel&e."));
-            return;
+            return false;
         }
 
-        RunicGuilds.getRunicGuildsAPI().setJedisGuild(player.getUniqueId(), RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildName());
+        RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildName());
         ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), RunicGuilds.GUILD_COST);
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage()));
+        return true;
     }
 
     @Subcommand("accept")
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildAcceptCommand(Player player) {
-        if (RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot use this command since you are in a guild."));
             return;
         }
@@ -81,7 +85,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
         Guild guild = guildData.getGuild();
 
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
@@ -92,7 +96,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
-        RunicGuilds.getRunicGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName());
+        RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation."));
 
         Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guildData, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
@@ -102,7 +106,7 @@ public class GuildCommand extends BaseCommand {
     @Subcommand("bank")
     @Conditions("is-player|is-op")
     public void onGuildBankCommand(Player player) {
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
@@ -113,7 +117,7 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildBannerCommand(Player player) {
-        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
         if (guild == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -162,19 +166,20 @@ public class GuildCommand extends BaseCommand {
     public void onGuildConfirmCommand(Player player, String[] args) {
         if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
             // Disbanding
-            String prefix = RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
-            GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(prefix);
+            String prefix = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
+            GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(prefix);
             Guild guild = guildData.getGuild();
             guild.disband(player, guildData);
         } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
             // Transferring ownership
-            String prefix = RunicGuilds.getRunicGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
-            GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(prefix);
+            String prefix = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
+            GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(prefix);
             Guild guild = guildData.getGuild();
             this.transferOwnership(player, guild, guildData);
         } else if (RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
             // Creating guild
-            this.createGuild(player, args);
+            // noinspection unused
+            boolean result = this.createGuild(player, args);
         } else {
             // Not confirming
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have nothing to confirm."));
@@ -191,7 +196,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have decline the guild invitation."));
-        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId())).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId())).getGuild();
         Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guild, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
         GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
@@ -207,12 +212,12 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
@@ -256,12 +261,12 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildDisbandCommand(Player player) {
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
@@ -284,11 +289,11 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildInfoCommand(Player player) {
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
-        Guild guild = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
         player.openInventory(new GuildInfoUI(player, guild).getInventory());
     }
 
@@ -303,12 +308,12 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.RECRUITER)) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank recruiter or higher to invite other players."));
@@ -326,7 +331,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (RunicGuilds.getRunicGuildsAPI().isInGuild(target.getUniqueId())) {
+        if (RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is already in a guild."));
             return;
         }
@@ -348,12 +353,12 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
@@ -378,7 +383,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         guild.removeMember(otherPlayerUuid);
-        RunicGuilds.getRunicGuildsAPI().setJedisGuild(otherPlayerUuid, "None");
+        RunicGuilds.getGuildsAPI().setJedisGuild(otherPlayerUuid, "None");
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
 
         Player target = Bukkit.getPlayerExact(args[0]);
@@ -392,12 +397,12 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildLeaveCommand(Player player) {
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
@@ -405,7 +410,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        RunicGuilds.getRunicGuildsAPI().setJedisGuild(player.getUniqueId(), "None");
+        RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), "None");
         guild.removeMember(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
 
@@ -432,12 +437,12 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         if (!guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
@@ -487,12 +492,12 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         GuildRank rank = GuildRank.getByIdentifier(args[0]);
@@ -530,12 +535,12 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getRunicGuildsAPI().getGuildData(player.getUniqueId());
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {

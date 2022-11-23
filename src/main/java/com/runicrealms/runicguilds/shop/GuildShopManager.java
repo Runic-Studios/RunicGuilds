@@ -46,7 +46,7 @@ public class GuildShopManager {
 
     private RunicItemRunnable runGuildHeraldBuy() {
         return player -> {
-            if (RunicGuilds.getRunicGuildsAPI().isInGuild(player.getUniqueId())) {
+            if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
                 if (!RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
                     player.sendMessage
                             (ChatColor.YELLOW + "Creating a guild will cost you " + RunicGuilds.GUILD_COST +

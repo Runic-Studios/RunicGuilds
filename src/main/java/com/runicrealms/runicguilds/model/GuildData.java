@@ -4,11 +4,11 @@ import com.mongodb.client.model.Filters;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.database.GuildMongoData;
 import com.runicrealms.plugin.database.MongoData;
-import com.runicrealms.plugin.database.MongoDataSection;
 import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
+import org.bson.Document;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -28,18 +28,16 @@ public class GuildData implements SessionData {
     private final String prefix; // of the GUILD
     private Guild guild;
 
-//    /**
-//     * @param guild
-//     * @param createNewDocument
-//     */
-//    public GuildData(Guild guild, boolean createNewDocument) { // todo: createNew should be false, just check if exists
-//        this.prefix = guild.getGuildPrefix();
-//        if (createNewDocument) {
-//            RunicCore.getDatabaseManager().getGuildData().insertOne(new Document("prefix", guild.getGuildPrefix()));
-//        }
-//        this.guildData = new GuildMongoData(guild.getGuildPrefix());
-//        this.save(guild, true);
-//    }
+    /**
+     * This constructor is used ONLY when a guild is created for the FIRST time
+     *
+     * @param guild to be created
+     */
+    public GuildData(Guild guild) {
+        this.prefix = guild.getGuildPrefix();
+        this.guild = guild;
+        RunicCore.getDatabaseManager().getGuildDocuments().insertOne(new Document("prefix", guild.getGuildPrefix()));
+    }
 
     /**
      * Build a GuildData object from mongo, then cache in jedis / memory
@@ -50,8 +48,8 @@ public class GuildData implements SessionData {
      */
     public GuildData(String prefix, GuildMongoData guildMongoData, Jedis jedis) {
         this.prefix = prefix;
-        MongoDataSection ownerSection = guildMongoData.getSection("owner");
-        OwnerData ownerData = new OwnerData(this.prefix, ownerSection);
+
+        OwnerData ownerData = new OwnerData(this.prefix, guildMongoData);
         MemberData memberData = new MemberData(this.prefix, guildMongoData);
         SettingsData settingsData = new SettingsData(this.prefix, guildMongoData);
         GuildBankData guildBankData = new GuildBankData(this.prefix, guildMongoData);
@@ -88,7 +86,7 @@ public class GuildData implements SessionData {
                     );
         }
         this.writeToJedis(jedis);
-        RunicGuilds.getRunicGuildsAPI().getGuildDataMap().put(this.prefix, this);
+        RunicGuilds.getGuildsAPI().getGuildDataMap().put(this.prefix, this);
     }
 
     /**
@@ -132,8 +130,8 @@ public class GuildData implements SessionData {
      * Removes this GuildData object from memory and removes the guild document from memory
      */
     public void delete() {
-        RunicGuilds.getRunicGuildsAPI().getGuildDataMap().remove(this.prefix);
-        RunicCore.getDatabaseManager().getGuildData().deleteOne(Filters.eq("prefix", this.guild.getGuildPrefix()));
+        RunicGuilds.getGuildsAPI().getGuildDataMap().remove(this.prefix);
+        RunicCore.getDatabaseManager().getGuildDocuments().deleteOne(Filters.eq("prefix", this.guild.getGuildPrefix()));
     }
 
     @Override
@@ -154,10 +152,10 @@ public class GuildData implements SessionData {
     @Override
     public void writeToJedis(Jedis jedis, int... ints) {
         // Set guild for owner
-        RunicGuilds.getRunicGuildsAPI().setJedisGuild(this.guild.getOwner().getUUID(), this.guild.getGuildName(), jedis);
+        RunicGuilds.getGuildsAPI().setJedisGuild(this.guild.getOwner().getUUID(), this.guild.getGuildName(), jedis);
         // Set guild for members
         for (GuildMember guildMember : this.guild.getMembers()) {
-            RunicGuilds.getRunicGuildsAPI().setJedisGuild(guildMember.getUUID(), this.guild.getGuildName(), jedis);
+            RunicGuilds.getGuildsAPI().setJedisGuild(guildMember.getUUID(), this.guild.getGuildName(), jedis);
         }
     }
 
