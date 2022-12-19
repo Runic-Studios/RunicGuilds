@@ -36,7 +36,7 @@ public class GuildData implements SessionData {
     public GuildData(Guild guild) {
         this.prefix = guild.getGuildPrefix();
         this.guild = guild;
-        RunicCore.getDatabaseManager().getGuildDocuments().insertOne(new Document("prefix", guild.getGuildPrefix()));
+        RunicCore.getDataAPI().getGuildDocuments().insertOne(new Document("prefix", guild.getGuildPrefix()));
     }
 
     /**
@@ -131,7 +131,7 @@ public class GuildData implements SessionData {
      */
     public void delete() {
         RunicGuilds.getGuildsAPI().getGuildDataMap().remove(this.prefix);
-        RunicCore.getDatabaseManager().getGuildDocuments().deleteOne(Filters.eq("prefix", this.guild.getGuildPrefix()));
+        RunicCore.getDataAPI().getGuildDocuments().deleteOne(Filters.eq("prefix", this.guild.getGuildPrefix()));
     }
 
     @Override

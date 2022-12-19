@@ -2,13 +2,11 @@ package com.runicrealms.runicguilds.model;
 
 import com.mongodb.client.FindIterable;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.api.RunicCoreAPI;
 import com.runicrealms.plugin.database.GuildMongoData;
 import com.runicrealms.plugin.database.PlayerMongoData;
 import com.runicrealms.plugin.database.event.MongoSaveEvent;
 import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.plugin.model.SessionDataManager;
-import com.runicrealms.plugin.redis.RedisUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -16,7 +14,7 @@ import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.guild.*;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.util.GuildUtil;
-import com.runicrealms.runicrestart.api.RunicRestartApi;
+import com.runicrealms.runicrestart.RunicRestart;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -211,7 +209,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
                 return GuildRenameResult.NAME_NOT_UNIQUE;
             }
         }
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             guildData.getGuild().setGuildName(name);
             guildData.writeToJedis(jedis);
         } catch (Exception exception) {
@@ -223,16 +221,16 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
 
     @Override
     public void setJedisGuild(UUID playerUuid, String guildName) {
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             jedis.set(playerUuid + ":guild", guildName);
-            jedis.expire(playerUuid + ":guild", RedisUtil.EXPIRE_TIME);
+            jedis.expire(playerUuid + ":guild", RunicCore.getRedisAPI().getExpireTime());
         }
     }
 
     @Override
     public void setJedisGuild(UUID playerUuid, String guildName, Jedis jedis) {
         jedis.set(playerUuid + ":guild", guildName);
-        jedis.expire(playerUuid + ":guild", RedisUtil.EXPIRE_TIME);
+        jedis.expire(playerUuid + ":guild", RunicCore.getRedisAPI().getExpireTime());
     }
 
     @Override
@@ -252,7 +250,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
         GuildData guildData = (GuildData) this.guildDataMap.get(prefix);
         if (guildData != null) return guildData;
         // Step 2: check if achievement data is cached in redis
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             return loadSessionData(prefix, jedis);
         }
     }
@@ -316,7 +314,7 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
                 bankPermissions.put(rank, rank.canAccessBankByDefault());
             }
         }
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             Guild guild = new Guild(new HashSet<>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45, bankPermissions, 0);
             GuildData guildData = new GuildData(guild);
             guildDataMap.put(prefix, guildData);
@@ -333,13 +331,13 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
      * cache them in jedis / memory for faster lookup during runtime
      */
     private void loadGuildsIntoMemory() {
-        FindIterable<Document> iterable = RunicCore.getDatabaseManager().getGuildDocuments().find();
+        FindIterable<Document> iterable = RunicCore.getDataAPI().getGuildDocuments().find();
         for (Document guildDocument : iterable) {
             Bukkit.broadcastMessage("a guild was found with prefix: " + guildDocument.getString("prefix"));
             String prefix = guildDocument.getString("prefix");
             loadSessionData(prefix); // caches guild in memory
         }
-        RunicRestartApi.markPluginLoaded("guilds");
+        RunicRestart.getAPI().markPluginLoaded("guilds");
     }
 
     @EventHandler

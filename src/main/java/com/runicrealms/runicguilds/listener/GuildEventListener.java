@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.listener;
 
-import com.runicrealms.plugin.api.RunicCoreAPI;
+import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.character.api.CharacterSelectEvent;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
@@ -40,7 +40,7 @@ public class GuildEventListener implements Listener {
         Player player = event.getWhoDisbanded();
         Guild guild = event.getGuild();
         GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(guild.getGuildPrefix());
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             for (GuildMember member : guild.getMembers()) {
                 RunicGuilds.getGuildsAPI().setJedisGuild(member.getUUID(), "None", jedis);
                 Player playerMember = Bukkit.getPlayer(member.getUUID());
@@ -80,7 +80,7 @@ public class GuildEventListener implements Listener {
             if (playerMember == null) continue;
             syncDisplays(playerMember);
         }
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             event.getGuildData().writeToJedis(jedis);
         }
     }
@@ -97,7 +97,7 @@ public class GuildEventListener implements Listener {
             if (playerMember == null) continue;
             syncDisplays(playerMember);
         }
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             RunicGuilds.getGuildsAPI().setJedisGuild(whoWasKicked.getUniqueId(), "None", jedis);
         }
     }
@@ -123,7 +123,7 @@ public class GuildEventListener implements Listener {
         int score = member.getScore();
         member.setScore(score + event.getScore());
         guild.recalculateScore();
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             event.getGuildData().writeToJedis(jedis);
         }
     }
@@ -165,14 +165,14 @@ public class GuildEventListener implements Listener {
     private void syncDisplays(Player player) {
         if (player == null) return;
         Guild guild = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId());
-        try (Jedis jedis = RunicCoreAPI.getNewJedisResource()) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             if (guild != null) {
                 RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName(), jedis);
             } else {
                 RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), "None", jedis);
             }
         }
-        RunicCoreAPI.updatePlayerScoreboard(player);
+        RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
         GuildUtil.updateGuildTabColumn(player);
     }
 }

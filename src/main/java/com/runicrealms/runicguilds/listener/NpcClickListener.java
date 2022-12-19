@@ -1,9 +1,9 @@
 package com.runicrealms.runicguilds.listener;
 
+import com.runicrealms.plugin.api.NpcClickEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
-import com.runicrealms.runicnpcs.api.NpcClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
