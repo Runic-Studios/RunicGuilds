@@ -12,9 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 public class GuildShopManager {
 
@@ -39,7 +37,10 @@ public class GuildShopManager {
             tradeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             purchaseGuildItemStack.setItemMeta(tradeMeta);
         }
-        shopItems.add(new RunicShopItem(1500, "Coin", purchaseGuildItemStack, runGuildHeraldBuy()));
+        Map<String, Integer> requiredItems = new HashMap<String, Integer>() {{
+            put("Coin", 1500);
+        }};
+        shopItems.add(new RunicShopItem(requiredItems, purchaseGuildItemStack, runGuildHeraldBuy()));
         shopItems.forEach(runicShopItem -> runicShopItem.setRemovePayment(false));
         return new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", RunicGuilds.GUILD_HERALDS, shopItems, new int[]{13});
     }
