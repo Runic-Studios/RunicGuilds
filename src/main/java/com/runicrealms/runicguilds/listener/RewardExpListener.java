@@ -16,14 +16,16 @@ import org.bukkit.event.Listener;
  */
 public class RewardExpListener implements Listener {
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerGainExperience(RunicExpEvent event) {
+        if (event.getRunicExpSource() != RunicExpEvent.RunicExpSource.MOB
+                && event.getRunicExpSource() != RunicExpEvent.RunicExpSource.PARTY) return; // only mobs or party kills
 
         Player player = event.getPlayer();
 
         // ensure this perk can be unlocked
-        StageReward stageReward = StageReward.EXP_BONUS;
-        GuildStage guildStage = GuildStage.getFromReward(stageReward);
+        StageReward expStageReward = StageReward.EXP_BONUS;
+        GuildStage guildStage = GuildStage.getFromReward(expStageReward);
         if (guildStage == null) return;
 
         // ensure there is a guild
@@ -35,7 +37,7 @@ public class RewardExpListener implements Listener {
         if (guild.getGuildStage().getRank() < guildStage.getRank()) return;
 
         int eventExperience = event.getOriginalAmount(); // exp before other bonuses so we don't apply compound bonuses
-        eventExperience *= stageReward.getBuffPercent(); // determine bonus amount
+        eventExperience *= expStageReward.getBuffPercent(); // determine bonus amount
 
         event.setFinalAmount(event.getFinalAmount() + eventExperience);
     }
