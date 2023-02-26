@@ -32,7 +32,7 @@ public class GuildChannel extends ChatChannel {
 
     @Override
     public String getPrefix() {
-        return "&6[Guild] [%guild_rank%] &r";
+        return "&6[Guild] [%guild_rank%] %luckperms_meta_name_color%%player_name%: ";
     }
 
     @Override
@@ -62,7 +62,7 @@ public class GuildChannel extends ChatChannel {
 
     @Override
     public String getMessageFormat() {
-        return "%luckperms_meta_name_color%%player_name%: &e%message%";
+        return "&e%message%";
     }
 
     @Override
