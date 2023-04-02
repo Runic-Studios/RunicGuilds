@@ -3,14 +3,14 @@ package com.runicrealms.runicguilds;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.PaperCommandManager;
 import com.runicrealms.RunicChat;
-import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.PostedGuildBanner;
 import com.runicrealms.runicguilds.listener.*;
-import com.runicrealms.runicguilds.model.GuildDataManager;
+import com.runicrealms.runicguilds.model.DataManager;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.ui.GuildBannerUIListener;
 import com.runicrealms.runicguilds.ui.GuildInfoUIListener;
@@ -39,7 +39,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     public static List<Integer> GUILD_HERALDS;
     public static List<Integer> GUILD_VENDORS;
     private static RunicGuilds instance;
-    private static RunicGuildsAPI guildsAPI;
+    private static GuildsAPI guildsAPI;
     private static PaperCommandManager commandManager;
 
     public static Set<UUID> getPlayersCreatingGuild() {
@@ -58,7 +58,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         return commandManager;
     }
 
-    public static RunicGuildsAPI getGuildsAPI() {
+    public static GuildsAPI getGuildsAPI() {
         return guildsAPI;
     }
 
@@ -67,7 +67,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
 
         instance = this;
         this.saveDefaultConfig();
-        guildsAPI = new GuildDataManager();
+        guildsAPI = new DataManager();
         GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
         GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
         GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");

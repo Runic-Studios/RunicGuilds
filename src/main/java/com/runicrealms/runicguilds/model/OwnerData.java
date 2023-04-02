@@ -1,9 +1,7 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.database.GuildMongoData;
-import com.runicrealms.plugin.database.MongoData;
-import com.runicrealms.plugin.model.SessionData;
-import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.plugin.api.WriteCallback;
+import com.runicrealms.plugin.model.SessionDataRedis;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -13,8 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class OwnerData implements SessionData {
-    private final String prefix; // of the guild
+public class OwnerData implements SessionDataRedis {
     private final GuildMember owner;
 
     /**
@@ -74,8 +71,31 @@ public class OwnerData implements SessionData {
     }
 
     @Override
+    public Map<String, String> getDataMapFromJedis(UUID uuid, Jedis jedis, int... ints) {
+        return null;
+    }
+
+    @Override
     public List<String> getFields() {
         return null;
+    }
+
+    @Override
+    public Map<String, String> toMap(UUID uuid, int... ints) {
+        return null;
+    }
+
+    @Override
+    public void writeToJedis(UUID uuid, Jedis jedis, WriteCallback writeCallback, int... ints) {
+
+    }
+
+    public GuildMember getOwner() {
+        return owner;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     @Override
@@ -95,13 +115,5 @@ public class OwnerData implements SessionData {
         }
         mongoData.set("owner." + this.owner.getUUID().toString() + ".score", this.owner.getScore());
         return mongoData;
-    }
-
-    public GuildMember getOwner() {
-        return owner;
-    }
-
-    public String getPrefix() {
-        return prefix;
     }
 }

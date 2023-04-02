@@ -167,13 +167,13 @@ public class GuildCommand extends BaseCommand {
         if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
             // Disbanding
             String prefix = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
-            GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(prefix);
+            GuildData guildData = RunicGuilds.getGuildsAPI().getGuild(prefix);
             Guild guild = guildData.getGuild();
             guild.disband(player, guildData);
         } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
             // Transferring ownership
             String prefix = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getGuildPrefix();
-            GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(prefix);
+            GuildData guildData = RunicGuilds.getGuildsAPI().getGuild(prefix);
             Guild guild = guildData.getGuild();
             this.transferOwnership(player, guild, guildData);
         } else if (RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {

@@ -77,7 +77,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(args[0]);
+        GuildData guildData = RunicGuilds.getGuildsAPI().getGuild(args[0]);
         if (guildData == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild prefix!"));
             return;
@@ -131,7 +131,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(args[0]).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuild(args[0]).getGuild();
         GuildCommandMapManager.getTransferOwnership().remove(guild.getOwner().getUUID());
         GuildCommandMapManager.getDisbanding().remove(guild.getOwner().getUUID());
 

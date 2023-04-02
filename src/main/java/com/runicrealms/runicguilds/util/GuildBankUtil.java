@@ -44,7 +44,7 @@ public class GuildBankUtil implements Listener {
      * @param prefix
      */
     public static void open(Player player, Integer page, String prefix) {
-        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(prefix).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuild(prefix).getGuild();
         Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
         if (guild.getBankSize() > 45 && page != guild.getBankSize() / 45) {
             inventory.setItem(8, new ItemBuilder(Material.ARROW, 1, "&6Next Page").getItem());

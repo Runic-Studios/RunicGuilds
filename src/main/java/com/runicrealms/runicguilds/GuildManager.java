@@ -1,25 +1,19 @@
-package com.runicrealms.runicguilds.model;
+package com.runicrealms.runicguilds;
 
-import com.mongodb.client.FindIterable;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.database.GuildMongoData;
-import com.runicrealms.plugin.database.PlayerMongoData;
-import com.runicrealms.plugin.database.event.MongoSaveEvent;
-import com.runicrealms.plugin.model.SessionData;
-import com.runicrealms.plugin.model.SessionDataManager;
-import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.api.RunicGuildsAPI;
+import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
-import com.runicrealms.runicguilds.guild.*;
+import com.runicrealms.runicguilds.guild.GuildCreationResult;
+import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
+import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.util.GuildUtil;
-import com.runicrealms.runicrestart.RunicRestart;
-import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import redis.clients.jedis.Jedis;
@@ -28,31 +22,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Manager for handling guild data and keeping it consistent across the network
- *
- * @author Skyfallin
- */
-public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataManager {
+public class GuildManager implements GuildsAPI, Listener {
 
-    private final Map<Object, SessionData> guildDataMap; // maps prefix to data
-
-    /**
-     * Initializes guilds and adds them to memory on plugin startup
-     */
-    public GuildDataManager() {
-        this.guildDataMap = new HashMap<>();
-        Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
-        /*
-        Load guilds into memory from mongo / jedis on startup
-         */
-        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), this::loadGuildsIntoMemory);
-        /*
-        Tab update task
-         */
-        Bukkit.getScheduler().runTaskTimerAsynchronously(RunicGuilds.getInstance(), this::updateGuildTabs, 100L, 20L);
-        Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
-    }
 
     @Override
     public boolean addGuildScore(UUID player, Integer score) {
@@ -78,20 +49,9 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
             RunicGuilds.getGuildsAPI().setJedisGuild(owner.getUniqueId(), name);
-            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(RunicGuilds.getGuildsAPI().getGuildData(prefix).getGuild(), modCreated));
+            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(RunicGuilds.getGuildsAPI().getGuild(prefix).getGuild(), modCreated));
         }
         return result;
-    }
-
-    @Override
-    public List<Guild> getAllGuilds() {
-        List<Guild> allGuilds = new ArrayList<>();
-        for (Object obj : guildDataMap.keySet()) {
-            String key = (String) obj;
-            GuildData guildData = (GuildData) guildDataMap.get(key);
-            allGuilds.add(guildData.getGuild());
-        }
-        return allGuilds;
     }
 
     @Override
@@ -104,10 +64,12 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
     }
 
     @Override
-    public Guild getGuild(String prefix) {
-        GuildData data = RunicGuilds.getGuildsAPI().getGuildData(prefix);
-        if (data != null) {
-            return data.getGuild();
+    public GuildData getGuild(String prefix) {
+        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
+            GuildData guildData = (GuildData) entry.getValue();
+            if (guildData.getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
+                return guildData;
+            }
         }
         return null;
     }
@@ -127,22 +89,6 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
             }
         }
         return null;
-    }
-
-    @Override
-    public GuildData getGuildData(String prefix) {
-        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
-            GuildData guildData = (GuildData) entry.getValue();
-            if (guildData.getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
-                return guildData;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Map<Object, SessionData> getGuildDataMap() {
-        return this.guildDataMap;
     }
 
     @Override
@@ -174,22 +120,11 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
 
     @Override
     public GuildStage getGuildStage(String prefix) {
-        GuildData data = RunicGuilds.getGuildsAPI().getGuildData(prefix);
+        GuildData data = RunicGuilds.getGuildsAPI().getGuild(prefix);
         if (data != null) {
             return data.getGuild().getGuildStage();
         }
         return null;
-    }
-
-    @Override
-    public List<GuildMember> getOnlineMembersWithOwner(Guild guild) {
-        List<GuildMember> online = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (guild.getMember(player.getUniqueId()) != null) {
-                online.add(guild.getMember(player.getUniqueId()));
-            }
-        }
-        return online;
     }
 
     @Override
@@ -217,53 +152,6 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
             return GuildRenameResult.INTERNAL_ERROR;
         }
         return GuildRenameResult.SUCCESSFUL;
-    }
-
-    @Override
-    public void setJedisGuild(UUID playerUuid, String guildName) {
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            jedis.set(playerUuid + ":guild", guildName);
-            jedis.expire(playerUuid + ":guild", RunicCore.getRedisAPI().getExpireTime());
-        }
-    }
-
-    @Override
-    public void setJedisGuild(UUID playerUuid, String guildName, Jedis jedis) {
-        jedis.set(playerUuid + ":guild", guildName);
-        jedis.expire(playerUuid + ":guild", RunicCore.getRedisAPI().getExpireTime());
-    }
-
-    @Override
-    public SessionData checkJedisForSessionData(Object object, Jedis jedis, int... slot) {
-        return null;
-    }
-
-    @Override
-    public Map<Object, SessionData> getSessionDataMap() {
-        return this.guildDataMap;
-    }
-
-    @Override
-    public SessionData loadSessionData(Object object, int... slot) {
-        String prefix = (String) object;
-        // Step 1: check if guild data is memoized
-        GuildData guildData = (GuildData) this.guildDataMap.get(prefix);
-        if (guildData != null) return guildData;
-        // Step 2: check if achievement data is cached in redis
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            return loadSessionData(prefix, jedis);
-        }
-    }
-
-    @Override
-    public SessionData loadSessionData(Object object, Jedis jedis, int... slot) {
-        String prefix = (String) object;
-        // Step 2: check if achievement data is cached in redis
-        GuildData guildData = (GuildData) checkJedisForSessionData(prefix, jedis);
-        if (guildData != null) return guildData;
-        // Step 2: check mongo documents
-        GuildMongoData guildMongoData = new GuildMongoData(prefix);
-        return new GuildData(prefix, guildMongoData, jedis);
     }
 
     /**
@@ -326,43 +214,39 @@ public class GuildDataManager implements Listener, RunicGuildsAPI, SessionDataMa
         return GuildCreationResult.SUCCESSFUL;
     }
 
-    /**
-     * On startup, we call this method to grab all guilds from our in-memory mongo documents, then
-     * cache them in jedis / memory for faster lookup during runtime
-     */
-    private void loadGuildsIntoMemory() {
-        FindIterable<Document> iterable = RunicCore.getDataAPI().getGuildDocuments().find();
-        for (Document guildDocument : iterable) {
-            Bukkit.broadcastMessage("a guild was found with prefix: " + guildDocument.getString("prefix"));
-            String prefix = guildDocument.getString("prefix");
-            loadSessionData(prefix); // caches guild in memory
+    @Override
+    public List<Guild> getAllGuilds() {
+        List<Guild> allGuilds = new ArrayList<>();
+        for (Object obj : guildDataMap.keySet()) {
+            String key = (String) obj;
+            GuildData guildData = (GuildData) guildDataMap.get(key);
+            allGuilds.add(guildData.getGuild());
         }
-        RunicRestart.getAPI().markPluginLoaded("guilds");
+        return allGuilds;
     }
 
-    @EventHandler
-    public void onMongoSave(MongoSaveEvent event) {
-        for (UUID uuid : event.getPlayersToSave().keySet()) {
-            PlayerMongoData playerMongoData = event.getPlayersToSave().get(uuid).getPlayerMongoData();
-            Guild guild = RunicGuilds.getGuildsAPI().getGuild(uuid);
-            if (guild != null)
-                playerMongoData.set("guild", guild.getGuildName());
+    @Override
+    public Guild getGuild(String prefix) {
+        GuildData data = RunicGuilds.getGuildsAPI().getGuild(prefix);
+        if (data != null) {
+            return data.getGuild();
         }
-        for (Object prefix : this.guildDataMap.keySet()) {
-            GuildData guildData = (GuildData) this.guildDataMap.get(prefix);
-            GuildMongoData guildMongoData = new GuildMongoData(guildData.getGuild().getGuildPrefix());
-            guildData.writeToMongo(guildMongoData);
-            guildMongoData.save();
-        }
-        event.markPluginSaved("guilds");
+        return null;
     }
 
-    /**
-     * Updates the guild section of tab for all online players
-     */
-    private void updateGuildTabs() {
+    @Override
+    public List<GuildMember> getOnlineMembersWithOwner(Guild guild) {
+        List<GuildMember> online = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            GuildUtil.updateGuildTabColumn(player);
+            if (guild.getMember(player.getUniqueId()) != null) {
+                online.add(guild.getMember(player.getUniqueId()));
+            }
         }
+        return online;
+    }
+
+    @Override
+    public Map<Object, SessionData> getSessionDataMap() {
+        return this.guildDataMap;
     }
 }

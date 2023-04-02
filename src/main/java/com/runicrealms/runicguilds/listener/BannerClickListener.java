@@ -36,7 +36,7 @@ public class BannerClickListener implements Listener {
 
         String result = event.getRightClicked().getPersistentDataContainer().get(PostedGuildBanner.KEY, PersistentDataType.STRING);
 
-        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(result).getGuild();
+        Guild guild = RunicGuilds.getGuildsAPI().getGuild(result).getGuild();
 
         if (guild == null) {
             return;

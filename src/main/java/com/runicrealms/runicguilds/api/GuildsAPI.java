@@ -1,19 +1,17 @@
 package com.runicrealms.runicguilds.api;
 
-import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import org.bukkit.entity.Player;
-import redis.clients.jedis.Jedis;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public interface RunicGuildsAPI {
+public interface GuildsAPI {
 
     /**
      * Attempts to add guild score to the given player
@@ -36,38 +34,22 @@ public interface RunicGuildsAPI {
     GuildCreationResult createGuild(Player owner, String name, String prefix, boolean modCreated);
 
     /**
-     * @return a list of all guilds in the guildDataMap
-     */
-    List<Guild> getAllGuilds();
-
-    /**
      * @param uuid of the player
      * @return the guild of the player (or null)
      */
-    Guild getGuild(UUID uuid);
+    GuildData getGuild(UUID uuid);
 
     /**
      * @param prefix of the guild
      * @return the guild (or null) matching prefix
      */
-    Guild getGuild(String prefix);
+    GuildData getGuild(String prefix);
 
     /**
      * @param playerUuid uuid of player to lookup
      * @return the GuildData object (or null if not found)
      */
     GuildData getGuildData(UUID playerUuid);
-
-    /**
-     * @param prefix of the GUILD
-     * @return the GuildData object (or null if not found)
-     */
-    GuildData getGuildData(String prefix);
-
-    /**
-     * @return a map of guild redis/mongo data, keyed by prefix
-     */
-    Map<Object, SessionData> getGuildDataMap();
 
     /**
      * Used to determine which player will receive messages in guild chat
@@ -95,7 +77,7 @@ public interface RunicGuildsAPI {
      * @param guild to check
      * @return a list of members
      */
-    List<GuildMember> getOnlineMembersWithOwner(Guild guild);
+    List<GuildMember> getOnlineMembersWithOwner(GuildData guild);
 
     /**
      * @param uuid to check
@@ -106,22 +88,10 @@ public interface RunicGuildsAPI {
     /**
      * Attempts to rename the given guild
      *
-     * @param guildData the in-memory data of the guild
-     * @param name      the intended new name
+     * @param guild the in-memory data of the guild
+     * @param name  the intended new name
      * @return a rename result
      */
-    GuildRenameResult renameGuild(GuildData guildData, String name);
+    GuildRenameResult renameGuild(GuildData guild, String name);
 
-    /**
-     * @param playerUuid of player to update
-     * @param guildName  of the guild, or "None"
-     */
-    void setJedisGuild(UUID playerUuid, String guildName);
-
-    /**
-     * @param playerUuid of player to update
-     * @param guildName  of the guild, or "None"
-     * @param jedis      the jedis resource
-     */
-    void setJedisGuild(UUID playerUuid, String guildName, Jedis jedis);
 }
