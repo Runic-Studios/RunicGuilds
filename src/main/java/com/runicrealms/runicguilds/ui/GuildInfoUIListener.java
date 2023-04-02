@@ -39,8 +39,9 @@ public class GuildInfoUIListener implements Listener {
         Material material = item.getType();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
         e.setCancelled(true);
-        if (RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()) == null) return;
+        if (RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId()) == null) return;
         Guild guild = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
+        // todo: completablefuture for guild members
         if (material == GUIUtil.CLOSE_BUTTON.getType())
             player.closeInventory();
         else if (material == Material.PLAYER_HEAD)

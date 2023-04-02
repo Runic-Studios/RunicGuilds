@@ -1,55 +1,26 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.database.GuildMongoData;
-import com.runicrealms.plugin.database.MongoData;
-import com.runicrealms.plugin.database.MongoDataSection;
-import com.runicrealms.plugin.model.SessionDataNested;
-import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.plugin.api.WriteCallback;
+import com.runicrealms.plugin.model.SessionDataRedis;
 import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-public class MemberData implements SessionDataNested {
-    private final String prefix; // of the guild
-    private final Set<GuildMember> members;
+public class MemberData implements SessionDataRedis {
+    private UUID uuid;
+    private GuildRank rank;
+    private Integer score;
 
-    /**
-     * Builds the data object from mongo
-     *
-     * @param prefix         of the guild
-     * @param guildMongoData of the guild's mongo data
-     */
-    public MemberData(String prefix, GuildMongoData guildMongoData) {
-        this.prefix = prefix;
-        this.members = new HashSet<>();
-        if (guildMongoData.has("members")) {
-            MongoDataSection membersSection = guildMongoData.getSection("members");
-            for (String key : membersSection.getKeys()) {
-                members.add
-                        (
-                                new GuildMember(UUID.fromString(key),
-                                        GuildRank.getByName(membersSection.get(key + ".rank", String.class)),
-                                        membersSection.get(key + ".score", Integer.class), GuildUtil.getOfflinePlayerName(UUID.fromString(key)))
-                        );
-            }
-        }
-    }
-
-    /**
-     * Builds the MemberData object from some guild. Used during shutdown
-     *
-     * @param guild the guild to save
-     */
-    public MemberData(Guild guild) {
-        this.prefix = guild.getGuildPrefix();
-        this.members = guild.getMembers();
+    @SuppressWarnings("unused")
+    public MemberData() {
+        // Default constructor for Spring
     }
 
     @Override
-    public Map<String, String> getDataMapFromJedis(Jedis jedis, Object nestedObject, int... ints) {
+    public Map<String, String> getDataMapFromJedis(UUID uuid, Jedis jedis, int... ints) {
         return null;
     }
 
@@ -59,30 +30,37 @@ public class MemberData implements SessionDataNested {
     }
 
     @Override
-    public Map<String, String> toMap(Object nestedObject) {
+    public Map<String, String> toMap(UUID uuid, int... ints) {
         return null;
     }
 
     @Override
-    public void writeToJedis(Jedis jedis, int... slot) {
+    public void writeToJedis(UUID uuid, Jedis jedis, WriteCallback writeCallback, int... ints) {
 
     }
 
-    @Override
-    public MongoData writeToMongo(MongoData mongoData, int... ints) {
-        GuildMongoData guildMongoData = (GuildMongoData) mongoData;
-        for (GuildMember member : this.members) {
-            guildMongoData.set("members." + member.getUUID().toString() + ".rank", member.getRank().getName());
-            guildMongoData.set("members." + member.getUUID().toString() + ".score", member.getScore());
-        }
-        return mongoData;
+    public GuildRank getRank() {
+        return rank;
     }
 
-    public Set<GuildMember> getMembers() {
-        return members;
+    public void setRank(GuildRank rank) {
+        this.rank = rank;
     }
 
-    public String getPrefix() {
-        return prefix;
+    public Integer getScore() {
+        return score;
     }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
 }

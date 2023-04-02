@@ -19,7 +19,6 @@ import redis.clients.jedis.Jedis;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 /**
  * Manager for handling guild data and keeping it consistent across the network
@@ -31,9 +30,9 @@ import java.util.logging.Level;
 public class DataManager implements DataAPI, Listener {
 
     // Maps a PLAYER uuid to a GUILD uuid
-    private final HashMap<UUID, UUID> playerToGuildMap;
-    // Contains some latency-sensitive data for fastest lookup. Keyed by GUILD uuid
-    private final HashMap<UUID, GuildInfo> guildInfoMap; // todo: write to this on jedis lookups for specific fields
+    private final HashMap<UUID, GuildUUID> playerToGuildMap;
+    // Contains some latency-sensitive data for fastest lookup.
+    private final HashMap<GuildUUID, GuildInfo> guildInfoMap; // todo: write to this on jedis lookups for specific fields
 
     public DataManager() {
         playerToGuildMap = new HashMap<>();
@@ -47,7 +46,8 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public GuildData checkRedisForGuildData(UUID uuid, Jedis jedis) {
+    public GuildData checkRedisForGuildData(GuildUUID guildUUID, Jedis jedis) {
+        UUID uuid = guildUUID.getUUID();
         String key = GuildData.getJedisKey(uuid);
         if (jedis.exists(key)) {
             jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
@@ -57,20 +57,19 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public GuildInfo getGuildInfo(Player player) {
-        UUID playerUuid = player.getUniqueId();
-        if (this.playerToGuildMap.get(playerUuid) == null) return null;
-        UUID guildUuid = this.playerToGuildMap.get(playerUuid);
-        return this.guildInfoMap.get(guildUuid);
+    public GuildInfo getGuildInfo(UUID uuid) {
+        if (this.playerToGuildMap.get(uuid) == null) return null;
+        GuildUUID guildUUID = this.playerToGuildMap.get(uuid);
+        return this.guildInfoMap.get(guildUUID);
     }
 
     @Override
-    public GuildInfo getGuildInfo(UUID guildUuid) {
-        return this.guildInfoMap.get(guildUuid);
+    public GuildInfo getGuildInfo(GuildUUID uuid) {
+        return this.guildInfoMap.get(uuid);
     }
 
     @Override
-    public CompletableFuture<GuildData> loadGuildData(UUID uuid, Jedis jedis) {
+    public CompletableFuture<GuildData> loadGuildData(GuildUUID uuid, Jedis jedis) {
         CompletableFuture<GuildData> future = new CompletableFuture<>();
         // Step 1: Check Redis
         GuildData guildData = checkRedisForGuildData(uuid, jedis);
@@ -92,30 +91,31 @@ public class DataManager implements DataAPI, Listener {
         return null;
     }
 
-    public HashMap<UUID, GuildInfo> getGuildInfoMap() {
+    public HashMap<GuildUUID, GuildInfo> getGuildInfoMap() {
         return guildInfoMap;
     }
 
-    public HashMap<UUID, UUID> getPlayerToGuildMap() {
+    public HashMap<UUID, GuildUUID> getPlayerToGuildMap() {
         return playerToGuildMap;
     }
 
     @EventHandler(priority = EventPriority.LOW) // early
     public void onCharacterSelect(CharacterSelectEvent event) {
-        UUID uuid = event.getPlayer().getUniqueId();
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<GuildData> future = loadGuildData(uuid, jedis);
-            // todo: create an index for player UUID in members and/or owner
-            // todo: no need to lookup entire guild here. just load the guild name
-            future.whenComplete((GuildData guildData, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to load on select for player " + uuid);
-                    ex.printStackTrace();
-                } else {
-                    this.playerToGuildMap.put(uuid, guildData.getUuid());
-                }
-            });
-        }
+//        UUID uuid = event.getPlayer().getUniqueId();
+//        GuildUUID guildUUID = findIfPlayerHasUUID
+//        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+//            CompletableFuture<GuildData> future = loadGuildData(uuid, jedis);
+//            // todo: create an index for player UUID in members and/or owner
+//            // todo: no need to lookup entire guild here. just load the guild name
+//            future.whenComplete((GuildData guildData, Throwable ex) -> {
+//                if (ex != null) {
+//                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to load on select for player " + uuid);
+//                    ex.printStackTrace();
+//                } else {
+//                    this.playerToGuildMap.put(uuid, guildData.getUuid());
+//                }
+//            });
+//        }
     }
 
     /**
