@@ -6,11 +6,9 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 import redis.clients.jedis.Jedis;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -20,13 +18,12 @@ import java.util.UUID;
 public class GuildData implements SessionDataMongo {
     @Id
     private ObjectId id;
-    @Field("guildUuid")
-    private UUID uuid;
+    private GuildUUID guildUUID;
     private String name = "";
     private String prefix = "";
     private int exp = 0;
     private OwnerData ownerData;
-    private List<MemberData> memberDataList = new ArrayList<>();
+    private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
     private GuildBankData bankData;
     private SettingsData settingsData;
 
@@ -39,14 +36,14 @@ public class GuildData implements SessionDataMongo {
      * Constructor for new players
      *
      * @param id        of the guild document in mongo
-     * @param uuid      of the guild
+     * @param guildUUID of the guild
      * @param name      of the guild
      * @param prefix    of the guild's name
      * @param ownerData player owner of the guild
      */
-    public GuildData(ObjectId id, UUID uuid, String name, String prefix, OwnerData ownerData) {
+    public GuildData(ObjectId id, GuildUUID guildUUID, String name, String prefix, OwnerData ownerData) {
         this.id = id;
-        this.uuid = uuid;
+        this.guildUUID = guildUUID;
         this.name = name;
         this.prefix = prefix;
         this.ownerData = ownerData;
@@ -55,12 +52,12 @@ public class GuildData implements SessionDataMongo {
     /**
      * Constructor for retrieving data from Redis
      *
-     * @param uuid  of the GUILD in Redis
-     * @param jedis a new jedis resource
+     * @param guildUUID of the GUILD in Redis
+     * @param jedis     a new jedis resource
      */
-    public GuildData(UUID uuid, Jedis jedis) {
-        this.id = new ObjectId(jedis.get(uuid + ":_id"));
-        this.uuid = uuid;
+    public GuildData(GuildUUID guildUUID, Jedis jedis) {
+        this.id = new ObjectId(jedis.get(guildUUID + ":_id"));
+        this.guildUUID = guildUUID;
         // todo: initialize ALL other fields
     }
 
@@ -97,6 +94,14 @@ public class GuildData implements SessionDataMongo {
         this.exp = exp;
     }
 
+    public GuildUUID getGuildUUID() {
+        return guildUUID;
+    }
+
+    public void setGuildUUID(GuildUUID guildUUID) {
+        this.guildUUID = guildUUID;
+    }
+
     public ObjectId getId() {
         return id;
     }
@@ -105,12 +110,12 @@ public class GuildData implements SessionDataMongo {
         this.id = id;
     }
 
-    public List<MemberData> getMemberDataList() {
-        return memberDataList;
+    public HashMap<UUID, MemberData> getMemberDataMap() {
+        return memberDataMap;
     }
 
-    public void setMemberDataList(List<MemberData> memberDataList) {
-        this.memberDataList = memberDataList;
+    public void setMemberDataMap(HashMap<UUID, MemberData> memberDataMap) {
+        this.memberDataMap = memberDataMap;
     }
 
     public String getName() {
@@ -145,14 +150,6 @@ public class GuildData implements SessionDataMongo {
         this.settingsData = settingsData;
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
     /**
      * A jedis write method that writes the underlying data structures
      *
@@ -162,9 +159,11 @@ public class GuildData implements SessionDataMongo {
         // todo: write fields for EACH data object
 //        this.ownerData.writeToJedis(uuid, jedis, () -> {
 //        });
-//        for (MemberData memberData : this.memberDataList) {
-//            memberData.writeToJedis();
-//        }
+        // Write member data
+        for (UUID uuid : this.memberDataMap.keySet()) {
+            MemberData memberData = this.memberDataMap.get(uuid);
+            memberData.writeToJedis(this.guildUUID, uuid, jedis);
+        }
 //        this.bankData.writeToJedis();
 //        this.settingsData.writeToJedis();
     }

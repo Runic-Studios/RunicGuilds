@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.api.WriteCallback;
 import com.runicrealms.plugin.model.SessionDataRedis;
-import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import redis.clients.jedis.Jedis;

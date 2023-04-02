@@ -8,20 +8,15 @@ import java.util.UUID;
 
 public class GuildInvitationDeclinedEvent extends Event {
 
-    private Guild guild;
-    private UUID invited;
-    private UUID inviter;
-
     private static final HandlerList handlers = new HandlerList();
+    private final UUID invited;
+    private final UUID inviter;
+    private Guild guild;
 
     public GuildInvitationDeclinedEvent(Guild guild, UUID invited, UUID inviter) {
         this.guild = guild;
         this.invited = invited;
         this.inviter = inviter;
-    }
-
-    public HandlerList getHandlers() {
-        return handlers;
     }
 
     public static HandlerList getHandlerList() {
@@ -30,6 +25,10 @@ public class GuildInvitationDeclinedEvent extends Event {
 
     public Guild getGuild() {
         return this.guild;
+    }
+
+    public HandlerList getHandlers() {
+        return handlers;
     }
 
     public UUID getInvited() {
