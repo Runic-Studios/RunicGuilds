@@ -1,195 +1,134 @@
 package com.runicrealms.runicguilds.model;
 
-import com.mongodb.client.model.Filters;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.database.GuildMongoData;
-import com.runicrealms.plugin.database.MongoData;
-import com.runicrealms.plugin.model.SessionData;
-import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildMember;
-import org.bson.Document;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.io.BukkitObjectInputStream;
-import org.bukkit.util.io.BukkitObjectOutputStream;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
-import redis.clients.jedis.Jedis;
+import com.runicrealms.plugin.model.SessionDataMongo;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 /**
- * A wrapper around a Guild object that is used to manage its data in redis / mongo
+ * This is our top-level Data Transfer Object (DTO) that handles read-writing to redis and mongo
  */
-public class GuildData implements SessionData {
-    private final String prefix; // of the GUILD
-    private Guild guild;
+@Document(collection = "guilds")
+public class GuildData implements SessionDataMongo {
+    @Id
+    private ObjectId id;
+    @Field("guildUuid")
+    private UUID uuid;
+    private String name = "";
+    private String prefix = "";
+    private int exp = 0;
+    private OwnerData owner;
+    private List<MemberData> members = new ArrayList<>();
+    private GuildBankData bank;
+    private SettingsData settings;
 
-    /**
-     * This constructor is used ONLY when a guild is created for the FIRST time
-     *
-     * @param guild to be created
-     */
-    public GuildData(Guild guild) {
-        this.prefix = guild.getGuildPrefix();
-        this.guild = guild;
-        RunicCore.getDataAPI().getGuildDocuments().insertOne(new Document("prefix", guild.getGuildPrefix()));
+    @SuppressWarnings("unused")
+    public GuildData() {
+        // Default constructor for Spring
     }
 
     /**
-     * Build a GuildData object from mongo, then cache in jedis / memory
+     * Constructor for new players
      *
-     * @param prefix         of the guild
-     * @param guildMongoData a GuildMongoData for the guild
-     * @param jedis          the jedis resource
+     * @param id     of the guild document in mongo
+     * @param uuid   of the guild
+     * @param name   of the guild
+     * @param prefix of the guild's name
+     * @param owner  player owner of the guild
      */
-    public GuildData(String prefix, GuildMongoData guildMongoData, Jedis jedis) {
+    public GuildData(ObjectId id, UUID uuid, String name, String prefix, OwnerData owner) {
+        this.id = id;
+        this.uuid = uuid;
+        this.name = name;
         this.prefix = prefix;
-
-        OwnerData ownerData = new OwnerData(this.prefix, guildMongoData);
-        MemberData memberData = new MemberData(this.prefix, guildMongoData);
-        SettingsData settingsData = new SettingsData(this.prefix, guildMongoData);
-        GuildBankData guildBankData = new GuildBankData(this.prefix, guildMongoData);
-
-        int guildEXP = 0;
-        if (guildMongoData.has("guild-exp")) {
-            guildEXP = guildMongoData.get("guild-exp", Integer.class);
-        }
-
-        if (!guildMongoData.has("guild-banner")) {
-            this.guild = new Guild
-                    (
-                            memberData.getMembers(),
-                            ownerData.getOwner(),
-                            guildMongoData.get("name", String.class),
-                            guildMongoData.get("prefix", String.class),
-                            guildBankData.getItems(),
-                            guildMongoData.get("bank-size", Integer.class),
-                            settingsData.getBankSettings(),
-                            guildEXP
-                    );
-        } else {
-            this.guild = new Guild
-                    (
-                            memberData.getMembers(),
-                            deserializeItemStack(guildMongoData.get("guild-banner", String.class)),
-                            ownerData.getOwner(),
-                            guildMongoData.get("name", String.class),
-                            guildMongoData.get("prefix", String.class),
-                            guildBankData.getItems(),
-                            guildMongoData.get("bank-size", Integer.class),
-                            settingsData.getBankSettings(),
-                            guildEXP
-                    );
-        }
-        this.writeToJedis(jedis);
-        RunicGuilds.getGuildsAPI().getGuildDataMap().put(this.prefix, this);
+        this.owner = owner;
     }
 
-    /**
-     * Retrieve an ItemStack from a base64 string (should be loss-less)
-     *
-     * @param item the base64 string
-     * @return an ItemStack to set as the guild banner
-     */
-    private static ItemStack deserializeItemStack(String item) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(item));
-        try {
-            BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-            dataInput.close();
-            return (ItemStack) dataInput.readObject();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Convert a GuildBanner ItemStack into base64 for storage and retrieval (should be loss-less)
-     *
-     * @param item the item stack associated with the guild banner
-     * @return a string for jedis / mongo storage
-     */
-    private static String serializeItemStack(ItemStack item) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
-            dataOutput.writeObject(item);
-            dataOutput.close();
-            return Base64Coder.encodeLines(outputStream.toByteArray());
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Removes this GuildData object from memory and removes the guild document from memory
-     */
-    public void delete() {
-        RunicGuilds.getGuildsAPI().getGuildDataMap().remove(this.prefix);
-        RunicCore.getDataAPI().getGuildDocuments().deleteOne(Filters.eq("prefix", this.guild.getGuildPrefix()));
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
-    public Map<String, String> getDataMapFromJedis(Jedis jedis, int... slot) {
-        return null;
+    public GuildData addDocumentToMongo() {
+        MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
+        return mongoTemplate.save(this);
     }
 
-    @Override
-    public List<String> getFields() {
-        return null;
+    public GuildBankData getBank() {
+        return bank;
     }
 
-    @Override
-    public Map<String, String> toMap() {
-        return null;
+    public void setBank(GuildBankData bank) {
+        this.bank = bank;
     }
 
-    @Override
-    public void writeToJedis(Jedis jedis, int... ints) {
-        // Set guild for owner
-        RunicGuilds.getGuildsAPI().setJedisGuild(this.guild.getOwner().getUUID(), this.guild.getGuildName(), jedis);
-        // Set guild for members
-        for (GuildMember guildMember : this.guild.getMembers()) {
-            RunicGuilds.getGuildsAPI().setJedisGuild(guildMember.getUUID(), this.guild.getGuildName(), jedis);
-        }
+    public int getExp() {
+        return exp;
     }
 
-    @Override
-    public MongoData writeToMongo(MongoData mongoData, int... ints) {
-
-        GuildMongoData guildMongoData = (GuildMongoData) mongoData;
-        guildMongoData.remove("members");
-        guildMongoData.remove("bank");
-
-        guildMongoData.set("prefix", guild.getGuildPrefix());
-        guildMongoData.set("name", guild.getGuildName());
-        guildMongoData.set("bank-size", guild.getBankSize());
-        guildMongoData.set("score", guild.getScore());
-        guildMongoData.set("guild-exp", guild.getGuildExp());
-        guildMongoData.set("guild-banner", serializeItemStack(guild.getGuildBanner().getBannerItem()));
-
-        OwnerData ownerData = new OwnerData(guild);
-        ownerData.writeToMongo(guildMongoData);
-        MemberData memberData = new MemberData(guild);
-        memberData.writeToMongo(guildMongoData);
-        SettingsData settingsData = new SettingsData(guild);
-        settingsData.writeToMongo(guildMongoData);
-        GuildBankData guildBankData = new GuildBankData(guild);
-        guildBankData.writeToMongo(guildMongoData);
-
-        return mongoData;
+    public void setExp(int exp) {
+        this.exp = exp;
     }
 
-    public Guild getGuild() {
-        return this.guild;
+    public ObjectId getId() {
+        return id;
     }
 
-    public void setGuild(Guild guild) {
-        this.guild = guild;
+    public void setId(ObjectId id) {
+        this.id = id;
     }
+
+    public List<MemberData> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<MemberData> members) {
+        this.members = members;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public OwnerData getOwner() {
+        return owner;
+    }
+
+    public void setOwner(OwnerData owner) {
+        this.owner = owner;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public SettingsData getSettings() {
+        return settings;
+    }
+
+    public void setSettings(SettingsData settings) {
+        this.settings = settings;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+
 }

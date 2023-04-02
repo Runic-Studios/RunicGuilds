@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.guild;
 
-import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;

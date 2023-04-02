@@ -1,7 +1,5 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.database.GuildMongoData;
-import com.runicrealms.plugin.database.MongoData;
 import com.runicrealms.plugin.model.SessionDataNested;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicitems.DupeManager;
@@ -83,6 +81,14 @@ public class GuildBankData implements SessionDataNested {
     public void writeToJedis(Jedis jedis, int... slot) {
     }
 
+    public List<ItemStack> getItems() {
+        return items;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
     @Override
     public MongoData writeToMongo(MongoData mongoData, int... ints) {
         GuildMongoData guildMongoData = (GuildMongoData) mongoData;
@@ -95,13 +101,5 @@ public class GuildBankData implements SessionDataNested {
             }
         }
         return guildMongoData;
-    }
-
-    public List<ItemStack> getItems() {
-        return items;
-    }
-
-    public String getPrefix() {
-        return prefix;
     }
 }

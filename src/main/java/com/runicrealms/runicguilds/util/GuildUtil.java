@@ -11,7 +11,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.UUID;
 
 public class GuildUtil {
@@ -42,6 +49,43 @@ public class GuildUtil {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
         if (player.hasPlayedBefore()) {
             return player.getName();
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve an ItemStack from a base64 string (should be loss-less)
+     *
+     * @param item the base64 string
+     * @return an ItemStack to set as the guild banner
+     */
+    private static ItemStack deserializeItemStack(String item) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(item));
+        try {
+            BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+            dataInput.close();
+            return (ItemStack) dataInput.readObject();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Convert a GuildBanner ItemStack into base64 for storage and retrieval (should be loss-less)
+     *
+     * @param item the item stack associated with the guild banner
+     * @return a string for jedis / mongo storage
+     */
+    private static String serializeItemStack(ItemStack item) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
+            dataOutput.writeObject(item);
+            dataOutput.close();
+            return Base64Coder.encodeLines(outputStream.toByteArray());
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
         return null;
     }

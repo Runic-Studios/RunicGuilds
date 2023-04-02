@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.api;
 
-import com.runicrealms.plugin.model.SessionData;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildMember;
@@ -11,7 +10,6 @@ import org.bukkit.entity.Player;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
