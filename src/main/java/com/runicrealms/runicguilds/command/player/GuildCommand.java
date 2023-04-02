@@ -128,7 +128,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (guild.getGuildExp() < GuildStage.STAGE2.getExp()) {
+        if (guild.getGuildExp() < GuildStage.STAGE_2.getExp()) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be at least guild stage two to create a banner!"));
             return;
         }

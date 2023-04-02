@@ -55,43 +55,6 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public Guild getGuild(UUID uuid) {
-        GuildData data = RunicGuilds.getGuildsAPI().getGuildData(uuid);
-        if (data != null) {
-            return data.getGuild();
-        }
-        return null;
-    }
-
-    @Override
-    public GuildData getGuild(String prefix) {
-        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
-            GuildData guildData = (GuildData) entry.getValue();
-            if (guildData.getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
-                return guildData;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public GuildData getGuildData(UUID playerUuid) {
-        // Bukkit.broadcastMessage(guildDataMap.size() + " is how many guilds loaded into memory");
-        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
-            GuildData guildData = (GuildData) entry.getValue();
-            if (guildData.getGuild().getOwner().getUUID().equals(playerUuid)) {
-                return guildData;
-            }
-            for (GuildMember member : guildData.getGuild().getMembers()) {
-                if (member.getUUID().equals(playerUuid)) {
-                    return guildData;
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
     public Set<UUID> getGuildRecipients(UUID player) {
         if (!isInGuild(player)) {
             return null;
@@ -226,10 +189,47 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
+    public Guild getGuild(UUID uuid) {
+        GuildData data = RunicGuilds.getGuildsAPI().getGuildData(uuid);
+        if (data != null) {
+            return data.getGuild();
+        }
+        return null;
+    }
+
+    @Override
+    public GuildData getGuild(String prefix) {
+        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
+            GuildData guildData = (GuildData) entry.getValue();
+            if (guildData.getGuild().getGuildPrefix().equalsIgnoreCase(prefix)) {
+                return guildData;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Guild getGuild(String prefix) {
         GuildData data = RunicGuilds.getGuildsAPI().getGuild(prefix);
         if (data != null) {
             return data.getGuild();
+        }
+        return null;
+    }
+
+    @Override
+    public GuildData getGuildData(UUID playerUuid) {
+        // Bukkit.broadcastMessage(guildDataMap.size() + " is how many guilds loaded into memory");
+        for (Map.Entry<Object, SessionData> entry : guildDataMap.entrySet()) {
+            GuildData guildData = (GuildData) entry.getValue();
+            if (guildData.getGuild().getOwner().getUUID().equals(playerUuid)) {
+                return guildData;
+            }
+            for (GuildMember member : guildData.getGuild().getMembers()) {
+                if (member.getUUID().equals(playerUuid)) {
+                    return guildData;
+                }
+            }
         }
         return null;
     }

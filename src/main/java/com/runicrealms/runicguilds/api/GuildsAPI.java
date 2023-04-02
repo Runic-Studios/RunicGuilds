@@ -34,24 +34,6 @@ public interface GuildsAPI {
     GuildCreationResult createGuild(Player owner, String name, String prefix, boolean modCreated);
 
     /**
-     * @param uuid of the player
-     * @return the guild of the player (or null)
-     */
-    GuildData getGuild(UUID uuid);
-
-    /**
-     * @param prefix of the guild
-     * @return the guild (or null) matching prefix
-     */
-    GuildData getGuild(String prefix);
-
-    /**
-     * @param playerUuid uuid of player to lookup
-     * @return the GuildData object (or null if not found)
-     */
-    GuildData getGuildData(UUID playerUuid);
-
-    /**
      * Used to determine which player will receive messages in guild chat
      *
      * @param player who sent message

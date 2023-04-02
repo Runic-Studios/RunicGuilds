@@ -30,10 +30,14 @@ import java.util.logging.Level;
  */
 public class DataManager implements DataAPI, Listener {
 
-    private final HashMap<UUID, String> playerToGuildMap; // Keeps an in-memory store of the name each player's guild
+    // Maps a PLAYER uuid to a GUILD uuid
+    private final HashMap<UUID, UUID> playerToGuildMap;
+    // Contains some latency-sensitive data for fastest lookup. Keyed by GUILD uuid
+    private final HashMap<UUID, GuildInfo> guildInfoMap; // todo: write to this on jedis lookups for specific fields
 
     public DataManager() {
         playerToGuildMap = new HashMap<>();
+        this.guildInfoMap = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
         /*
         Tab update task
@@ -50,6 +54,19 @@ public class DataManager implements DataAPI, Listener {
             return new GuildData(uuid, jedis);
         }
         return null;
+    }
+
+    @Override
+    public GuildInfo getGuildInfo(Player player) {
+        UUID playerUuid = player.getUniqueId();
+        if (this.playerToGuildMap.get(playerUuid) == null) return null;
+        UUID guildUuid = this.playerToGuildMap.get(playerUuid);
+        return this.guildInfoMap.get(guildUuid);
+    }
+
+    @Override
+    public GuildInfo getGuildInfo(UUID guildUuid) {
+        return this.guildInfoMap.get(guildUuid);
     }
 
     @Override
@@ -75,7 +92,11 @@ public class DataManager implements DataAPI, Listener {
         return null;
     }
 
-    public HashMap<UUID, String> getPlayerToGuildMap() {
+    public HashMap<UUID, GuildInfo> getGuildInfoMap() {
+        return guildInfoMap;
+    }
+
+    public HashMap<UUID, UUID> getPlayerToGuildMap() {
         return playerToGuildMap;
     }
 
@@ -91,7 +112,7 @@ public class DataManager implements DataAPI, Listener {
                     Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to load on select for player " + uuid);
                     ex.printStackTrace();
                 } else {
-                    this.playerToGuildMap.put(uuid, guildData.getName());
+                    this.playerToGuildMap.put(uuid, guildData.getUuid());
                 }
             });
         }

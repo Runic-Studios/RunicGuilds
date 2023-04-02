@@ -64,6 +64,16 @@ public class GuildData implements SessionDataMongo {
         // todo: initialize ALL other fields
     }
 
+    /**
+     * Grabs the root jedis key for this guild to determine if there is data stored in Redis
+     *
+     * @param uuid of the GUILD
+     * @return the root key path
+     */
+    public static String getJedisKey(UUID uuid) {
+        return uuid + ":_id";
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public GuildData addDocumentToMongo() {

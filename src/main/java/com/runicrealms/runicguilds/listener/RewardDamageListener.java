@@ -3,10 +3,9 @@ package com.runicrealms.runicguilds.listener;
 import com.runicrealms.plugin.events.MagicDamageEvent;
 import com.runicrealms.plugin.events.PhysicalDamageEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.guild.stage.StageReward;
-import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,10 +26,10 @@ public class RewardDamageListener implements Listener {
         StageReward damageReward = StageReward.COMBAT_BONUS;
         GuildStage requiredStage = GuildStage.getFromReward(damageReward);
         if (requiredStage == null) return damageBeforeBonus;
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
-        if (guildData == null) return damageBeforeBonus;
-        Guild guild = guildData.getGuild();
-        if (guild.getGuildStage().getRank() < requiredStage.getRank())
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) return damageBeforeBonus;
+        GuildStage guildStage = GuildStage.getFromExp(guildInfo.getExp());
+        if (guildStage.getRank() < requiredStage.getRank())
             return damageBeforeBonus;
         int bonusDamage = (int) (damageBeforeBonus * damageReward.getBuffPercent());
         return damageBeforeBonus + bonusDamage;

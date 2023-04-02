@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.PaperCommandManager;
 import com.runicrealms.RunicChat;
+import com.runicrealms.runicguilds.api.DataAPI;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
@@ -39,6 +40,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     public static List<Integer> GUILD_HERALDS;
     public static List<Integer> GUILD_VENDORS;
     private static RunicGuilds instance;
+    private static DataAPI dataAPI;
     private static GuildsAPI guildsAPI;
     private static PaperCommandManager commandManager;
 
@@ -58,16 +60,20 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         return commandManager;
     }
 
+    public static DataAPI getDataAPI() {
+        return dataAPI;
+    }
+
     public static GuildsAPI getGuildsAPI() {
         return guildsAPI;
     }
 
     @Override
     public void onEnable() {
-
         instance = this;
         this.saveDefaultConfig();
-        guildsAPI = new DataManager();
+        dataAPI = new DataManager();
+        guildsAPI = new GuildManager();
         GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
         GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
         GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");
@@ -122,6 +128,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     @EventHandler
     public void onShutdown(ServerShutdownEvent event) {
         instance = null;
+        dataAPI = null;
         guildsAPI = null;
         commandManager = null;
     }
