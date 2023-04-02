@@ -1,9 +1,8 @@
 package com.runicrealms.runicguilds.model;
 
+import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.api.WriteCallback;
 import com.runicrealms.plugin.model.SessionDataRedis;
-import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
@@ -11,62 +10,24 @@ import java.util.Map;
 import java.util.UUID;
 
 public class OwnerData implements SessionDataRedis {
-    private final GuildMember owner;
+
+    private UUID uuid;
+    private MemberData memberData;
+
+    @SuppressWarnings("unused")
+    public OwnerData() {
+        // Default constructor for Spring
+    }
 
     /**
-     * Builds the OwnerData object with literal values, supplied from a given guild
+     * Constructor to load values from Redis
      *
-     * @param prefix of the guild
-     * @param uuid   of the owner
-     * @param score  of the OWNER
+     * @param uuid       of the owner
+     * @param memberData their score and rank
      */
-    public OwnerData(String prefix, UUID uuid, int score) {
-        this.prefix = prefix;
-        this.owner = new GuildMember
-                (
-                        uuid,
-                        GuildRank.OWNER,
-                        score,
-                        GuildUtil.getOfflinePlayerName(uuid)
-                );
-    }
-
-    /**
-     * Builds the OwnerData object from mongo
-     *
-     * @param prefix       of the guild
-     * @param ownerSection the section of the guild's mongo data
-     */
-    public OwnerData(String prefix, GuildMongoData ownerSection) {
-        this.prefix = prefix;
-        UUID ownerUuid = UUID.fromString(ownerSection.getKeys().iterator().next());
-        this.owner = new GuildMember
-                (
-                        ownerUuid,
-                        GuildRank.OWNER,
-                        ownerSection.get(ownerUuid + ".score", Integer.class),
-                        GuildUtil.getOfflinePlayerName(ownerUuid)
-                );
-    }
-
-    /**
-     * @param guild
-     */
-    public OwnerData(Guild guild) {
-        this.prefix = guild.getGuildPrefix();
-        UUID ownerUuid = guild.getOwner().getUUID();
-        this.owner = new GuildMember
-                (
-                        ownerUuid,
-                        GuildRank.OWNER,
-                        guild.getOwner().getScore(),
-                        GuildUtil.getOfflinePlayerName(ownerUuid)
-                );
-    }
-
-    @Override
-    public Map<String, String> getDataMapFromJedis(Jedis jedis, int... slot) {
-        return null;
+    public OwnerData(UUID uuid, MemberData memberData) {
+        this.uuid = uuid;
+        this.memberData = memberData;
     }
 
     @Override
@@ -89,30 +50,35 @@ public class OwnerData implements SessionDataRedis {
 
     }
 
-    public GuildMember getOwner() {
-        return owner;
+    public MemberData getMemberData() {
+        return memberData;
     }
 
-    public String getPrefix() {
-        return prefix;
+    public void setMemberData(MemberData memberData) {
+        this.memberData = memberData;
     }
 
-    @Override
-    public Map<String, String> toMap() {
-        return null;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    @Override
-    public void writeToJedis(Jedis jedis, int... slot) {
-
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
-    @Override
-    public MongoData writeToMongo(MongoData mongoData, int... slot) {
-        if (mongoData.has("owner") && !mongoData.getSection("owner").getKeys().iterator().next().equalsIgnoreCase(this.owner.getUUID().toString())) {
-            mongoData.remove("owner");
-        }
-        mongoData.set("owner." + this.owner.getUUID().toString() + ".score", this.owner.getScore());
-        return mongoData;
+    /**
+     * ?
+     *
+     * @param guildUUID
+     * @param playerUUID
+     * @param jedis
+     */
+    public void writeToJedis(GuildUUID guildUUID, UUID playerUUID, Jedis jedis) {
+        // Inform the server that this guild member should be saved to mongo on next task (jedis data is refreshed)
+        jedis.sadd("markedForSave:guilds", guildUUID.toString());
+        String key = getJedisKey(guildUUID, playerUUID);
+        jedis.hmset(key, this.toMap(guildUUID.getUUID()));
+        jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
     }
+
 }

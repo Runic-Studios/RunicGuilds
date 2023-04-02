@@ -2,6 +2,9 @@ package com.runicrealms.runicguilds.model;
 
 public enum GuildDataField {
 
+    EXP("exp"),
+    NAME("name"),
+    PREFIX("prefix"),
     RANK("rank"),
     SCORE("score"),
     UUID("guildUuid");

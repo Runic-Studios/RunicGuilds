@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.model.SessionDataNested;
+import com.runicrealms.plugin.api.WriteCallback;
+import com.runicrealms.plugin.model.SessionDataRedis;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicitems.DupeManager;
 import com.runicrealms.runicitems.ItemManager;
@@ -13,8 +14,9 @@ import redis.clients.jedis.Jedis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-public class GuildBankData implements SessionDataNested {
+public class GuildBankData implements SessionDataRedis {
     private final String prefix; // of the guild
     private final Guild guild;
     private final List<ItemStack> items;
@@ -51,19 +53,13 @@ public class GuildBankData implements SessionDataNested {
         }
     }
 
-    /**
-     * Builds the bank data using a guild (called during mongo save)
-     *
-     * @param guild the guild
-     */
-    public GuildBankData(Guild guild) {
-        this.prefix = guild.getGuildPrefix();
-        this.guild = guild;
-        this.items = guild.getBankContents();
+    @Override
+    public Map<String, String> getDataMapFromJedis(Jedis jedis, Object nestedObject, int... ints) {
+        return null;
     }
 
     @Override
-    public Map<String, String> getDataMapFromJedis(Jedis jedis, Object nestedObject, int... ints) {
+    public Map<String, String> getDataMapFromJedis(UUID uuid, Jedis jedis, int... ints) {
         return null;
     }
 
@@ -73,12 +69,13 @@ public class GuildBankData implements SessionDataNested {
     }
 
     @Override
-    public Map<String, String> toMap(Object nestedObject) {
+    public Map<String, String> toMap(UUID uuid, int... ints) {
         return null;
     }
 
     @Override
-    public void writeToJedis(Jedis jedis, int... slot) {
+    public void writeToJedis(UUID uuid, Jedis jedis, WriteCallback writeCallback, int... ints) {
+
     }
 
     public List<ItemStack> getItems() {
@@ -87,6 +84,15 @@ public class GuildBankData implements SessionDataNested {
 
     public String getPrefix() {
         return prefix;
+    }
+
+    @Override
+    public Map<String, String> toMap(Object nestedObject) {
+        return null;
+    }
+
+    @Override
+    public void writeToJedis(Jedis jedis, int... slot) {
     }
 
     @Override

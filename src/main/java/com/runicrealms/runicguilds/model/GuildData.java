@@ -15,6 +15,7 @@ import java.util.UUID;
  * This is our top-level Data Transfer Object (DTO) that handles read-writing to redis and mongo
  */
 @Document(collection = "guilds")
+@SuppressWarnings("unused")
 public class GuildData implements SessionDataMongo {
     @Id
     private ObjectId id;
@@ -56,7 +57,6 @@ public class GuildData implements SessionDataMongo {
      * @param jedis     a new jedis resource
      */
     public GuildData(GuildUUID guildUUID, Jedis jedis) {
-        this.id = new ObjectId(jedis.get(guildUUID + ":_id"));
         this.guildUUID = guildUUID;
         // todo: initialize ALL other fields
     }
@@ -67,8 +67,8 @@ public class GuildData implements SessionDataMongo {
      * @param uuid of the GUILD
      * @return the root key path
      */
-    public static String getJedisKey(UUID uuid) {
-        return uuid + ":_id";
+    public static String getJedisKey(GuildUUID uuid) {
+        return uuid + ":guildUUID";
     }
 
     @SuppressWarnings("unchecked")
@@ -156,15 +156,26 @@ public class GuildData implements SessionDataMongo {
      * @param jedis some new jedis resource
      */
     public void writeToJedis(Jedis jedis) {
-        // todo: write fields for EACH data object
-//        this.ownerData.writeToJedis(uuid, jedis, () -> {
-//        });
+        String root = getJedisKey(this.guildUUID);
+        // Write basic fields
+        jedis.set(root + ":" + GuildDataField.UUID.getField(), this.guildUUID.getUUID().toString());
+        jedis.expire(root + ":" + GuildDataField.UUID.getField(), RunicCore.getRedisAPI().getExpireTime());
+        jedis.set(root + ":" + GuildDataField.NAME.getField(), this.name);
+        jedis.expire(root + ":" + GuildDataField.NAME.getField(), RunicCore.getRedisAPI().getExpireTime());
+        jedis.set(root + ":" + GuildDataField.PREFIX.getField(), this.prefix);
+        jedis.expire(root + ":" + GuildDataField.PREFIX.getField(), RunicCore.getRedisAPI().getExpireTime());
+        jedis.set(root + ":" + GuildDataField.EXP.getField(), String.valueOf(this.exp));
+        jedis.expire(root + ":" + GuildDataField.EXP.getField(), RunicCore.getRedisAPI().getExpireTime());
+        // Write owner data
+        this.ownerData.writeToJedis(this.guildUUID, this.ownerData.getUuid(), jedis);
         // Write member data
         for (UUID uuid : this.memberDataMap.keySet()) {
             MemberData memberData = this.memberDataMap.get(uuid);
             memberData.writeToJedis(this.guildUUID, uuid, jedis);
         }
+        // todo Write bank data
 //        this.bankData.writeToJedis();
+        // todo Write settings data
 //        this.settingsData.writeToJedis();
     }
 
