@@ -52,6 +52,18 @@ public class GuildData implements SessionDataMongo {
         this.ownerData = ownerData;
     }
 
+    /**
+     * Constructor for retrieving data from Redis
+     *
+     * @param uuid  of the GUILD in Redis
+     * @param jedis a new jedis resource
+     */
+    public GuildData(UUID uuid, Jedis jedis) {
+        this.id = new ObjectId(jedis.get(uuid + ":_id"));
+        this.uuid = uuid;
+        // todo: initialize ALL other fields
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public GuildData addDocumentToMongo() {
@@ -137,6 +149,7 @@ public class GuildData implements SessionDataMongo {
      * @param jedis some new jedis resource
      */
     public void writeToJedis(Jedis jedis) {
+        // todo: write fields for EACH data object
 //        this.ownerData.writeToJedis(uuid, jedis, () -> {
 //        });
 //        for (MemberData memberData : this.memberDataList) {
