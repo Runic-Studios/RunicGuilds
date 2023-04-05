@@ -15,6 +15,7 @@ public class MemberData implements SessionDataRedis {
     }};
     private GuildRank rank;
     private Integer score;
+    private UUID uuid; // Not a redundant field. Needed when we project member data
 
     @SuppressWarnings("unused")
     public MemberData() {
@@ -24,10 +25,12 @@ public class MemberData implements SessionDataRedis {
     /**
      * Constructor to retrieve data from Redis
      *
+     * @param uuid  of the player
      * @param rank  of the player
      * @param score of the player
      */
-    public MemberData(GuildRank rank, Integer score) {
+    public MemberData(UUID uuid, GuildRank rank, Integer score) {
+        this.uuid = uuid;
         this.rank = rank;
         this.score = score;
     }
@@ -98,6 +101,14 @@ public class MemberData implements SessionDataRedis {
 
     public void setScore(Integer score) {
         this.score = score;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     /**

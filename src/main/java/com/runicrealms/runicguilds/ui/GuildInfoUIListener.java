@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -40,12 +40,11 @@ public class GuildInfoUIListener implements Listener {
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
         e.setCancelled(true);
         if (RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId()) == null) return;
-        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
-        // todo: completablefuture for guild members
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         if (material == GUIUtil.CLOSE_BUTTON.getType())
             player.closeInventory();
         else if (material == Material.PLAYER_HEAD)
-            player.openInventory(new GuildMembersUI(player, guild).getInventory());
+            player.openInventory(new GuildMembersUI(player, guildInfo).getInventory());
     }
 
 }

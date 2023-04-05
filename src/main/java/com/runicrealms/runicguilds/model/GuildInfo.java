@@ -1,19 +1,16 @@
 package com.runicrealms.runicguilds.model;
 
-import java.util.UUID;
-
 /**
  * A container for several latency-sensitive fields about guilds
  */
 public class GuildInfo {
-
-    private final UUID uuid; // of the guild
+    private final GuildUUID guildUUID;
     private String name;
     private String prefix;
     private int exp;
 
-    public GuildInfo(UUID uuid, String name, String prefix, int exp) {
-        this.uuid = uuid;
+    public GuildInfo(GuildUUID guildUUID, String name, String prefix, int exp) {
+        this.guildUUID = guildUUID;
         this.name = name;
         this.prefix = prefix;
         this.exp = exp;
@@ -25,6 +22,10 @@ public class GuildInfo {
 
     public void setExp(int exp) {
         this.exp = exp;
+    }
+
+    public GuildUUID getGuildUUID() {
+        return guildUUID;
     }
 
     public String getName() {
@@ -41,9 +42,5 @@ public class GuildInfo {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
-    }
-
-    public UUID getUuid() {
-        return uuid;
     }
 }
