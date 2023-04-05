@@ -61,11 +61,4 @@ public interface DataAPI {
      */
     CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis);
 
-    /**
-     * Removes the specified player (by uuid) from the
-     *
-     * @param guildUUID of the guild
-     * @param toRemove  uuid of player to remove
-     */
-    void removeGuildMember(GuildUUID guildUUID, UUID toRemove);
 }

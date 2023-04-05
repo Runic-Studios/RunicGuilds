@@ -6,8 +6,8 @@ import com.keenant.tabbed.util.Skins;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.Guild;
-import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.MemberData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,12 +21,18 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
+import redis.clients.jedis.Jedis;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class GuildUtil {
     public static final String PREFIX = "&r&6&lGuilds »&r &e";
@@ -137,27 +143,47 @@ public class GuildUtil {
         if (tableTabList == null) {
             return; // tab not setup yet
         }
-        Guild guild = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId());
-        if (guild == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) {
             tableTabList.set(1, 0, new TextTabItem
                     (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
         } else {
-            tableTabList.set(1, 0, new TextTabItem
-                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + RunicGuilds.getGuildsAPI().getOnlineMembersWithOwner(guild).size() + "]", 0, Skins.getDot(ChatColor.GOLD))); // +1 for owner
-            int j = 0;
-            for (GuildMember guildMember : RunicGuilds.getGuildsAPI().getOnlineMembersWithOwner(guild)) {
-                if (j > 19) break;
-                Player playerMember = Bukkit.getPlayer(guildMember.getUUID());
-                if (playerMember == null) continue;
-                tableTabList.set(1, j + 1, new TextTabItem
-                        (
-                                playerMember.getName(),
-                                RunicCore.getTabAPI().getPing(playerMember),
-                                Skins.getPlayer(playerMember)
-                        ));
-                j++;
+            // Load all the members and owner as a CompletableFuture
+            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                getFuturesAndPopulate(tableTabList, guildInfo, jedis);
             }
         }
+    }
+
+    private static void getFuturesAndPopulate(TableTabList tableTabList, GuildInfo guildInfo, Jedis jedis) {
+        CompletableFuture<HashMap<UUID, MemberData>> future = RunicGuilds.getDataAPI().loadGuildMembers(guildInfo.getGuildUUID(), jedis);
+        future.whenComplete((HashMap<UUID, MemberData> memberDataMap, Throwable ex) -> {
+            if (ex != null) {
+                Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to retrieve online players!");
+                ex.printStackTrace();
+            } else {
+                List<UUID> onlineMembers = memberDataMap.values().stream().map(MemberData::getUuid)
+                        .filter(uuid -> Bukkit.getPlayer(uuid) != null)
+                        .collect(Collectors.toList());
+                onlineMembers.add(guildInfo.getOwnerUuid());
+                tableTabList.set(1, 0, new TextTabItem
+                        (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD))); // +1 for owner
+                int j = 0;
+                for (UUID guildMember : onlineMembers) {
+                    if (j > 19) break;
+                    Player playerMember = Bukkit.getPlayer(guildMember);
+                    if (playerMember == null) continue; // Insurance
+                    tableTabList.set(1, j + 1, new TextTabItem
+                            (
+                                    playerMember.getName(),
+                                    RunicCore.getTabAPI().getPing(playerMember),
+                                    Skins.getPlayer(playerMember)
+                            ));
+                    j++;
+                }
+
+            }
+        });
     }
 
 }

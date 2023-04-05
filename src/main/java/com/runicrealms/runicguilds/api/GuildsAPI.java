@@ -47,18 +47,18 @@ public interface GuildsAPI {
     GuildStage getGuildStage(GuildUUID guildUUID);
 
     /**
-     * Gets a list of online guild members, including the guild owner
-     *
-     * @param guild to check
-     * @return a list of members
-     */
-    List<GuildMember> getOnlineMembersWithOwner(GuildData guild);
-
-    /**
      * @param uuid to check
      * @return true if player in guild
      */
     boolean isInGuild(UUID uuid);
+
+    /**
+     * Removes the specified player (by uuid) from the
+     *
+     * @param guildUUID of the guild
+     * @param toRemove  uuid of player to remove
+     */
+    void removeGuildMember(GuildUUID guildUUID, UUID toRemove);
 
     /**
      * Attempts to rename the given guild

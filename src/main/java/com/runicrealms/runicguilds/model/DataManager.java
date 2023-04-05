@@ -17,10 +17,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 /**
  * Manager for handling guild data and keeping it consistent across the network
@@ -43,7 +41,7 @@ public class DataManager implements DataAPI, Listener {
         /*
         Tab update task
          */
-        Bukkit.getScheduler().runTaskTimerAsynchronously(RunicGuilds.getInstance(), this::updateGuildTabs, 100L, 20L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(RunicGuilds.getInstance(), this::updateGuildTabs, 100L, 100L);
         Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
     }
 
@@ -112,23 +110,6 @@ public class DataManager implements DataAPI, Listener {
     @Override
     public CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis) {
         return null;
-    }
-
-    @Override
-    public void removeGuildMember(GuildUUID guildUUID, UUID toRemove) {
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<GuildData> future = loadGuildData(guildUUID, jedis);
-            future.whenComplete((GuildData guildData, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to remove player from guild");
-                    ex.printStackTrace();
-                } else {
-                    Map<UUID, MemberData> memberDataMap = guildData.getMemberDataMap();
-                    memberDataMap.remove(toRemove);
-                    guildData.writeToJedis(jedis);
-                }
-            });
-        }
     }
 
     public HashMap<GuildUUID, GuildInfo> getGuildInfoMap() {

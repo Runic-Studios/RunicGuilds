@@ -9,6 +9,9 @@ import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
+import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -18,6 +21,8 @@ import org.bukkit.inventory.ItemStack;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,8 +77,35 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
+    public GuildStage getGuildStage(GuildUUID guildUUID) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+        if (guildInfo == null) {
+            return GuildStage.STAGE_0;
+        } else {
+            return GuildStage.getFromExp(guildInfo.getExp());
+        }
+    }
+
+    @Override
     public boolean isInGuild(UUID uuid) {
         return RunicGuilds.getDataAPI().getGuildInfo(uuid) != null;
+    }
+
+    @Override
+    public void removeGuildMember(GuildUUID guildUUID, UUID toRemove) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(guildUUID, jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to remove player from guild");
+                    ex.printStackTrace();
+                } else {
+                    Map<UUID, MemberData> memberDataMap = guildData.getMemberDataMap();
+                    memberDataMap.remove(toRemove);
+                    guildData.writeToJedis(jedis);
+                }
+            });
+        }
     }
 
     @Override
