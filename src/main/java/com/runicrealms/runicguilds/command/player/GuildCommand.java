@@ -584,7 +584,7 @@ public class GuildCommand extends BaseCommand {
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully transferred guild ownership. You have been demoted to officer."));
 
         // guildData.queueToSave();
-        Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferedEvent(guild, GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId()), player.getUniqueId()));
+        Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferEvent(guild, GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId()), player.getUniqueId()));
         GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
     }
 }

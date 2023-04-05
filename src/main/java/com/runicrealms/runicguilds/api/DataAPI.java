@@ -59,7 +59,8 @@ public interface DataAPI {
      * ?
      *
      * @param guildUUID
+     * @param jedis
      * @return
      */
-    CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID);
+    CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis);
 }

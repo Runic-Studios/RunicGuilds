@@ -108,7 +108,7 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID) {
+    public CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis) {
         return null;
     }
 

@@ -9,6 +9,8 @@ import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
@@ -19,6 +21,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import redis.clients.jedis.Jedis;
+
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Handles logic for what to do whenever a particular custom guild event is called
@@ -129,9 +135,10 @@ public class GuildEventListener implements Listener {
     }
 
     @EventHandler
-    public void onGuildTransfer(GuildOwnershipTransferedEvent event) {
+    public void onGuildTransfer(GuildOwnershipTransferEvent event) {
         Player oldOwner = Bukkit.getPlayer(event.getOldOwner());
         syncDisplays(oldOwner);
+        CompletableFuture<HashMap<UUID, MemberData>> future = RunicGuilds.getDataAPI().loadGuildMembers(event.getGuildUUID());
         for (GuildMember member : event.getGuild().getMembersWithOwner()) {
             Player playerMember = Bukkit.getPlayer(member.getUUID());
             if (playerMember == null) continue;
@@ -164,14 +171,15 @@ public class GuildEventListener implements Listener {
      */
     private void syncDisplays(Player player) {
         if (player == null) return;
-        Guild guild = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId());
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            if (guild != null) {
-                RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName(), jedis);
-            } else {
-                RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), "None", jedis);
-            }
-        }
+        GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+//        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+//            if (guild != null) {
+//                RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName(), jedis);
+//            } else {
+//                RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), "None", jedis);
+//            }
+//        }
+        // todo: update the player's jedis tag
         RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
         GuildUtil.updateGuildTabColumn(player);
     }
