@@ -87,6 +87,26 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
+    public void giveExperience(GuildUUID guildUUID, int exp) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+            guildInfo.setExp(guildInfo.getExp() + exp);
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(guildUUID, jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to give guild experience!");
+                    ex.printStackTrace();
+                } else {
+                    guildData.writeToJedis(jedis);
+                }
+            });
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to give guild experience!");
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
     public boolean isInGuild(UUID uuid) {
         return RunicGuilds.getDataAPI().getGuildInfo(uuid) != null;
     }

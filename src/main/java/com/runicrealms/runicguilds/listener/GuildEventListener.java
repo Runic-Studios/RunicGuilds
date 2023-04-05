@@ -97,9 +97,13 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildKick(GuildMemberKickedEvent event) {
         OfflinePlayer whoWasKicked = Bukkit.getOfflinePlayer(event.getKicked());
-        event.getGuild().removeMember(whoWasKicked.getUniqueId());
-        whoWasKicked.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
-        syncDisplays(whoWasKicked);
+        RunicGuilds.getGuildsAPI().removeGuildMember(event.getGuildUUID(), whoWasKicked.getUniqueId());
+        if (whoWasKicked.isOnline()) {
+            Player player = whoWasKicked.getPlayer();
+            assert player != null;
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
+            syncDisplays(player);
+        }
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             syncMemberDisplays(event.getGuildUUID(), jedis);
 //            RunicGuilds.getGuildsAPI().setJedisGuild(whoWasKicked.getUniqueId(), "None", jedis);

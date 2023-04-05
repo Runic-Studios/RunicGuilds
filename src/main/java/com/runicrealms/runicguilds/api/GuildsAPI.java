@@ -47,6 +47,14 @@ public interface GuildsAPI {
     GuildStage getGuildStage(GuildUUID guildUUID);
 
     /**
+     * Gives the specified guild an amount of exp
+     *
+     * @param guildUUID of the guild
+     * @param exp       an amount of guild experience
+     */
+    void giveExperience(GuildUUID guildUUID, int exp);
+
+    /**
      * @param uuid to check
      * @return true if player in guild
      */

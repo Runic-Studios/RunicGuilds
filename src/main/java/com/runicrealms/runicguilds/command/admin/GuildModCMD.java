@@ -12,6 +12,7 @@ import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
@@ -165,13 +166,11 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
-        if (guildData == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
         }
-
-        Guild guild = guildData.getGuild();
 
         GuildEXPSource source = this.getGuildExpSource(args[1]);
         if (source == null) {
@@ -190,7 +189,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GiveGuildEXPEvent event = new GiveGuildEXPEvent(guild, amount, source);
+        GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getGuildUUID(), amount, source);
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
