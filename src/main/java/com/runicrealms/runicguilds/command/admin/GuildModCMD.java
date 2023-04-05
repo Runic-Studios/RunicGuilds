@@ -111,7 +111,7 @@ public class GuildModCMD extends BaseCommand {
         if (result == GuildCreationResult.SUCCESSFUL) {
             Guild guild = RunicGuilds.getGuildsAPI().getGuildData(uuid).getGuild();
             RunicGuilds.getGuildsAPI().setJedisGuild(uuid, guild.getGuildName());
-            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, true));
+            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, uuid, true));
         }
     }
 

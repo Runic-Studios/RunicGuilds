@@ -47,20 +47,25 @@ public interface DataAPI {
     CompletableFuture<GuildData> loadGuildData(GuildUUID guildUUID, Jedis jedis);
 
     /**
-     * ?
+     * Loads the guild data from redis and/or mongo (if it exists!)
+     * Uses projection to exclude Bank data from the future
      *
-     * @param guildUUID
-     * @param jedis
-     * @return
+     * @param guildUUID of the GUILD
+     * @param jedis     a new jedis resource
+     * @return a future, which will eventually have the data
      */
     CompletableFuture<GuildData> loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis);
 
     /**
-     * ?
-     *
-     * @param guildUUID
-     * @param jedis
-     * @return
+     * Loads only the guild member map from redis/mongo
      */
     CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis);
+
+    /**
+     * Removes the specified player (by uuid) from the
+     *
+     * @param guildUUID of the guild
+     * @param toRemove  uuid of player to remove
+     */
+    void removeGuildMember(GuildUUID guildUUID, UUID toRemove);
 }

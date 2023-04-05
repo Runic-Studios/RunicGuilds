@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.api.event;
 
+import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -8,19 +9,18 @@ import org.bukkit.event.HandlerList;
  * This custom event is called when a player attempts to disband their guild
  */
 public class GuildDisbandEvent extends Event {
-
     private static final HandlerList handlers = new HandlerList();
-    private final Guild guild;
+    private final GuildUUID guildUUID;
     private final boolean modDisbanded;
     private final Player whoDisbanded;
 
     /**
-     * @param guild        to be disbanded
+     * @param guildUUID    of guild to be disbanded
      * @param whoDisbanded the player who initiated the action
      * @param modDisbanded true if a mod is force-disbanding the guild
      */
-    public GuildDisbandEvent(Guild guild, Player whoDisbanded, boolean modDisbanded) {
-        this.guild = guild;
+    public GuildDisbandEvent(GuildUUID guildUUID, Player whoDisbanded, boolean modDisbanded) {
+        this.guildUUID = guildUUID;
         this.whoDisbanded = whoDisbanded;
         this.modDisbanded = modDisbanded;
     }
@@ -33,8 +33,8 @@ public class GuildDisbandEvent extends Event {
         return this.modDisbanded;
     }
 
-    public Guild getGuild() {
-        return this.guild;
+    public GuildUUID getGuildUUID() {
+        return this.guildUUID;
     }
 
     public HandlerList getHandlers() {

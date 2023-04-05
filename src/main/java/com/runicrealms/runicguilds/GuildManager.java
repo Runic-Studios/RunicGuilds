@@ -5,7 +5,6 @@ import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
-import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
@@ -70,24 +69,6 @@ public class GuildManager implements GuildsAPI, Listener {
             }
         }
         return recipients;
-    }
-
-    @Override
-    public GuildStage getGuildStage(UUID uuid) {
-        GuildData data = RunicGuilds.getGuildsAPI().getGuildData(uuid);
-        if (data != null) {
-            return data.getGuild().getGuildStage();
-        }
-        return null;
-    }
-
-    @Override
-    public GuildStage getGuildStage(String prefix) {
-        GuildData data = RunicGuilds.getGuildsAPI().getGuild(prefix);
-        if (data != null) {
-            return data.getGuild().getGuildStage();
-        }
-        return null;
     }
 
     @Override
@@ -230,6 +211,15 @@ public class GuildManager implements GuildsAPI, Listener {
                     return guildData;
                 }
             }
+        }
+        return null;
+    }
+
+    @Override
+    public GuildStage getGuildStage(UUID uuid) {
+        GuildData data = RunicGuilds.getGuildsAPI().getGuildData(uuid);
+        if (data != null) {
+            return data.getGuild().getGuildStage();
         }
         return null;
     }

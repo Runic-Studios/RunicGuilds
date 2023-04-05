@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.api.event;
 
-import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -8,19 +8,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public class GuildInvitationAcceptedEvent extends Event {
-
     private static final HandlerList handlers = new HandlerList();
-    private final GuildData guildData;
+    private final GuildUUID guildUUID;
     private final UUID invited;
     private final UUID inviter;
 
-    /**
-     * @param guildData
-     * @param invited
-     * @param inviter
-     */
-    public GuildInvitationAcceptedEvent(GuildData guildData, UUID invited, UUID inviter) {
-        this.guildData = guildData;
+    public GuildInvitationAcceptedEvent(GuildUUID guildUUID, UUID invited, UUID inviter) {
+        this.guildUUID = guildUUID;
         this.invited = invited;
         this.inviter = inviter;
     }
@@ -29,8 +23,8 @@ public class GuildInvitationAcceptedEvent extends Event {
         return handlers;
     }
 
-    public GuildData getGuildData() {
-        return this.guildData;
+    public GuildUUID getGuildUUID() {
+        return this.guildUUID;
     }
 
     @NotNull

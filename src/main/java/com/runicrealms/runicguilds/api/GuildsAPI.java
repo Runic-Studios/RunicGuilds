@@ -1,13 +1,12 @@
 package com.runicrealms.runicguilds.api;
 
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
-import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,16 +41,10 @@ public interface GuildsAPI {
     Set<UUID> getGuildRecipients(UUID player);
 
     /**
-     * @param uuid of the GUILD
+     * @param guildUUID of the GUILD
      * @return the stage of the guild
      */
-    GuildStage getGuildStage(UUID uuid);
-
-    /**
-     * @param prefix of the GUILD
-     * @return the stage of the guild
-     */
-    GuildStage getGuildStage(String prefix);
+    GuildStage getGuildStage(GuildUUID guildUUID);
 
     /**
      * Gets a list of online guild members, including the guild owner

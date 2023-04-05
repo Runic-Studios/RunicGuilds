@@ -1,37 +1,39 @@
 package com.runicrealms.runicguilds.api.event;
 
-import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import java.util.UUID;
 
 public class GuildMemberKickedEvent extends Event {
-
-    private final Guild guild;
+    private static final HandlerList handlers = new HandlerList();
+    private final GuildUUID guildUUID;
     private final UUID kicked;
     private final UUID kicker;
     private final boolean modKicked;
 
-    private static final HandlerList handlers = new HandlerList();
-
-    public GuildMemberKickedEvent(Guild guild, UUID kicked, UUID kicker, boolean modKicked) {
-        this.guild = guild;
+    public GuildMemberKickedEvent(GuildUUID guildUUID, UUID kicked, UUID kicker, boolean modKicked) {
+        this.guildUUID = guildUUID;
         this.kicked = kicked;
         this.kicker = kicker;
         this.modKicked = modKicked;
-    }
-
-    public HandlerList getHandlers() {
-        return handlers;
     }
 
     public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public Guild getGuild() {
-        return this.guild;
+    public boolean didModKick() {
+        return this.modKicked;
+    }
+
+    public GuildUUID getGuildUUID() {
+        return this.guildUUID;
+    }
+
+    public HandlerList getHandlers() {
+        return handlers;
     }
 
     public UUID getKicked() {
@@ -40,10 +42,6 @@ public class GuildMemberKickedEvent extends Event {
 
     public UUID getKicker() {
         return this.kicker;
-    }
-
-    public boolean didModKick() {
-        return this.modKicked;
     }
 
 }
