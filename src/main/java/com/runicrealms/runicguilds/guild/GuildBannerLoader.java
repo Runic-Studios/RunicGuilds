@@ -56,7 +56,7 @@ public class GuildBannerLoader extends BukkitRunnable {
     @Override
     public void run() {
         List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
-        posted.forEach(PostedGuildBanner::remove);
+        posted.forEach(PostedGuildBanner::remove); // Remove existing banners
 
         List<Guild> ordering = new ArrayList<>(RunicGuilds.getGuildsAPI().getAllGuilds());
         List<Guild> guilds = new ArrayList<>();

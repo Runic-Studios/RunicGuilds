@@ -4,6 +4,8 @@ import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -16,54 +18,18 @@ import org.jetbrains.annotations.NotNull;
  * Class to spawn the guild banners in hub cities for display
  */
 public class PostedGuildBanner {
-    private final Guild guild;
+    public static final NamespacedKey KEY = new NamespacedKey(RunicGuilds.getInstance(), "bannerKey");
+    private final GuildUUID guildUUID;
     private final ArmorStand[] banner;
     private final Hologram hologram;
 
-    public static final NamespacedKey KEY = new NamespacedKey(RunicGuilds.getInstance(), "bannerKey");
-
-    public PostedGuildBanner(Guild guild, Location location) {
-        this.guild = guild;
+    public PostedGuildBanner(GuildUUID guildUUID, Location location) {
+        this.guildUUID = guildUUID;
         this.banner = this.createShowcase(location);
         this.hologram = this.makeHologram(location);
     }
 
-    public void remove() {
-        this.hologram.delete();
-        for (ArmorStand entity : this.banner) {
-            entity.remove();
-        }
-        RunicGuilds.getPostedGuildBanners().remove(this);
-    }
-
-    public Guild getGuild() {
-        return this.guild;
-    }
-
-    public ArmorStand[] getBanner() {
-        return this.banner;
-    }
-
-    public Hologram getHologram() {
-        return this.hologram;
-    }
-
-    private ArmorStand[] createShowcase(@NotNull Location location) {
-        World world = location.getWorld();
-        double x = location.getX();
-        double y = location.getY();
-        double z = location.getZ();
-
-        ArmorStand bannerBody = (ArmorStand) world.spawnEntity(new Location(world, x - .5, y - 1.45, z + .78), EntityType.ARMOR_STAND);
-        this.armorStandSetup(bannerBody, this.guild.getGuildBanner().getBannerItem());
-
-        ArmorStand logBody = (ArmorStand) location.getWorld().spawnEntity(new Location(world, x - .5, y - 1.6, z + .5), EntityType.ARMOR_STAND);
-        this.armorStandSetup(logBody, new ItemStack(Material.OAK_LOG, 1));
-
-        return new ArmorStand[]{bannerBody, logBody};
-    }
-
-    private void armorStandSetup(ArmorStand armorStand, ItemStack item) {
+    private void armorStandSetup(@NotNull ArmorStand armorStand, ItemStack item) {
         armorStand.setInvulnerable(true);
         armorStand.setCanPickupItems(false);
         armorStand.setGravity(false);
@@ -74,17 +40,61 @@ public class PostedGuildBanner {
         armorStand.setMarker(true);
         armorStand.getEquipment().setHelmet(item);
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
-        armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, this.guild.getGuildPrefix());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
+        if (guildInfo != null) {
+            armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, guildInfo.getPrefix());
+        }
+    }
+
+    private ArmorStand[] createShowcase(@NotNull Location location) {
+        World world = location.getWorld();
+        double x = location.getX();
+        double y = location.getY();
+        double z = location.getZ();
+
+        ArmorStand bannerBody = (ArmorStand) world.spawnEntity(new Location(world, x - .5, y - 1.45, z + .78), EntityType.ARMOR_STAND);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
+        if (guildInfo != null) {
+            this.armorStandSetup(bannerBody, guildInfo.getGuildBanner().getBannerItem());
+        }
+
+        ArmorStand logBody = (ArmorStand) location.getWorld().spawnEntity(new Location(world, x - .5, y - 1.6, z + .5), EntityType.ARMOR_STAND);
+        this.armorStandSetup(logBody, new ItemStack(Material.OAK_LOG, 1));
+
+        return new ArmorStand[]{bannerBody, logBody};
+    }
+
+    public ArmorStand[] getBanner() {
+        return this.banner;
+    }
+
+    public Hologram getHologram() {
+        return this.hologram;
+    }
+
+    public GuildUUID guildUUID() {
+        return this.guildUUID;
     }
 
     private Hologram makeHologram(Location location) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
         World world = location.getWorld();
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
         Hologram hologram = HologramsAPI.createHologram(RunicGuilds.getInstance(), new Location(world, x - .5, y + 2.85, z + .5));
-        hologram.appendTextLine(ColorUtil.format("&r&6&l" + ChatColor.stripColor(this.guild.getGuildName())));
-        hologram.appendTextLine(ColorUtil.format("&r&6&lScore: " + this.guild.getScore()));
+        if (guildInfo != null) {
+            hologram.appendTextLine(ColorUtil.format("&r&6&l" + ChatColor.stripColor(guildInfo.getName())));
+            hologram.appendTextLine(ColorUtil.format("&r&6&lScore: " + guildInfo.getScore()));
+        }
         return hologram;
+    }
+
+    public void remove() {
+        this.hologram.delete();
+        for (ArmorStand entity : this.banner) {
+            entity.remove();
+        }
+        RunicGuilds.getPostedGuildBanners().remove(this);
     }
 }

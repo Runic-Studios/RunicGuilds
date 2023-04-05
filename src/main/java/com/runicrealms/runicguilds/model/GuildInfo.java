@@ -1,5 +1,7 @@
 package com.runicrealms.runicguilds.model;
 
+import com.runicrealms.runicguilds.guild.GuildBanner;
+
 import java.util.UUID;
 
 /**
@@ -12,14 +14,17 @@ public class GuildInfo {
     private String prefix;
     private int exp;
     private int score;
+    private GuildBanner guildBanner;
 
-    public GuildInfo(GuildUUID guildUUID, UUID ownerUuid, String name, String prefix, int exp, int score) {
+    public GuildInfo(GuildUUID guildUUID, UUID ownerUuid, String name, String prefix, int exp,
+                     int score, GuildBanner guildBanner) {
         this.guildUUID = guildUUID;
         this.ownerUuid = ownerUuid;
         this.name = name;
         this.prefix = prefix;
         this.exp = exp;
         this.score = score;
+        this.guildBanner = guildBanner;
     }
 
     public int getExp() {
@@ -28,6 +33,14 @@ public class GuildInfo {
 
     public void setExp(int exp) {
         this.exp = exp;
+    }
+
+    public GuildBanner getGuildBanner() {
+        return guildBanner;
+    }
+
+    public void setGuildBanner(GuildBanner guildBanner) {
+        this.guildBanner = guildBanner;
     }
 
     public GuildUUID getGuildUUID() {

@@ -55,6 +55,7 @@ public class GuildEventListener implements Listener {
                 if (playerMember == null) continue;
                 if (GuildBankUtil.isViewingBank(member.getUUID())) {
                     GuildBankUtil.close(playerMember);
+                    // todo: pub/sub
                 }
             }
             // remove guild for owner

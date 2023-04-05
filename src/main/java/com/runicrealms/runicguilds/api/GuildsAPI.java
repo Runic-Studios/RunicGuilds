@@ -13,6 +13,15 @@ import java.util.UUID;
 public interface GuildsAPI {
 
     /**
+     * Adds the player to the list of bank viewers. This is stored in Redis, ensuring data
+     * remains consistent across the network
+     *
+     * @param guildUUID of the guild
+     * @param uuid      of the player
+     */
+    void addBankViewer(GuildUUID guildUUID, UUID uuid);
+
+    /**
      * Attempts to add guild score to the given player
      *
      * @param player to add score
@@ -59,6 +68,15 @@ public interface GuildsAPI {
      * @return true if player in guild
      */
     boolean isInGuild(UUID uuid);
+
+    /**
+     * Removes the player from the list of bank viewers. This is stored in Redis, ensuring data
+     * remains consistent across the network
+     *
+     * @param guildUUID of the guild
+     * @param uuid      of the player
+     */
+    void removeBankViewer(GuildUUID guildUUID, UUID uuid);
 
     /**
      * Removes the specified player (by uuid) from the

@@ -1,10 +1,9 @@
 package com.runicrealms.runicguilds.listener;
 
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.guild.stage.StageReward;
-import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicmounts.api.event.MountedEvent;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.AbstractHorse;
@@ -23,13 +22,12 @@ public class RewardMountListener implements Listener {
      * @return their new correct speed
      */
     private double guildMountedSpeed(final Player player, double previousSpeed) {
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
-        if (guildData == null) return previousSpeed;
-        Guild guild = guildData.getGuild();
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) return previousSpeed;
         StageReward mountSpeedReward = StageReward.MOUNT_SPEED_BONUS;
         GuildStage requiredStage = GuildStage.getFromReward(mountSpeedReward);
         if (requiredStage == null) return previousSpeed;
-        if (guild.getGuildStage().getRank() < requiredStage.getRank()) return previousSpeed;
+        if (guildInfo.getExp() < requiredStage.getExp()) return previousSpeed;
         double bonusSpeed = previousSpeed * mountSpeedReward.getBuffPercent();
         return previousSpeed + bonusSpeed;
     }
@@ -42,4 +40,5 @@ public class RewardMountListener implements Listener {
         double finalSpeed = guildMountedSpeed(player, speed);
         abstractHorse.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(finalSpeed);
     }
+    
 }

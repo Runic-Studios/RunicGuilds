@@ -12,6 +12,7 @@ import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -28,6 +29,12 @@ import java.util.regex.Pattern;
 
 public class GuildManager implements GuildsAPI, Listener {
 
+    @Override
+    public void addBankViewer(GuildUUID guildUUID, UUID uuid) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            jedis.sadd(GuildBankUtil.getJedisKey(guildUUID, jedis), uuid.toString());
+        }
+    }
 
     @Override
     public boolean addGuildScore(UUID player, Integer score) {
@@ -109,6 +116,13 @@ public class GuildManager implements GuildsAPI, Listener {
     @Override
     public boolean isInGuild(UUID uuid) {
         return RunicGuilds.getDataAPI().getGuildInfo(uuid) != null;
+    }
+
+    @Override
+    public void removeBankViewer(GuildUUID guildUUID, UUID uuid) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            jedis.srem(GuildBankUtil.getJedisKey(guildUUID, jedis), uuid.toString());
+        }
     }
 
     @Override
@@ -209,18 +223,7 @@ public class GuildManager implements GuildsAPI, Listener {
         }
         return GuildCreationResult.SUCCESSFUL;
     }
-
-    @Override
-    public List<Guild> getAllGuilds() {
-        List<Guild> allGuilds = new ArrayList<>();
-        for (Object obj : guildDataMap.keySet()) {
-            String key = (String) obj;
-            GuildData guildData = (GuildData) guildDataMap.get(key);
-            allGuilds.add(guildData.getGuild());
-        }
-        return allGuilds;
-    }
-
+    
     @Override
     public Guild getGuild(UUID uuid) {
         GuildData data = RunicGuilds.getGuildsAPI().getGuildData(uuid);

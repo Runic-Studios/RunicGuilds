@@ -4,6 +4,8 @@ import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.GuildBanner;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -22,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Manages the UI that lets players customize their guild banner
  */
 public class GuildBannerUI implements InventoryHolder {
     private static final ItemStack CONFIRM_COLOR;
@@ -43,7 +45,7 @@ public class GuildBannerUI implements InventoryHolder {
     }
 
     private final Inventory inventory;
-    private final Guild guild;
+    private final GuildUUID guildUUID;
     private final GuildBanner banner;
     private final ItemStack dummyBanner;
     private final NamespacedKey key = new NamespacedKey(RunicGuilds.getInstance(), "itemKey");
@@ -53,10 +55,15 @@ public class GuildBannerUI implements InventoryHolder {
     private PatternType chosenPattern;
     private int page;
 
-    public GuildBannerUI(Guild guild) {
+    public GuildBannerUI(GuildUUID guildUUID) {
         this.inventory = Bukkit.createInventory(this, 54, ColorUtil.format("&r&6Guild Banner"));
-        this.guild = guild;
-        this.banner = guild.getGuildBanner();
+        this.guildUUID = guildUUID;
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+        if (guildInfo != null) {
+            this.banner = guildInfo.getGuildBanner();
+        } else {
+            this.banner = new GuildBanner(guildUUID);
+        }
         this.dummyBanner = this.banner();
         setupColorMenu();
     }
@@ -113,8 +120,8 @@ public class GuildBannerUI implements InventoryHolder {
         return this.dummyBanner;
     }
 
-    public Guild getGuild() {
-        return this.guild;
+    public GuildUUID getGuildUUID() {
+        return guildUUID;
     }
 
     @Override
@@ -128,6 +135,10 @@ public class GuildBannerUI implements InventoryHolder {
 
     public int getPage() {
         return this.page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
 
     private ItemStack getPattern(PatternType type) {

@@ -5,6 +5,7 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.ui.ItemBuilder;
 import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicitems.item.RunicItem;
@@ -22,6 +23,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import redis.clients.jedis.Jedis;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -78,6 +80,10 @@ public class GuildBankUtil implements Listener {
     public static void close(Player player) {
         player.closeInventory();
         viewers.remove(player.getUniqueId());
+    }
+
+    public static String getJedisKey(GuildUUID guildUUID, Jedis jedis) {
+        return jedis.get(guildUUID + ":bankViewers");
     }
 
     /**
