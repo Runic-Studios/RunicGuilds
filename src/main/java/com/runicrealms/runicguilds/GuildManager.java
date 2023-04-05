@@ -92,7 +92,7 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @Override
     public boolean isInGuild(UUID uuid) {
-        return RunicGuilds.getGuildsAPI().getGuildData(uuid) != null;
+        return RunicGuilds.getDataAPI().getGuildInfo(uuid) != null;
     }
 
     @Override

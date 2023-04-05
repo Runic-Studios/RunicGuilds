@@ -1,24 +1,18 @@
 package com.runicrealms.runicguilds.ui;
 
-import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.RankCompare;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -55,35 +49,6 @@ public class GuildMembersUI implements InventoryHolder {
     }
 
     /**
-     * @param player      the item represents
-     * @param name        of the player
-     * @param description of this itemStack
-     * @return an ItemStack to display in the ui menu
-     */
-    private ItemStack guildMemberItem(Player player, String name, String description) {
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
-        ItemMeta meta = item.getItemMeta();
-        assert meta != null;
-
-        SkullMeta skullMeta = (SkullMeta) meta;
-        skullMeta.setOwningPlayer(player);
-
-        ArrayList<String> lore = new ArrayList<>();
-        meta.setDisplayName(ColorUtil.format(name));
-        String[] desc = description.split("\n");
-        for (String line : desc) {
-            lore.add(ColorUtil.format(line));
-        }
-        meta.setLore(lore);
-        ((Damageable) meta).setDamage(5);
-        meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    /**
      * Opens the inventory associated w/ this GUI, ordering perks
      */
     private void openMenu() {
@@ -105,7 +70,7 @@ public class GuildMembersUI implements InventoryHolder {
                 memberDataList.sort(new RankCompare());
                 for (MemberData guildMember : memberDataList) {
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guildMember.getUuid());
-                    this.inventory.setItem(this.inventory.firstEmpty(), guildMemberItem
+                    this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
                             (
                                     offlinePlayer.getPlayer(),
                                     ChatColor.GOLD + offlinePlayer.getName(), // Last known name

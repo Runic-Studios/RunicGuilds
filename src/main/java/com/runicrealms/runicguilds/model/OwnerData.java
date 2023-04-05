@@ -30,6 +30,15 @@ public class OwnerData implements SessionDataRedis {
         this.memberData = memberData;
     }
 
+    /**
+     * ?
+     *
+     * @return
+     */
+    public static String getJedisKey(GuildUUID guildUUID) {
+        return guildUUID + ":owner";
+    }
+
     @Override
     public Map<String, String> getDataMapFromJedis(UUID uuid, Jedis jedis, int... ints) {
         return null;
@@ -70,13 +79,12 @@ public class OwnerData implements SessionDataRedis {
      * ?
      *
      * @param guildUUID
-     * @param playerUUID
      * @param jedis
      */
-    public void writeToJedis(GuildUUID guildUUID, UUID playerUUID, Jedis jedis) {
+    public void writeToJedis(GuildUUID guildUUID, Jedis jedis) {
         // Inform the server that this guild member should be saved to mongo on next task (jedis data is refreshed)
         jedis.sadd("markedForSave:guilds", guildUUID.toString());
-        String key = getJedisKey(guildUUID, playerUUID);
+        String key = getJedisKey(guildUUID);
         jedis.hmset(key, this.toMap(guildUUID.getUUID()));
         jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
     }

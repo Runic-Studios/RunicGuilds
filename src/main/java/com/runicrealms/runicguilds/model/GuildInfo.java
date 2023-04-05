@@ -1,19 +1,25 @@
 package com.runicrealms.runicguilds.model;
 
+import java.util.UUID;
+
 /**
  * A container for several latency-sensitive fields about guilds
  */
 public class GuildInfo {
     private final GuildUUID guildUUID;
+    private UUID ownerUuid;
     private String name;
     private String prefix;
     private int exp;
+    private int score;
 
-    public GuildInfo(GuildUUID guildUUID, String name, String prefix, int exp) {
+    public GuildInfo(GuildUUID guildUUID, UUID ownerUuid, String name, String prefix, int exp, int score) {
         this.guildUUID = guildUUID;
+        this.ownerUuid = ownerUuid;
         this.name = name;
         this.prefix = prefix;
         this.exp = exp;
+        this.score = score;
     }
 
     public int getExp() {
@@ -36,11 +42,27 @@ public class GuildInfo {
         this.name = name;
     }
 
+    public UUID getOwnerUuid() {
+        return ownerUuid;
+    }
+
+    public void setOwnerUuid(UUID ownerUuid) {
+        this.ownerUuid = ownerUuid;
+    }
+
     public String getPrefix() {
         return prefix;
     }
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

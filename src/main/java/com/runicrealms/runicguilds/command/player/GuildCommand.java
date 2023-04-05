@@ -12,6 +12,7 @@ import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.ui.GuildBannerUI;
 import com.runicrealms.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
@@ -291,8 +292,8 @@ public class GuildCommand extends BaseCommand {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
-        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
-        player.openInventory(new GuildInfoUI(player, guild).getInventory());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        player.openInventory(new GuildInfoUI(player, guildInfo).getInventory());
     }
 
     @Subcommand("invite")
@@ -400,7 +401,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         Guild guild = guildData.getGuild();
 
         if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {

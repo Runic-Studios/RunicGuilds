@@ -64,11 +64,11 @@ public class GuildData implements SessionDataMongo {
     /**
      * Grabs the root jedis key for this guild to determine if there is data stored in Redis
      *
-     * @param uuid of the GUILD
+     * @param guildUUID of the GUILD
      * @return the root key path
      */
-    public static String getJedisKey(GuildUUID uuid) {
-        return uuid + ":guildUUID";
+    public static String getJedisKey(GuildUUID guildUUID) {
+        return guildUUID + ":guildUUID";
     }
 
     @SuppressWarnings("unchecked")
@@ -167,7 +167,7 @@ public class GuildData implements SessionDataMongo {
         jedis.set(root + ":" + GuildDataField.EXP.getField(), String.valueOf(this.exp));
         jedis.expire(root + ":" + GuildDataField.EXP.getField(), RunicCore.getRedisAPI().getExpireTime());
         // Write owner data
-        this.ownerData.writeToJedis(this.guildUUID, this.ownerData.getUuid(), jedis);
+        this.ownerData.writeToJedis(this.guildUUID, jedis);
         // Write member data
         for (UUID uuid : this.memberDataMap.keySet()) {
             MemberData memberData = this.memberDataMap.get(uuid);

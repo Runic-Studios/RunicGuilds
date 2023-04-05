@@ -4,14 +4,20 @@ import com.keenant.tabbed.item.TextTabItem;
 import com.keenant.tabbed.tablist.TableTabList;
 import com.keenant.tabbed.util.Skins;
 import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
@@ -19,6 +25,7 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class GuildUtil {
@@ -38,6 +45,36 @@ public class GuildUtil {
         }
         return null;
     }
+
+    /**
+     * @param player      the item represents
+     * @param name        of the player
+     * @param description of this itemStack
+     * @return an ItemStack to display in the ui menu
+     */
+    public static ItemStack guildMemberItem(Player player, String name, String description) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta meta = item.getItemMeta();
+        assert meta != null;
+
+        SkullMeta skullMeta = (SkullMeta) meta;
+        skullMeta.setOwningPlayer(player);
+
+        ArrayList<String> lore = new ArrayList<>();
+        meta.setDisplayName(ColorUtil.format(name));
+        String[] desc = description.split("\n");
+        for (String line : desc) {
+            lore.add(ColorUtil.format(line));
+        }
+        meta.setLore(lore);
+        ((Damageable) meta).setDamage(5);
+        meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        item.setItemMeta(meta);
+        return item;
+    }
+
 
     /**
      * Gets the name of the OfflinePlayer found using uuid

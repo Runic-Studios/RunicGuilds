@@ -15,36 +15,36 @@ import org.bukkit.inventory.ItemStack;
 public class GuildMembersUIListener implements Listener {
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent e) {
-        if (e.getClickedInventory() == null) return;
-        if (!(e.getView().getTopInventory().getHolder() instanceof GuildMembersUI)) return;
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() == null) return;
+        if (!(event.getView().getTopInventory().getHolder() instanceof GuildMembersUI)) return;
         // prevent clicking items in player inventory
-        if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-            e.setCancelled(true);
+        if (event.getClickedInventory().getType() == InventoryType.PLAYER) {
+            event.setCancelled(true);
             return;
         }
-        GuildMembersUI guildMembersUI = (GuildMembersUI) e.getClickedInventory().getHolder();
+        GuildMembersUI guildMembersUI = (GuildMembersUI) event.getClickedInventory().getHolder();
         if (guildMembersUI == null) return;
 
         // insurance
-        if (!e.getWhoClicked().equals(guildMembersUI.getPlayer())) {
-            e.setCancelled(true);
-            e.getWhoClicked().closeInventory();
+        if (!event.getWhoClicked().equals(guildMembersUI.getPlayer())) {
+            event.setCancelled(true);
+            event.getWhoClicked().closeInventory();
             return;
         }
-        Player player = (Player) e.getWhoClicked();
-        if (e.getCurrentItem() == null) return;
-        if (guildMembersUI.getInventory().getItem(e.getRawSlot()) == null) return;
-        ItemStack item = e.getCurrentItem();
+        Player player = (Player) event.getWhoClicked();
+        if (event.getCurrentItem() == null) return;
+        if (guildMembersUI.getInventory().getItem(event.getRawSlot()) == null) return;
+        ItemStack item = event.getCurrentItem();
         Material material = item.getType();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
-        e.setCancelled(true);
+        event.setCancelled(true);
         if (RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()) == null) return;
         Guild guild = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
         if (material == GUIUtil.CLOSE_BUTTON.getType())
             player.closeInventory();
         else if (material == GUIUtil.BACK_BUTTON.getType())
-            e.getWhoClicked().openInventory(new GuildInfoUI(player, guild).getInventory());
+            event.getWhoClicked().openInventory(new GuildInfoUI(player, guild).getInventory());
     }
 
 }

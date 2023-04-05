@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.api.event;
 
-import com.runicrealms.runicguilds.guild.Guild;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

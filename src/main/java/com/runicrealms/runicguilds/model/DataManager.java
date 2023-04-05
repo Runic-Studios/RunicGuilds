@@ -47,11 +47,10 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public GuildData checkRedisForGuildData(GuildUUID guildUUID, Jedis jedis) {
-        UUID uuid = guildUUID.getUUID();
-        String key = GuildData.getJedisKey(uuid);
+        String key = GuildData.getJedisKey(guildUUID);
         if (jedis.exists(key)) {
             jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
-            return new GuildData(uuid, jedis);
+            return new GuildData(guildUUID, jedis);
         }
         return null;
     }
@@ -88,6 +87,28 @@ public class DataManager implements DataAPI, Listener {
             return future;
         }
         // No data found!
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<GuildData> loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis) {
+        // todo: redis
+        // todo: mongo projection
+        /*
+                // Find our top-level document
+        Query query = new Query(Criteria.where(CharacterField.PLAYER_UUID.getField()).is(this.uuid));
+        // Project only the fields we need
+        query.fields()
+                .include("coreCharacterDataMap." + slot + "." + CharacterField.CLASS_TYPE.getField())
+                .include("coreCharacterDataMap." + slot + "." + CharacterField.CLASS_LEVEL.getField())
+                .include("coreCharacterDataMap." + slot + "." + CharacterField.CLASS_EXP.getField());
+        CorePlayerData corePlayerData = RunicCore.getDataAPI().getMongoTemplate().findOne(query, CorePlayerData.class);
+         */
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID) {
         return null;
     }
 
