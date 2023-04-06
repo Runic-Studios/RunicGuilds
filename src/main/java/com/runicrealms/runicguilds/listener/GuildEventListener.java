@@ -6,10 +6,10 @@ import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
+import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
-import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,10 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import redis.clients.jedis.Jedis;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -44,43 +41,49 @@ public class GuildEventListener implements Listener {
      */
     @EventHandler
     public void onGuildDisband(GuildDisbandEvent event) {
-        // set guild data to "None" in redis / mongo, close guild bank
+        // Set guild data to "None" in redis / mongo, close guild bank
         Player player = event.getWhoDisbanded();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getGuildUUID());
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            for (GuildMember member : guild.getMembers()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(event.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to disband guild " + event.getGuildUUID());
+                    ex.printStackTrace();
+                } else {
+                    Map<UUID, MemberData> memberDataMap = guildData.getMemberDataMap();
+                    for (MemberData memberData : memberDataMap.values()) {
 //                RunicGuilds.getGuildsAPI().setJedisGuild(member.getUUID(), "None", jedis);
-                // todo: handle jedis guild
-                Player playerMember = Bukkit.getPlayer(member.getUUID());
-                if (playerMember == null) continue;
-                if (GuildBankUtil.isViewingBank(member.getUUID())) {
-                    GuildBankUtil.close(playerMember);
-                    // todo: pub/sub
+                        // todo: handle jedis guild
+                        Player playerMember = Bukkit.getPlayer(memberData.getUuid());
+                        if (playerMember == null) continue;
+//                        if (GuildBankUtil.isViewingBank(member.getUUID())) {
+//                            GuildBankUtil.close(playerMember);
+//                            // todo: pub/sub
+//                        }
+                    }
+                    // todo: remove guild for owner
+//                    RunicGuilds.getGuildsAPI().setJedisGuild(guild.getOwner().getUUID(), "None", jedis);
+
+
+//                    if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
+//                        Player playerOwner = Bukkit.getPlayer(guild.getOwner().getUUID());
+//                        if (playerOwner != null)
+//                            GuildBankUtil.close(playerOwner);
+//                    }
+
+                    // Remove from jedis, mongo, and memory
+                    // todo: guildData.removeFromJedis();
+                    // todo: removeFromMongo
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully disbanded guild."));
+                    GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
+                    syncDisplays(event.getWhoDisbanded());
+                    for (UUID uuid : memberDataMap.keySet()) {
+                        Player playerMember = Bukkit.getPlayer(uuid);
+                        if (playerMember == null) continue;
+                        syncDisplays(playerMember);
+                    }
                 }
-            }
-            // remove guild for owner
-            RunicGuilds.getGuildsAPI().setJedisGuild(guild.getOwner().getUUID(), "None", jedis);
-
-
-            if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
-                Player playerOwner = Bukkit.getPlayer(guild.getOwner().getUUID());
-                if (playerOwner != null)
-                    GuildBankUtil.close(playerOwner);
-            }
-
-            // remove from jedis, mongo, and memory
-            guildData.delete();
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully disbanded guild."));
-            GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
-            syncDisplays(event.getWhoDisbanded());
-            for (GuildMember member : event.getGuild().getMembersWithOwner()) {
-                Player playerMember = Bukkit.getPlayer(member.getUUID());
-                if (playerMember == null) continue;
-                syncDisplays(playerMember);
-            }
-        } catch (Exception ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "There was a problem handling GuildDisbandEvent!");
-            ex.printStackTrace();
+            });
         }
     }
 

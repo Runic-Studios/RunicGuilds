@@ -39,6 +39,10 @@ public class DataManager implements DataAPI, Listener {
         this.guildInfoMap = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
         /*
+        Loads guilds into memory on startup
+         */
+        // todo: for every guild in redis... create a GuildInfo
+        /*
         Tab update task
          */
         Bukkit.getScheduler().runTaskTimerAsynchronously(RunicGuilds.getInstance(), this::updateGuildTabs, 100L, 100L);
