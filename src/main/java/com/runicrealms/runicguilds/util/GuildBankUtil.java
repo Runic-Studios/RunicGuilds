@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.util;
 
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildUUID;
@@ -41,11 +40,13 @@ public class GuildBankUtil implements Listener {
     }
 
     /**
+     * ?
+     *
      * @param player
      * @param page
-     * @param prefix
+     * @param guildUUID
      */
-    public static void open(Player player, Integer page, String prefix) {
+    public static void open(Player player, Integer page, GuildUUID guildUUID) {
         Guild guild = RunicGuilds.getGuildsAPI().getGuild(prefix).getGuild();
         Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
         if (guild.getBankSize() > 45 && page != guild.getBankSize() / 45) {

@@ -9,7 +9,6 @@ public class GuildUUID {
         if (uuid == null) {
             throw new IllegalArgumentException("UUID cannot be null");
         }
-
         this.uuid = uuid;
     }
 

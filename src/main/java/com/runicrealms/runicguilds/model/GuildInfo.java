@@ -21,16 +21,20 @@ public class GuildInfo {
     private GuildBanner guildBanner;
     private SettingsData settingsData;
 
-    public GuildInfo(GuildUUID guildUUID, UUID ownerUuid, String name, String prefix, int exp,
-                     int score, GuildBanner guildBanner, SettingsData settingsData) {
-        this.guildUUID = guildUUID;
-        this.ownerUuid = ownerUuid;
-        this.name = name;
-        this.prefix = prefix;
-        this.exp = exp;
-        this.score = score;
-        this.guildBanner = guildBanner;
-        this.settingsData = settingsData;
+    /**
+     * Updates our in-memory guild info cache from some retrieved GuildData object from Redis/Mongo
+     *
+     * @param guildData an object retrieved from a database call
+     */
+    public GuildInfo(GuildData guildData) {
+        this.guildUUID = guildData.getGuildUUID();
+        this.ownerUuid = guildData.getOwnerData().getUuid();
+        this.name = guildData.getName();
+        this.prefix = guildData.getPrefix();
+        this.exp = guildData.getExp();
+        this.score = guildData.calculateGuildScore();
+        this.guildBanner = guildData.getGuildBanner();
+        this.settingsData = guildData.getSettingsData();
     }
 
     public int getExp() {

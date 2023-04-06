@@ -11,6 +11,13 @@ import java.util.concurrent.CompletableFuture;
 public interface DataAPI {
 
     /**
+     * Creates a local, in-memory cache of the guild's info for fast lookup
+     *
+     * @param guildInfo some container of guild info
+     */
+    void addGuildInfoToMemory(GuildInfo guildInfo);
+
+    /**
      * Checks redis to see if the currently selected GuildData is cached
      *
      * @param guildUUID of the guild to check

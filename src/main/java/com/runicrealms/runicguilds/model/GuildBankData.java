@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class GuildBankData implements SessionDataRedis {
-    private final List<RunicItem> runicItems = new ArrayList<>();
+    private List<RunicItem> runicItems = new ArrayList<>();
 
     @SuppressWarnings("unused")
     public GuildBankData() {
@@ -36,6 +36,14 @@ public class GuildBankData implements SessionDataRedis {
     @Override
     public void writeToJedis(UUID uuid, Jedis jedis, WriteCallback writeCallback, int... ints) {
 
+    }
+
+    public List<RunicItem> getRunicItems() {
+        return runicItems;
+    }
+
+    public void setRunicItems(List<RunicItem> runicItems) {
+        this.runicItems = runicItems;
     }
 
 

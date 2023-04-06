@@ -27,9 +27,9 @@ import java.util.UUID;
 @CommandAlias("guild")
 public class GuildCommand extends BaseCommand {
 
-    private String combineArgs(String[] args, int start) {
+    private String combineArgs(String[] args) {
         StringBuilder builder = new StringBuilder();
-        for (int i = start; i < args.length; i++) {
+        for (int i = 1; i < args.length; i++) {
             builder.append(args[i]);
             if (i != args.length - 1) {
                 builder.append(" ");
@@ -45,7 +45,7 @@ public class GuildCommand extends BaseCommand {
      * @param args   the name and prefix of the guild
      * @return true if successful, false if failed
      */
-    private boolean createGuild(Player player, String[] args) {
+    private boolean createGuildFromCommand(Player player, String[] args) {
         if (args.length < 1) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "To confirm creation of your guild, type &6/guild confirm <guild-prefix> <guild-name>&e. The prefix must be of 3-6 english letters."));
             return false;
@@ -57,7 +57,8 @@ public class GuildCommand extends BaseCommand {
             return false;
         }
 
-        GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(player, this.combineArgs(args, 1), args[0], false);
+        // Let's make a guild!
+        GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(player, this.combineArgs(args), args[0], false);
         if (result != GuildCreationResult.SUCCESSFUL) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage() + " Try again, or type &6/guild cancel&e."));
             return false;
@@ -178,7 +179,7 @@ public class GuildCommand extends BaseCommand {
         } else if (RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
             // Creating guild
             // noinspection unused
-            boolean result = this.createGuild(player, args);
+            boolean result = this.createGuildFromCommand(player, args);
         } else {
             // Not confirming
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have nothing to confirm."));

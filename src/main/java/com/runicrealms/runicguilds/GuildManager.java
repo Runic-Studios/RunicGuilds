@@ -8,20 +8,19 @@ import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
-import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.model.*;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
-import com.runicrealms.runicguilds.util.GuildUtil;
+import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -59,8 +58,15 @@ public class GuildManager implements GuildsAPI, Listener {
         GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-            RunicGuilds.getGuildsAPI().setJedisGuild(owner.getUniqueId(), name);
-            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(RunicGuilds.getGuildsAPI().getGuild(prefix).getGuild(), modCreated));
+//            RunicGuilds.getGuildsAPI().setJedisGuild(owner.getUniqueId(), name);
+            // todo: set user jedis guild?
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
+            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent
+                    (
+                            guildInfo.getGuildUUID(),
+                            owner.getUniqueId(),
+                            modCreated
+                    ));
         }
         return result;
     }
@@ -167,12 +173,12 @@ public class GuildManager implements GuildsAPI, Listener {
     /**
      * Attempts to create a guild
      *
-     * @param owner  of the guild
-     * @param name   of the guild
-     * @param prefix of the guild
+     * @param ownerUuid of the guild owner
+     * @param name      of the guild
+     * @param prefix    of the guild
      * @return the creation result
      */
-    private GuildCreationResult createGuild(UUID owner, String name, String prefix) {
+    private GuildCreationResult createGuild(UUID ownerUuid, String name, String prefix) {
         if (prefix.length() < 3 || prefix.length() > 4 || prefix.equalsIgnoreCase("None")) {
             return GuildCreationResult.BAD_PREFIX;
         }
@@ -184,44 +190,42 @@ public class GuildManager implements GuildsAPI, Listener {
         if (name.length() > 16) {
             return GuildCreationResult.NAME_TOO_LONG;
         }
-        for (Object obj : guildDataMap.keySet()) {
-            String guildPrefix = (String) obj;
-            GuildData guildData = (GuildData) guildDataMap.get(guildPrefix);
-            if (guildData.getGuild().getGuildName().equalsIgnoreCase(name)) {
-                return GuildCreationResult.NAME_NOT_UNIQUE;
-            }
-            if (guildData.getGuild().getOwner().getUUID().toString().equalsIgnoreCase(owner.toString())) {
-                return GuildCreationResult.CREATOR_IN_GUILD;
-            }
-            for (GuildMember member : guildData.getGuild().getMembers()) {
-                if (member.getUUID().toString().equalsIgnoreCase(owner.toString())) {
-                    return GuildCreationResult.CREATOR_IN_GUILD;
-                }
-            }
-            if (guildPrefix.equalsIgnoreCase(prefix)) {
-                return GuildCreationResult.PREFIX_NOT_UNIQUE;
-            }
-        }
-        List<ItemStack> bank = new ArrayList<>();
-        for (int i = 0; i < 45; i++) {
-            bank.add(null);
-        }
-        Map<GuildRank, Boolean> bankPermissions = new HashMap<>();
-        for (GuildRank rank : GuildRank.values()) {
-            if (rank != GuildRank.OWNER && !bankPermissions.containsKey(rank)) {
-                bankPermissions.put(rank, rank.canAccessBankByDefault());
-            }
-        }
+        // todo: Ensure guild name and prefix are unique?
+//        for (Object obj : guildDataMap.keySet()) {
+//            String guildPrefix = (String) obj;
+//            GuildData guildData = (GuildData) guildDataMap.get(guildPrefix);
+//            if (guildData.getGuild().getGuildName().equalsIgnoreCase(name)) {
+//                return GuildCreationResult.NAME_NOT_UNIQUE;
+//            }
+//            if (guildData.getGuild().getOwner().getUUID().toString().equalsIgnoreCase(owner.toString())) {
+//                return GuildCreationResult.CREATOR_IN_GUILD;
+//            }
+//            for (GuildMember member : guildData.getGuild().getMembers()) {
+//                if (member.getUUID().toString().equalsIgnoreCase(owner.toString())) {
+//                    return GuildCreationResult.CREATOR_IN_GUILD;
+//                }
+//            }
+//            if (guildPrefix.equalsIgnoreCase(prefix)) {
+//                return GuildCreationResult.PREFIX_NOT_UNIQUE;
+//            }
+//        }
+        // Setup empty bank
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            Guild guild = new Guild(new HashSet<>(), new GuildMember(owner, GuildRank.OWNER, 0, GuildUtil.getOfflinePlayerName(owner)), name, prefix, bank, 45, bankPermissions, 0);
-            GuildData guildData = new GuildData(guild);
-            guildDataMap.put(prefix, guildData);
+            // Create new guild, write to Redis (will mark it for Mongo save)
+            GuildData guildData = new GuildData
+                    (
+                            new ObjectId(),
+                            new GuildUUID(UUID.randomUUID()),
+                            name,
+                            prefix,
+                            new OwnerData(ownerUuid, new MemberData(ownerUuid, GuildRank.OWNER, 0))
+                    );
             guildData.writeToJedis(jedis);
-            GuildMongoData guildMongoData = new GuildMongoData(guild.getGuildPrefix());
-            guildData.writeToMongo(guildMongoData);
-            guildMongoData.save();
+            // Ensure there is a local copy of some fields for fast lookup
+            GuildInfo guildInfo = new GuildInfo(guildData);
+            RunicGuilds.getDataAPI().addGuildInfoToMemory(guildInfo);
         }
         return GuildCreationResult.SUCCESSFUL;
     }
-    
+
 }

@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.model.SessionDataMongo;
+import com.runicrealms.runicguilds.guild.GuildBanner;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -27,6 +28,7 @@ public class GuildData implements SessionDataMongo {
     private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
     private GuildBankData bankData;
     private SettingsData settingsData;
+    private GuildBanner guildBanner;
 
     @SuppressWarnings("unused")
     public GuildData() {
@@ -34,7 +36,7 @@ public class GuildData implements SessionDataMongo {
     }
 
     /**
-     * Constructor for new players
+     * Constructor for new guilds (creation)
      *
      * @param id        of the guild document in mongo
      * @param guildUUID of the guild
@@ -48,6 +50,9 @@ public class GuildData implements SessionDataMongo {
         this.name = name;
         this.prefix = prefix;
         this.ownerData = ownerData;
+        this.bankData = new GuildBankData();
+        this.settingsData = new SettingsData();
+        this.guildBanner = new GuildBanner(guildUUID);
     }
 
     /**
@@ -78,6 +83,20 @@ public class GuildData implements SessionDataMongo {
         return mongoTemplate.save(this);
     }
 
+    /**
+     * Calculates the total score for this guild as a simple aggregation of each member (and owner's)
+     * score
+     *
+     * @return the combined score of the guild
+     */
+    public int calculateGuildScore() {
+        int result = this.ownerData.getMemberData().getScore();
+        for (MemberData memberData : this.memberDataMap.values()) {
+            result += memberData.getScore();
+        }
+        return result;
+    }
+
     public GuildBankData getBankData() {
         return bankData;
     }
@@ -92,6 +111,14 @@ public class GuildData implements SessionDataMongo {
 
     public void setExp(int exp) {
         this.exp = exp;
+    }
+
+    public GuildBanner getGuildBanner() {
+        return guildBanner;
+    }
+
+    public void setGuildBanner(GuildBanner guildBanner) {
+        this.guildBanner = guildBanner;
     }
 
     public GuildUUID getGuildUUID() {

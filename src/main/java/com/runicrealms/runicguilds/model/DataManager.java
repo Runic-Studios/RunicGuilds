@@ -46,6 +46,11 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
+    public void addGuildInfoToMemory(GuildInfo guildInfo) {
+        this.guildInfoMap.put(guildInfo.getGuildUUID(), guildInfo);
+    }
+
+    @Override
     public GuildData checkRedisForGuildData(GuildUUID guildUUID, Jedis jedis) {
         String key = GuildData.getJedisKey(guildUUID);
         if (jedis.exists(key)) {
