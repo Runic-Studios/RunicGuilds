@@ -95,4 +95,13 @@ public interface DataAPI {
      */
     void renameGuildInRedis(GuildUUID guildUUID, String name, Jedis jedis);
 
+    /**
+     * Player's have a 'foreign' key that specifies the name of their guild.
+     * This is much faster to lookup than parsing through the list of members
+     *
+     * @param uuid of the player
+     * @param name of the guild "None" if none
+     */
+    void setGuildForPlayer(UUID uuid, String name, Jedis jedis);
+
 }

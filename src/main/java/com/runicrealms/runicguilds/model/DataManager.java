@@ -139,6 +139,11 @@ public class DataManager implements DataAPI, Listener {
 
     }
 
+    @Override
+    public void setGuildForPlayer(UUID uuid, String name, Jedis jedis) {
+
+    }
+
     public HashMap<GuildUUID, GuildInfo> getGuildInfoMap() {
         return guildInfoMap;
     }

@@ -52,8 +52,7 @@ public class GuildEventListener implements Listener {
                 } else {
                     Map<UUID, MemberData> memberDataMap = guildData.getMemberDataMap();
                     for (MemberData memberData : memberDataMap.values()) {
-//                RunicGuilds.getGuildsAPI().setJedisGuild(member.getUUID(), "None", jedis);
-                        // todo: handle jedis guild
+                        RunicGuilds.getDataAPI().setGuildForPlayer(memberData.getUuid(), "None", jedis);
                         Player playerMember = Bukkit.getPlayer(memberData.getUuid());
                         if (playerMember == null) continue;
 //                        if (GuildBankUtil.isViewingBank(member.getUUID())) {
@@ -61,8 +60,9 @@ public class GuildEventListener implements Listener {
 //                            // todo: pub/sub
 //                        }
                     }
-                    // todo: remove guild for owner
-//                    RunicGuilds.getGuildsAPI().setJedisGuild(guild.getOwner().getUUID(), "None", jedis);
+
+                    // Clear owner's guild string in Redis
+                    RunicGuilds.getDataAPI().setGuildForPlayer(guildData.getOwnerData().getUuid(), "None", jedis);
 
 
 //                    if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
@@ -110,8 +110,7 @@ public class GuildEventListener implements Listener {
         }
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             syncMemberDisplays(event.getGuildUUID(), jedis);
-//            RunicGuilds.getGuildsAPI().setJedisGuild(whoWasKicked.getUniqueId(), "None", jedis);
-            // todo: player guild jedis key?
+            RunicGuilds.getDataAPI().setGuildForPlayer(whoWasKicked.getUniqueId(), "None", jedis);
         }
     }
 
@@ -172,23 +171,21 @@ public class GuildEventListener implements Listener {
     private void syncDisplays(Player player) {
         if (player == null) return;
         GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
-//        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-//            if (guild != null) {
-//                RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName(), jedis);
-//            } else {
-//                RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), "None", jedis);
-//            }
-//        }
-        // todo: update the player's jedis tag
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            if (guild != null) {
+                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName(), jedis);
+            } else {
+                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None", jedis);
+            }
+        }
         RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
         GuildUtil.updateGuildTabColumn(player);
     }
 
     /**
-     * ?
+     * Syncs the scoreboard/tab for all guild members
      *
-     * @param guildUUID
-     * @param jedis
+     * @param guildUUID of the guild to sync
      */
     private void syncMemberDisplays(GuildUUID guildUUID, Jedis jedis) {
         CompletableFuture<HashMap<UUID, MemberData>> future = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);

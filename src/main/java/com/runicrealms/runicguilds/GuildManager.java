@@ -66,8 +66,6 @@ public class GuildManager implements GuildsAPI, Listener {
         GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-//            RunicGuilds.getGuildsAPI().setJedisGuild(owner.getUniqueId(), name);
-            // todo: set user jedis guild?
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent
                     (
@@ -213,6 +211,7 @@ public class GuildManager implements GuildsAPI, Listener {
                             new OwnerData(ownerUuid, new MemberData(ownerUuid, GuildRank.OWNER, 0))
                     );
             guildData.writeToJedis(jedis);
+            RunicGuilds.getDataAPI().setGuildForPlayer(ownerUuid, name, jedis);
             // Ensure there is a local copy of some fields for fast lookup
             GuildInfo guildInfo = new GuildInfo(guildData);
             RunicGuilds.getDataAPI().addGuildInfoToMemory(guildInfo);
