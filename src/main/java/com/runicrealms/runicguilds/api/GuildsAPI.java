@@ -7,7 +7,6 @@ import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.entity.Player;
 import redis.clients.jedis.Jedis;
 
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,14 +42,6 @@ public interface GuildsAPI {
      * @return the result of the creation
      */
     GuildCreationResult createGuild(Player owner, String name, String prefix, boolean modCreated);
-
-    /**
-     * Used to determine which player will receive messages in guild chat
-     *
-     * @param player who sent message
-     * @return a set of uuids of guild members
-     */
-    Set<UUID> getGuildRecipients(UUID player);
 
     /**
      * @param guildUUID of the GUILD

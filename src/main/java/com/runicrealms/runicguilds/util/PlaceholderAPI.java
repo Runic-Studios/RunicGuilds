@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.util;
 
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 
@@ -34,33 +34,35 @@ public class PlaceholderAPI extends PlaceholderExpansion {
         if (player == null) return null;
 
         String lowerArg = arg.toLowerCase();
-        Guild guild = RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
 
         switch (lowerArg) {
             case "name":
-                if (guild != null) {
-                    return guild.getGuildName();
+                if (guildInfo != null) {
+                    return guildInfo.getName();
                 } else {
                     return "";
                 }
             case "prefix":
-                if (guild != null) {
-                    return "[" + guild.getGuildPrefix() + "] ";
+                if (guildInfo != null) {
+                    return "[" + guildInfo.getPrefix() + "] ";
                 } else {
                     return "";
                 }
             case "rank":
-                if (guild != null) {
-                    return guild.getMember(player.getUniqueId()).getRank().getName();
-                } else {
-                    return GuildRank.MEMBER.getName();
-                }
+//                if (guildInfo != null) {
+//                    return guild.getMember(player.getUniqueId()).getRank().getName();
+//                } else {
+//                    return GuildRank.MEMBER.getName();
+//                }
+                return GuildRank.MEMBER.getName(); // todo: cache ranks somewhere in-memory
             case "score":
-                if (guild != null && guild.getMember(player.getUniqueId()) != null) {
-                    return String.valueOf(guild.getMember(player.getUniqueId()).getScore());
-                } else {
-                    return "0";
-                }
+//                if (guildInfo != null && guild.getMember(player.getUniqueId()) != null) {
+//                    return String.valueOf(guild.getMember(player.getUniqueId()).getScore());
+//                } else {
+                // todo: cache member data rank and score somewhere
+                return "0";
+//                }
             default:
                 return "";
         }

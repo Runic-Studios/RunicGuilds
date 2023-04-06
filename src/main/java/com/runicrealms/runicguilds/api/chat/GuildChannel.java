@@ -2,6 +2,8 @@ package com.runicrealms.runicguilds.api.chat;
 
 import com.runicrealms.api.chat.ChatChannel;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -15,20 +17,20 @@ import java.util.List;
 
 public class GuildChannel extends ChatChannel {
 
-    /**
-     * Displays the guild score of the given player, or 0
-     *
-     * @param player to check
-     * @return their guild score
-     */
-    private String displayScore(Player player) {
-        if (RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()) != null
-                && RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
-            return String.valueOf(RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
-        } else {
-            return "0";
-        }
-    }
+//    /**
+//     * Displays the guild score of the given player, or 0
+//     *
+//     * @param player to check
+//     * @return their guild score
+//     */
+//    private String displayScore(Player player) {
+//        if (RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()) != null
+//                && RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
+//            return String.valueOf(RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
+//        } else {
+//            return "0";
+//        }
+//    }
 
     @Override
     public String getPrefix() {
@@ -43,19 +45,18 @@ public class GuildChannel extends ChatChannel {
     @Override
     public List<Player> getRecipients(Player player) {
         List<Player> recipients = new ArrayList<>();
-        if (RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
-            for (Player target : Bukkit.getOnlinePlayers()) {
-                if (target != null) {
-                    if (RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) {
-                        if (RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId())
-                                .equals(RunicGuilds.getGuildsAPI().getGuild(target.getUniqueId()))) {
-                            recipients.add(target);
-                        }
-                    }
-                }
-            }
-        } else {
+        GuildInfo guildInfoSender = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfoSender == null) {
             player.sendMessage(ChatColor.RED + "You must be in a guild to use guild chat!");
+            return recipients;
+        }
+        for (Player target : Bukkit.getOnlinePlayers()) {
+            if (target == null) continue;
+            if (!RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) continue;
+            GuildUUID guildUUID = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId()).getGuildUUID();
+            if (guildInfoSender.getGuildUUID() == guildUUID) {
+                recipients.add(target);
+            }
         }
         return recipients;
     }

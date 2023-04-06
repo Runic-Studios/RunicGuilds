@@ -3,7 +3,7 @@ package com.runicrealms.runicguilds.ui;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -72,9 +72,10 @@ public class GuildBannerUIListener implements Listener {
         }
         ui.getBanner().setBanner(dummy.getType(), (BannerMeta) dummy.getItemMeta());
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(ui.getGuild().getGuildPrefix());
-        if (guildData != null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo != null) {
             player.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
+            // todo: update the banner here?
         } else {
             player.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
         }

@@ -42,7 +42,7 @@ public class PostedGuildBanner {
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
         if (guildInfo != null) {
-            armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, guildInfo.getPrefix());
+            armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, guildInfo.getGuildUUID().toString());
         }
     }
 

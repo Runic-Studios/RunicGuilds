@@ -17,9 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -79,24 +77,6 @@ public class GuildManager implements GuildsAPI, Listener {
                     ));
         }
         return result;
-    }
-
-    @Override
-    public Set<UUID> getGuildRecipients(UUID player) {
-        if (!isInGuild(player)) {
-            return null;
-        }
-        Set<UUID> recipients = new HashSet<>();
-        Guild guild = getGuild(player);
-        if (!guild.getOwner().getUUID().toString().equalsIgnoreCase(player.toString())) {
-            recipients.add(guild.getOwner().getUUID());
-        }
-        for (GuildMember member : guild.getMembers()) {
-            if (!member.getUUID().toString().equalsIgnoreCase(player.toString())) {
-                recipients.add(member.getUUID());
-            }
-        }
-        return recipients;
     }
 
     @Override
