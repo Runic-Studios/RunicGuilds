@@ -5,7 +5,11 @@ import com.runicrealms.runicguilds.guild.GuildBanner;
 import java.util.UUID;
 
 /**
- * A container for several latency-sensitive fields about guilds
+ * A container for several latency-sensitive fields about guilds.
+ * This is the closest thing we have to a local, in-memory cache of guild data
+ * Stores all basic fields, but does not store high memory-footprint data like members or bank
+ *
+ * @author Skyfallin
  */
 public class GuildInfo {
     private final GuildUUID guildUUID;
@@ -15,9 +19,10 @@ public class GuildInfo {
     private int exp;
     private int score;
     private GuildBanner guildBanner;
+    private SettingsData settingsData;
 
     public GuildInfo(GuildUUID guildUUID, UUID ownerUuid, String name, String prefix, int exp,
-                     int score, GuildBanner guildBanner) {
+                     int score, GuildBanner guildBanner, SettingsData settingsData) {
         this.guildUUID = guildUUID;
         this.ownerUuid = ownerUuid;
         this.name = name;
@@ -25,6 +30,7 @@ public class GuildInfo {
         this.exp = exp;
         this.score = score;
         this.guildBanner = guildBanner;
+        this.settingsData = settingsData;
     }
 
     public int getExp() {
@@ -77,5 +83,13 @@ public class GuildInfo {
 
     public void setScore(int score) {
         this.score = score;
+    }
+
+    public SettingsData getSettingsData() {
+        return settingsData;
+    }
+
+    public void setSettingsData(SettingsData settingsData) {
+        this.settingsData = settingsData;
     }
 }

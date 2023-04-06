@@ -18,6 +18,15 @@ public class SettingsData implements SessionDataRedis {
         // Default constructor for Spring
     }
 
+    /**
+     * @param rank of the player
+     * @return true if the player can access the guild bank
+     */
+    public boolean canAccessBank(GuildRank rank) {
+        if (!bankSettings.containsKey(rank)) return false;
+        return bankSettings.get(rank);
+    }
+
     public Map<GuildRank, Boolean> getBankSettings() {
         return bankSettings;
     }

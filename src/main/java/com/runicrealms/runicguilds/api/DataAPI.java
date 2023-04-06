@@ -1,12 +1,10 @@
 package com.runicrealms.runicguilds.api;
 
-import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
-import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.model.*;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,6 +36,15 @@ public interface DataAPI {
     GuildInfo getGuildInfo(GuildUUID guildUUID);
 
     /**
+     * Checks Redis for all guilds' score field, then returns a list of containers
+     * with the guild's uuid and score. Used for banners/leaderboards
+     *
+     * @param jedis a new jedis resource
+     * @return a future, which will eventually have the scores
+     */
+    CompletableFuture<List<ScoreContainer>> loadAllGuildScores(Jedis jedis);
+
+    /**
      * Loads the guild data from redis and/or mongo (if it exists!)
      *
      * @param guildUUID of the GUILD
@@ -60,5 +67,16 @@ public interface DataAPI {
      * Loads only the guild member map from redis/mongo
      */
     CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis);
+
+    /**
+     * Loads the data for a single guild member. Checks Redis first, then falls back to a projection
+     * in Mongo. Useful for retrieving the player's rank or score
+     *
+     * @param guildUUID of the guild
+     * @param uuid      of the guild member
+     * @param jedis     the jedis resource
+     * @return the data for the guild member
+     */
+    CompletableFuture<MemberData> loadMemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis);
 
 }

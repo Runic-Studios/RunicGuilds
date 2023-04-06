@@ -158,8 +158,8 @@ public class GuildData implements SessionDataMongo {
     public void writeToJedis(Jedis jedis) {
         String root = getJedisKey(this.guildUUID);
         // Write basic fields
-        jedis.set(root + ":" + GuildDataField.UUID.getField(), this.guildUUID.getUUID().toString());
-        jedis.expire(root + ":" + GuildDataField.UUID.getField(), RunicCore.getRedisAPI().getExpireTime());
+        jedis.set(root + ":" + GuildDataField.GUILD_UUID.getField(), this.guildUUID.getUUID().toString());
+        jedis.expire(root + ":" + GuildDataField.GUILD_UUID.getField(), RunicCore.getRedisAPI().getExpireTime());
         jedis.set(root + ":" + GuildDataField.NAME.getField(), this.name);
         jedis.expire(root + ":" + GuildDataField.NAME.getField(), RunicCore.getRedisAPI().getExpireTime());
         jedis.set(root + ":" + GuildDataField.PREFIX.getField(), this.prefix);

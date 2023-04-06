@@ -1,17 +1,25 @@
 package com.runicrealms.runicguilds.guild;
 
 import com.google.common.collect.Lists;
+import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.model.ScoreContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
+import redis.clients.jedis.Jedis;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 /**
+ * Loader that periodically retrieves the guild score for ALL guilds in redis (active guilds),
+ * sorts by highest, then places that guild's banner at set locations in major cities
  *
+ * @author BoBoBalloon, Skyfallin
  */
 public class GuildBannerLoader extends BukkitRunnable {
 
@@ -38,13 +46,13 @@ public class GuildBannerLoader extends BukkitRunnable {
     /**
      * Creates guild banners for display in the guild quarter of 'hub' cities
      *
-     * @param guilds a filtered list of the top ordered guilds (by guild score)
+     * @param guildScores a filtered list of the top ordered guilds (by guild score)
      */
-    private void makeBanners(List<Guild> guilds) {
-        for (int i = 1; i <= guilds.size(); i++) {
+    private void makeBanners(List<ScoreContainer> guildScores) {
+        for (int i = 1; i <= guildScores.size(); i++) {
             String path = "banners.number" + i;
             Location location = BANNER_LOCATIONS.get(path);
-            PostedGuildBanner banner = new PostedGuildBanner(guilds.get(i - 1), location);
+            PostedGuildBanner banner = new PostedGuildBanner(guildScores.get(i - 1).getGuildUUID(), location);
             RunicGuilds.getPostedGuildBanners().add(banner);
         }
     }
@@ -58,19 +66,29 @@ public class GuildBannerLoader extends BukkitRunnable {
         List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
         posted.forEach(PostedGuildBanner::remove); // Remove existing banners
 
-        List<Guild> ordering = new ArrayList<>(RunicGuilds.getGuildsAPI().getAllGuilds());
-        List<Guild> guilds = new ArrayList<>();
-        Comparator<Guild> comparator = Comparator.comparing(Guild::getScore).reversed();
-        ordering.sort(comparator);
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<List<ScoreContainer>> future = RunicGuilds.getDataAPI().loadAllGuildScores(jedis);
+            future.whenComplete((List<ScoreContainer> guildScores, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to retrieve guild scores!");
+                    ex.printStackTrace();
+                } else {
+                    // Success!
+                    List<ScoreContainer> guildsToDisplay = new ArrayList<>();
+                    Comparator<ScoreContainer> comparator = Comparator.comparing(ScoreContainer::getScore).reversed();
+                    guildScores.sort(comparator);
 
-        if (ordering.size() < MAX_POSTED_BANNERS) {
-            guilds.addAll(ordering);
-        } else {
-            for (int i = 0; i < MAX_POSTED_BANNERS; i++) {
-                guilds.add(ordering.get(i));
-            }
+                    if (guildScores.size() < MAX_POSTED_BANNERS) {
+                        guildsToDisplay.addAll(guildScores);
+                    } else {
+                        for (int i = 0; i < MAX_POSTED_BANNERS; i++) {
+                            guildsToDisplay.add(guildScores.get(i));
+                        }
+                    }
+
+                    Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guildsToDisplay));
+                }
+            });
         }
-
-        Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guilds));
     }
 }

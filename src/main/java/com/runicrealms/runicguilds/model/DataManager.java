@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
  * @author Skyfallin
  */
 public class DataManager implements DataAPI, Listener {
-
     // Maps a PLAYER uuid to a GUILD uuid
     private final HashMap<UUID, GuildUUID> playerToGuildMap;
     // Contains some latency-sensitive data for fastest lookup.
@@ -68,6 +68,11 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
+    public CompletableFuture<List<ScoreContainer>> loadAllGuildScores(Jedis jedis) {
+        return null;
+    }
+
+    @Override
     public CompletableFuture<GuildData> loadGuildData(GuildUUID guildUUID, Jedis jedis) {
         CompletableFuture<GuildData> future = new CompletableFuture<>();
         // Step 1: Check Redis
@@ -78,7 +83,7 @@ public class DataManager implements DataAPI, Listener {
         }
         // Step 2: Check the Mongo database
         Query query = new Query();
-        query.addCriteria(Criteria.where(GuildDataField.UUID.getField()).is(guildUUID));
+        query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
         MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
         GuildData result = mongoTemplate.findOne(query, GuildData.class);
         if (result != null) {
@@ -109,6 +114,11 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<MemberData> loadMemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis) {
         return null;
     }
 
