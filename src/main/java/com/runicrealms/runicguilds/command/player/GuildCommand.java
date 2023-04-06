@@ -64,7 +64,6 @@ public class GuildCommand extends BaseCommand {
             return false;
         }
 
-        RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild().getGuildName());
         ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), RunicGuilds.GUILD_COST);
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage()));
@@ -117,8 +116,8 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildBannerCommand(Player player) {
-        Guild guild = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId()).getGuild();
-        if (guild == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }

@@ -6,10 +6,8 @@ import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
-import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
-import com.runicrealms.runicguilds.guild.GuildMember;
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
@@ -26,6 +24,7 @@ import java.util.UUID;
 @CommandAlias("guildmod")
 @CommandPermission("permissions.guild-mod")
 @Conditions("is-player")
+@SuppressWarnings("unused")
 public class GuildModCMD extends BaseCommand {
 
     private final String prefix = "&r&6&lGuilds (Mod) »&r &e";
@@ -41,9 +40,9 @@ public class GuildModCMD extends BaseCommand {
         });
     }
 
-    private String combineArgs(String[] args, int start) {
+    private String combineArgs(String[] args) {
         StringBuilder builder = new StringBuilder();
-        for (int i = start; i < args.length; i++) {
+        for (int i = 1; i < args.length; i++) {
             builder.append(args[i]);
             if (i != args.length - 1) {
                 builder.append(" ");
@@ -110,9 +109,8 @@ public class GuildModCMD extends BaseCommand {
         GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(owner, args[1], args[2], true);
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
-            Guild guild = RunicGuilds.getGuildsAPI().getGuildData(uuid).getGuild();
-            RunicGuilds.getGuildsAPI().setJedisGuild(uuid, guild.getGuildName());
-            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guild, uuid, true));
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
+            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guildInfo.getGuildUUID(), uuid, true));
         }
     }
 
@@ -301,12 +299,13 @@ public class GuildModCMD extends BaseCommand {
         }
 
         UUID targetUUID = target.getUniqueId();
-
-        if (RunicGuilds.getGuildsAPI().getGuild(targetUUID) == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(targetUUID);
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;
         }
 
+        // todo: here's the problem...
         GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(targetUUID);
         Guild guild = guildData.getGuild();
         GuildMember targetMember = guild.getMember(targetUUID);
@@ -340,7 +339,7 @@ public class GuildModCMD extends BaseCommand {
         player.sendMessage(ColorUtil.format(this.prefix + RunicGuilds.getGuildsAPI().renameGuild
                 (
                         guildInfo.getGuildUUID(),
-                        this.combineArgs(args, 1)
+                        this.combineArgs(args)
                 ).getMessage()));
     }
 
@@ -360,12 +359,11 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        if (RunicGuilds.getGuildsAPI().getGuild(target.getUniqueId()) == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&eYou are not in a guild!"));
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        if (guildInfo == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "&eThis player is not in a guild!"));
             return;
         }
-
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
 
         player.sendMessage(ColorUtil.format(this.prefix + guildData.getGuild().updateGuildPrefix(guildData, args[1]).getMessage()));
     }
