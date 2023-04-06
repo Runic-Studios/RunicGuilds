@@ -127,6 +127,14 @@ public class DataManager implements DataAPI, Listener {
         return null;
     }
 
+    @Override
+    public void renameGuildInRedis(GuildUUID guildUUID, String name, Jedis jedis) {
+        String root = GuildData.getJedisKey(guildUUID);
+        // Write name
+        jedis.set(root + ":" + GuildDataField.NAME.getField(), name);
+
+    }
+
     public HashMap<GuildUUID, GuildInfo> getGuildInfoMap() {
         return guildInfoMap;
     }

@@ -331,14 +331,17 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        if (RunicGuilds.getGuildsAPI().getGuild(target.getUniqueId()) == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The targeted player must be in a guild execute this command!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
-
-        player.sendMessage(ColorUtil.format(this.prefix + RunicGuilds.getGuildsAPI().renameGuild(guildData, this.combineArgs(args, 1)).getMessage()));
+        player.sendMessage(ColorUtil.format(this.prefix + RunicGuilds.getGuildsAPI().renameGuild
+                (
+                        guildInfo.getGuildUUID(),
+                        this.combineArgs(args, 1)
+                ).getMessage()));
     }
 
     @Subcommand("set prefix")

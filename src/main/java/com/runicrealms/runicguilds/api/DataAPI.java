@@ -86,4 +86,13 @@ public interface DataAPI {
      */
     CompletableFuture<MemberData> loadMemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis);
 
+    /**
+     * Renames the guild by updating its shared field in redis
+     *
+     * @param guildUUID uuid of the guild
+     * @param name      the new name of the guild
+     * @param jedis     a new Jedis resource
+     */
+    void renameGuildInRedis(GuildUUID guildUUID, String name, Jedis jedis);
+
 }

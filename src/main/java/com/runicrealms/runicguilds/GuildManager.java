@@ -36,21 +36,31 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public boolean addGuildScore(UUID player, Integer score) {
-        if (isInGuild(player)) {
-            GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player);
-            if (guildData != null) {
+    public CompletableFuture<Boolean> addGuildScore(GuildUUID guildUUID, UUID uuid, Integer score, Jedis jedis) {
+        CompletableFuture<Boolean> resultFuture = new CompletableFuture<>();
+        CompletableFuture<MemberData> future = RunicGuilds.getDataAPI().loadMemberData(guildUUID, uuid, jedis);
+        future.whenComplete((MemberData memberData, Throwable ex) -> {
+            if (ex != null) {
+                Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to give add guild score to " + uuid + "!");
+                ex.printStackTrace();
+                resultFuture.complete(false);
+            } else {
+                GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+                if (guildInfo == null) {
+                    resultFuture.complete(false);
+                    return;
+                }
                 Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent
                         (
-                                guildData,
-                                guildData.getGuild().getMember(player),
+                                guildInfo.getGuildUUID(),
+                                memberData,
                                 score,
                                 false
                         ));
-                return true;
+                resultFuture.complete(true);
             }
-        }
-        return false;
+        });
+        return resultFuture;
     }
 
     @Override
@@ -149,20 +159,22 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public GuildRenameResult renameGuild(GuildData guildData, String name) {
+    public GuildRenameResult renameGuild(GuildUUID guildUUID, String name) {
         if (name.length() > 16) {
             return GuildRenameResult.NAME_TOO_LONG;
         }
-        for (Object obj : guildDataMap.keySet()) {
-            String otherGuildPrefix = (String) obj;
-            GuildData guildDataOther = (GuildData) guildDataMap.get(otherGuildPrefix);
-            if (guildDataOther.getGuild().getGuildName().equalsIgnoreCase(name)) {
-                return GuildRenameResult.NAME_NOT_UNIQUE;
-            }
-        }
+        // todo: ensure prefix unique
+//        for (Object obj : guildDataMap.keySet()) {
+//            String otherGuildPrefix = (String) obj;
+//            GuildData guildDataOther = (GuildData) guildDataMap.get(otherGuildPrefix);
+//            if (guildDataOther.getGuild().getGuildName().equalsIgnoreCase(name)) {
+//                return GuildRenameResult.NAME_NOT_UNIQUE;
+//            }
+//        }
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            guildData.getGuild().setGuildName(name);
-            guildData.writeToJedis(jedis);
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+            guildInfo.setName(name);
+            RunicGuilds.getDataAPI().renameGuildInRedis(guildUUID, name, jedis);
         } catch (Exception exception) {
             exception.printStackTrace();
             return GuildRenameResult.INTERNAL_ERROR;
