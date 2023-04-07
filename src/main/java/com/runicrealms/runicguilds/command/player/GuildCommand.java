@@ -497,49 +497,55 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
-        Guild guild = guildData.getGuild();
-
-        if (!guild.hasMinRank(player.getUniqueId(), GuildRank.OFFICER)) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to promote other players."));
+        Player target = Bukkit.getPlayer(args[0]);
+        if (target == null) {
+            player.sendMessage(GuildUtil.PREFIX + "Target player was not found!");
             return;
         }
 
-        if (!guild.isInGuild(args[0])) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
-            return;
-        }
+        // Retrieve guild data async
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to transfer guild " + guildData.getGuildUUID());
+                    ex.printStackTrace();
+                } else {
+                    if (!guildData.isAtLeastRank(player.getUniqueId(), GuildRank.OFFICER)) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to promote other players."));
+                        return;
+                    }
 
-        GuildMember member = null;
-        for (GuildMember target : guild.getMembers()) {
-            if (target.getLastKnownName().equalsIgnoreCase(args[0])) {
-                member = target;
-            }
-        }
+                    if (!guildData.isInGuild(target.getUniqueId())) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
+                        return;
+                    }
 
-        if (member == null) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild!"));
-            return;
-        }
+                    GuildRank commandSenderRank = guildData.getMemberDataMap().get(player.getUniqueId()).getRank();
+                    GuildRank targetRank = guildData.getMemberDataMap().get(target.getUniqueId()).getRank();
 
-        if (member.getRank().getRankNumber() <= guild.getMember(player.getUniqueId()).getRank().getRankNumber() && member.getRank() != GuildRank.OFFICER) {
-            if (member.getRank() == GuildRank.OFFICER) {
-                player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot promote another player to owner. To transfer guild ownership, use /guild transfer."));
-            } else {
-                player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can only promote members that are under your rank."));
-            }
-            return;
-        }
+                    if (targetRank == GuildRank.OFFICER) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot promote another player to owner. To transfer guild ownership, use /guild transfer."));
+                        return;
+                    }
 
-        member.setRank(GuildRank.getByNumber(member.getRank().getRankNumber() - 1));
-        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + member.getLastKnownName() + " has been promoted."));
-        // guildData.queueToSave();
-        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guild, member.getUUID(), player.getUniqueId()));
+                    if (targetRank.getRankNumber() <= commandSenderRank.getRankNumber()) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can only promote players that are below your rank!"));
+                        return;
+                    }
+
+                    guildData.getMemberDataMap().get(target.getUniqueId()).setRank(GuildRank.getByNumber(targetRank.getRankNumber() - 1));
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + target.getName() + " has been promoted."));
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guildData.getGuildUUID(), target.getUniqueId(), player.getUniqueId()));
+                }
+            });
+        }
     }
 
     @Subcommand("settings bank")
