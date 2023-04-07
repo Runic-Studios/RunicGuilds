@@ -12,10 +12,7 @@ import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import com.runicrealms.runicguilds.model.GuildData;
-import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
-import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.model.*;
 import com.runicrealms.runicguilds.ui.GuildBannerUI;
 import com.runicrealms.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
@@ -558,13 +555,11 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
-
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
-        Guild guild = guildData.getGuild();
 
         GuildRank rank = GuildRank.getByIdentifier(args[0]);
         if (rank == null) {
@@ -577,16 +572,28 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (args[1].equalsIgnoreCase("yes") || args[1].equalsIgnoreCase("true")) {
-            guild.setBankAccess(rank, true);
-            // guildData.queueToSave();
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
-        } else if (args[1].equalsIgnoreCase("no") || args[1].equalsIgnoreCase("false")) {
-            guild.setBankAccess(rank, false);
-            // guildData.queueToSave();
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
-        } else {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Please enter \"yes\" or \"no\"."));
+        // Retrieve guild settings data async
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadSettingsData(guildInfo.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to change settings for guild " + guildData.getGuildUUID());
+                    ex.printStackTrace();
+                } else {
+                    SettingsData settingsData = guildData.getSettingsData();
+                    if (args[1].equalsIgnoreCase("yes") || args[1].equalsIgnoreCase("true")) {
+                        settingsData.getBankSettingsMap().put(rank, true);
+                        // guildData.queueToSave();
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
+                    } else if (args[1].equalsIgnoreCase("no") || args[1].equalsIgnoreCase("false")) {
+                        settingsData.getBankSettingsMap().put(rank, true);
+                        // guildData.queueToSave();
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
+                    } else {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Please enter \"YES\" or \"NO\"."));
+                    }
+                }
+            });
         }
     }
 
@@ -607,6 +614,12 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
+        Player target = Bukkit.getPlayer(args[0]);
+        if (target == null) {
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not online."));
+            return;
+        }
+
         // Retrieve guild data async
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
@@ -615,12 +628,12 @@ public class GuildCommand extends BaseCommand {
                     Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to transfer guild " + guildData.getGuildUUID());
                     ex.printStackTrace();
                 } else {
-                    if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
+                    if (!guildData.getOwnerUuid().equals(player.getUniqueId())) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the guild owner to use this command."));
                         return;
                     }
 
-                    if (!guild.isInGuild(args[0])) {
+                    if (!guildData.isInGuild(target.getUniqueId())) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
                         return;
                     }

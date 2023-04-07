@@ -65,6 +65,15 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
+    public GuildInfo getGuildInfo(String name) {
+        for (GuildInfo guildInfo : this.guildInfoMap.values()) {
+            if (guildInfo.getName().equalsIgnoreCase(name))
+                return guildInfo;
+        }
+        return null;
+    }
+
+    @Override
     public GuildInfo getGuildInfo(UUID uuid) {
         if (this.playerToGuildMap.get(uuid) == null) return null;
         GuildUUID guildUUID = this.playerToGuildMap.get(uuid);
@@ -128,6 +137,12 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public CompletableFuture<MemberData> loadMemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<GuildData> loadSettingsData(GuildUUID guildUUID, Jedis jedis) {
+        // todo: load the guild data and only project basic fields and settings
         return null;
     }
 

@@ -125,25 +125,16 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getGuildsAPI().getGuildDataMap().containsKey(args[0])) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(args[0]);
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild!"));
             return;
         }
 
-        Guild guild = RunicGuilds.getGuildsAPI().getGuild(args[0]).getGuild();
-        GuildCommandMapManager.getTransferOwnership().remove(guild.getOwner().getUUID());
-        GuildCommandMapManager.getDisbanding().remove(guild.getOwner().getUUID());
-
-        for (GuildMember member : guild.getMembers()) {
-            RunicGuilds.getGuildsAPI().setJedisGuild(member.getUUID(), "None");
-            if (GuildBankUtil.isViewingBank(member.getUUID())) {
-                GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
-            }
-        }
-
-        Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guild, null, true));
-        //RunicGuilds.getRunicGuildsAPI().getGuildDatas().get(args[0]).deleteData();
-        // RunicGuilds.getRunicGuildsAPI().removeGuildFromCache(guild); todo: remove from memory cache
+        UUID ownerUuid = guildInfo.getOwnerUuid();
+        GuildCommandMapManager.getTransferOwnership().remove(ownerUuid);
+        GuildCommandMapManager.getDisbanding().remove(ownerUuid);
+        Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guildInfo.getGuildUUID(), null, true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully disbanded guild."));
     }
 

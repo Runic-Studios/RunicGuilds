@@ -27,6 +27,14 @@ public interface DataAPI {
     GuildData checkRedisForGuildData(GuildUUID guildUUID, Jedis jedis);
 
     /**
+     * Returns a container of basic guild info for guild (if it exists)
+     *
+     * @param name of the guild to lookup
+     * @return some basic info about their guilds, like exp, name, etc.
+     */
+    GuildInfo getGuildInfo(String name);
+
+    /**
      * Returns a container of basic guild info for player (if it exists)
      *
      * @param uuid of the player to lookup
@@ -85,6 +93,15 @@ public interface DataAPI {
      * @return the data for the guild member
      */
     CompletableFuture<MemberData> loadMemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis);
+
+    /**
+     * Loads the settings for this guild (currently only bank settings)
+     *
+     * @param guildUUID of the guild
+     * @param jedis     a new jedis resource
+     * @return the settings of the guild
+     */
+    CompletableFuture<GuildData> loadSettingsData(GuildUUID guildUUID, Jedis jedis);
 
     /**
      * Renames the guild by updating its shared field in redis

@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SettingsData implements SessionDataRedis {
-    private HashMap<GuildRank, Boolean> bankSettings = new HashMap<>();
+    private HashMap<GuildRank, Boolean> bankSettingsMap = new HashMap<>();
 
     @SuppressWarnings("unused")
     public SettingsData() {
         // Default constructor for Spring
         for (GuildRank guildRank : GuildRank.values()) {
-            bankSettings.put(guildRank, guildRank.canAccessBankByDefault());
+            bankSettingsMap.put(guildRank, guildRank.canAccessBankByDefault());
         }
     }
 
@@ -26,16 +26,16 @@ public class SettingsData implements SessionDataRedis {
      * @return true if the player can access the guild bank
      */
     public boolean canAccessBank(GuildRank rank) {
-        if (!bankSettings.containsKey(rank)) return false;
-        return bankSettings.get(rank);
+        if (!bankSettingsMap.containsKey(rank)) return false;
+        return bankSettingsMap.get(rank);
     }
 
-    public Map<GuildRank, Boolean> getBankSettings() {
-        return bankSettings;
+    public Map<GuildRank, Boolean> getBankSettingsMap() {
+        return bankSettingsMap;
     }
 
-    public void setBankSettings(HashMap<GuildRank, Boolean> bankSettings) {
-        this.bankSettings = bankSettings;
+    public void setBankSettingsMap(HashMap<GuildRank, Boolean> bankSettingsMap) {
+        this.bankSettingsMap = bankSettingsMap;
     }
 
     @Override

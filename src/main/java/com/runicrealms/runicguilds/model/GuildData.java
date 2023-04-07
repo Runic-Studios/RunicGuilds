@@ -249,16 +249,22 @@ public class GuildData implements SessionDataMongo {
         jedis.set(root + ":" + GuildDataField.EXP.getField(), String.valueOf(this.exp));
         jedis.expire(root + ":" + GuildDataField.EXP.getField(), RunicCore.getRedisAPI().getExpireTime());
         // Write member data (includes owner)
-        for (UUID uuid : this.memberDataMap.keySet()) {
-            MemberData memberData = this.memberDataMap.get(uuid);
-            memberData.writeToJedis(this.guildUUID, uuid, jedis);
+        if (memberDataMap != null) { // Exclude projection
+            for (UUID uuid : this.memberDataMap.keySet()) {
+                MemberData memberData = this.memberDataMap.get(uuid);
+                memberData.writeToJedis(this.guildUUID, uuid, jedis);
+            }
         }
         // Write bank data
-        this.bankData.writeToJedis(null, jedis, () -> {
-        });
+        if (bankData != null) { // Exclude projection
+            this.bankData.writeToJedis(null, jedis, () -> {
+            });
+        }
         // Write settings data
-        this.settingsData.writeToJedis(null, jedis, () -> {
-        });
+        if (settingsData != null) { // Exclude projection
+            this.settingsData.writeToJedis(null, jedis, () -> {
+            });
+        }
     }
 
 }
