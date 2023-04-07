@@ -402,7 +402,6 @@ public class GuildCommand extends BaseCommand {
         }
 
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
-        Guild guild = guildData.getGuild();
 
         if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
@@ -534,13 +533,11 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
-
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
-        Guild guild = guildData.getGuild();
 
         if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the guild owner to use this command."));

@@ -11,6 +11,7 @@ import java.util.UUID;
  *
  * @author Skyfallin
  */
+@SuppressWarnings("unused")
 public class GuildInfo {
     private final GuildUUID guildUUID;
     private UUID ownerUuid;

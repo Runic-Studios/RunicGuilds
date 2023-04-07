@@ -14,19 +14,16 @@ public class GuildScoreChangeEvent extends Event {
     private final GuildUUID guildUUID;
     private final MemberData memberData;
     private final int score;
-    private final boolean negative;
 
     /**
      * @param guildUUID  of the guild
      * @param memberData of member who gained/loss guild score
      * @param score      gained or lost by the member
-     * @param negative   true if we will subtract the score (for reset)
      */
-    public GuildScoreChangeEvent(GuildUUID guildUUID, MemberData memberData, int score, boolean negative) {
+    public GuildScoreChangeEvent(GuildUUID guildUUID, MemberData memberData, int score) {
         this.guildUUID = guildUUID;
         this.memberData = memberData;
         this.score = score;
-        this.negative = negative;
     }
 
     public static HandlerList getHandlerList() {
@@ -49,8 +46,5 @@ public class GuildScoreChangeEvent extends Event {
     public int getScore() {
         return score;
     }
-
-    public boolean isNegative() {
-        return negative;
-    }
+    
 }

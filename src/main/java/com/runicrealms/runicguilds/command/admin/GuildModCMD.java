@@ -236,7 +236,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildData, guildData.getGuild().getMember(target.getUniqueId()), amount, false));
+        Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildData, guildData.getGuild().getMember(target.getUniqueId()), amount));
         sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
     }
 

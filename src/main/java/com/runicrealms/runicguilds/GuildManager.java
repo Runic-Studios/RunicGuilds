@@ -52,8 +52,7 @@ public class GuildManager implements GuildsAPI, Listener {
                         (
                                 guildInfo.getGuildUUID(),
                                 memberData,
-                                score,
-                                false
+                                score
                         ));
                 resultFuture.complete(true);
             }
