@@ -300,15 +300,14 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildDisbandCommand(Player player) {
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(player.getUniqueId());
-        Guild guild = guildData.getGuild();
-
-        if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
+        UUID ownerUUid = guildInfo.getOwnerUuid();
+        if (!player.getUniqueId().equals(ownerUUid)) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the guild owner to use this command."));
             return;
         }
@@ -353,32 +352,44 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
+        // Retrieve guild data async
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to transfer guild " + guildData.getGuildUUID());
+                    ex.printStackTrace();
+                } else {
 
-        if (!guild.hasMinRank(player.getUniqueId(), GuildRank.RECRUITER)) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank recruiter or higher to invite other players."));
-            return;
+                    if (!guildData.isAtLeastRank(player.getUniqueId(), GuildRank.RECRUITER)) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank recruiter or higher to invite other players."));
+                        return;
+                    }
+
+                    GuildStage guildStage = GuildStage.getFromExp(guildInfo.getExp());
+                    if (guildData.getMemberDataMap().size() >= guildStage.getMaxMembers()) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
+                        return;
+                    }
+
+                    Player target = Bukkit.getPlayerExact(args[0]);
+                    if (target == null) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not online."));
+                        return;
+                    }
+
+                    if (RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is already in a guild."));
+                        return;
+                    }
+
+                    target.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have been invited to join the guild " + guildInfo.getName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have invited a player to the guild. An invitation has been sent."));
+                    GuildCommandMapManager.getInvites().put(target.getUniqueId(), player.getUniqueId());
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guildInfo.getGuildUUID(), target.getUniqueId(), player.getUniqueId()));
+                }
+            });
         }
-
-        if (guild.getMembers().size() >= guild.getGuildStage().getMaxMembers()) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
-            return;
-        }
-
-        Player target = Bukkit.getPlayerExact(args[0]);
-        if (target == null) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not online."));
-            return;
-        }
-
-        if (RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is already in a guild."));
-            return;
-        }
-
-        target.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have been invited to join the guild " + guild.getGuildName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
-        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have invited a player to the guild. An invitation has been sent."));
-        GuildCommandMapManager.getInvites().put(target.getUniqueId(), player.getUniqueId());
-        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guild, target.getUniqueId(), player.getUniqueId()));
     }
 
     @Subcommand("kick")
@@ -579,24 +590,35 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the guild owner to use this command."));
-            return;
-        }
+        // Retrieve guild data async
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to transfer guild " + guildData.getGuildUUID());
+                    ex.printStackTrace();
+                } else {
+                    if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the guild owner to use this command."));
+                        return;
+                    }
 
-        if (!guild.isInGuild(args[0])) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
-            return;
-        }
+                    if (!guild.isInGuild(args[0])) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
+                        return;
+                    }
 
-        if (args[0].equalsIgnoreCase(player.getName())) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot transfer ownership to yourself."));
-            return;
-        }
+                    if (args[0].equalsIgnoreCase(player.getName())) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot transfer ownership to yourself."));
+                        return;
+                    }
 
-        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Type /guild confirm to confirm your actions, or /guild cancel to cancel. &cWARNING - You will be demoted to officer if you confirm!"));
-        GuildCommandMapManager.getTransferOwnership().put(player.getUniqueId(), GuildUtil.getOfflinePlayerUUID(args[0]));
-        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Type /guild confirm to confirm your actions, or /guild cancel to cancel. &cWARNING - You will be demoted to officer if you confirm!"));
+                    GuildCommandMapManager.getTransferOwnership().put(player.getUniqueId(), GuildUtil.getOfflinePlayerUUID(args[0]));
+                    GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
+                }
+            });
+        }
     }
 
     private void sendHelpMessage(CommandSender sender) {
@@ -616,11 +638,10 @@ public class GuildCommand extends BaseCommand {
         }
     }
 
+
     private void transferOwnership(Player player, Guild guild, GuildData guildData) {
         GuildCommandMapManager.getTransferOwnership().get(guild.getMember(GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId())).getUUID());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully transferred guild ownership. You have been demoted to officer."));
-
-        // guildData.queueToSave();
         Bukkit.getServer().getPluginManager().callEvent(new GuildOwnershipTransferEvent(guild, GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId()), player.getUniqueId()));
         GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
     }
