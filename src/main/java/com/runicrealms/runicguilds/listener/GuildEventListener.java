@@ -11,6 +11,7 @@ import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -99,6 +100,10 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildKick(GuildMemberKickedEvent event) {
         OfflinePlayer whoWasKicked = Bukkit.getOfflinePlayer(event.getKicked());
+        Player target = Bukkit.getPlayer(event.getKicked());
+        if (target != null && GuildBankUtil.isViewingBank(target.getUniqueId())) {
+            GuildBankUtil.close(target);
+        }
         RunicGuilds.getGuildsAPI().removeGuildMember(event.getGuildUUID(), whoWasKicked.getUniqueId());
         if (whoWasKicked.isOnline()) {
             Player player = whoWasKicked.getPlayer();
@@ -109,6 +114,10 @@ public class GuildEventListener implements Listener {
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             syncMemberDisplays(event.getGuildUUID(), jedis);
             RunicGuilds.getDataAPI().setGuildForPlayer(whoWasKicked.getUniqueId(), "None", jedis);
+        }
+        Player player = Bukkit.getPlayer(event.getKicker());
+        if (player != null) {
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
         }
     }
 
@@ -141,7 +150,7 @@ public class GuildEventListener implements Listener {
         // Get the guild data async
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(GuildCommandMapManager.getInvites().get(event.getOldOwner().getUniqueId()));
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID(), jedis);
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
             future.whenComplete((GuildData guildData, Throwable ex) -> {
                 if (ex != null) {
                     Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to process guild transfer event!");

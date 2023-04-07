@@ -436,9 +436,7 @@ public class GuildCommand extends BaseCommand {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can only kick players that are below your rank!"));
                         return;
                     }
-
-                    guildData.removeMember(otherPlayerUuid, jedis);
-                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
+                    // Call event to remove player
                     Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent
                             (
                                     guildData.getGuildUUID(),
@@ -446,10 +444,6 @@ public class GuildCommand extends BaseCommand {
                                     player.getUniqueId(),
                                     false
                             ));
-                    Player target = Bukkit.getPlayerExact(args[0]);
-                    if (target != null && GuildBankUtil.isViewingBank(otherPlayerUuid)) {
-                        GuildBankUtil.close(target);
-                    }
                 }
             });
         }
@@ -459,31 +453,36 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildLeaveCommand(Player player) {
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
 
-        if (guild.getMember(player.getUniqueId()).getRank() == GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
-            return;
-        }
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to leave guild!");
+                    ex.printStackTrace();
+                } else {
+                    if (guildData.getMemberDataMap().get(player.getUniqueId()).getRank() == GuildRank.OWNER) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
+                        return;
+                    }
 
-        RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), "None");
-        guild.removeMember(player.getUniqueId());
-        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
+                    RunicGuilds.getGuildsAPI().removeGuildMember(guildInfo.getGuildUUID(), player.getUniqueId());
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guildData.getGuildUUID(), player.getUniqueId()));
+                    GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
+                    GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
 
-        // guildData.queueToSave();
-        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guild, player.getUniqueId()));
-
-        GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
-
-        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
-
-        if (GuildBankUtil.isViewingBank(player.getUniqueId())) {
-            GuildBankUtil.close(player);
+                    if (GuildBankUtil.isViewingBank(player.getUniqueId())) {
+                        GuildBankUtil.close(player);
+                    }
+                }
+            });
         }
     }
 
