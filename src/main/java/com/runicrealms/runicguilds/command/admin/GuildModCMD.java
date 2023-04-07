@@ -180,15 +180,8 @@ public class GuildModCMD extends BaseCommand {
 
         GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getGuildUUID(), amount, source);
         Bukkit.getPluginManager().callEvent(event);
-
-        if (event.isCancelled()) {
-            return;
-        }
-
-        amount = event.getAmount();
-
-        guild.setGuildExp(amount);
-        target.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &eYou received " + amount + " guild experience!"));
+        if (event.isCancelled()) return;
+        target.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "&eYou received " + amount + " guild experience!"));
         if (sender instanceof Player) {
             sender.sendMessage(ColorUtil.format(this.prefix + "You gave " + target.getName() + "'s guild " + amount + " guild experience!"));
         }

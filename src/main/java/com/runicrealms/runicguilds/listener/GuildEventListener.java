@@ -87,6 +87,29 @@ public class GuildEventListener implements Listener {
     }
 
     @EventHandler
+    public void onGuildExp(GiveGuildEXPEvent event) {
+        if (event.isCancelled()) return;
+        int amount = event.getAmount();
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getGuildUUID());
+        guildInfo.setExp(guildInfo.getExp() + event.getAmount());
+
+        // todo: load guildData async, then write to jedis and update
+        // Get the guild data async
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to process guild exp event!");
+                    ex.printStackTrace();
+                } else {
+                    guildData.setExp(amount);
+                    guildData.writeToJedis(jedis);
+                }
+            });
+        }
+    }
+
+    @EventHandler
     public void onGuildInvitationAccept(GuildInvitationAcceptedEvent event) {
         Player whoWasInvited = Bukkit.getPlayer(event.getInvited());
         syncDisplays(whoWasInvited);
