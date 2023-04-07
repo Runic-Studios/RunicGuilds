@@ -2,8 +2,12 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.model.SessionDataMongo;
+import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.GuildBanner;
+import com.runicrealms.runicguilds.guild.GuildRank;
 import org.bson.types.ObjectId;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -74,6 +78,16 @@ public class GuildData implements SessionDataMongo {
      */
     public static String getJedisKey(GuildUUID guildUUID) {
         return guildUUID + ":guildUUID";
+    }
+
+    /**
+     * Disbands this guild, removing its data from Redis/Mongo and memory
+     *
+     * @param guildUUID uuid of the data object wrapper
+     * @param player    who disbanded the guild
+     */
+    public static void disband(GuildUUID guildUUID, Player player, boolean mod) {
+        Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guildUUID, player, mod));
     }
 
     @SuppressWarnings("unchecked")
@@ -175,6 +189,32 @@ public class GuildData implements SessionDataMongo {
 
     public void setSettingsData(SettingsData settingsData) {
         this.settingsData = settingsData;
+    }
+
+    /**
+     * Checks whether the given player has AT LEAST the specified rank
+     *
+     * @param uuid of the player to check
+     * @param rank the minimum rank they must have achieved
+     * @return true if player is at least rank
+     */
+    public boolean isAtLeastRank(UUID uuid, GuildRank rank) {
+        // Return true for all 'min rank' checks if the player is the owner
+        if (this.ownerData.getUuid().equals(uuid)) {
+            return true;
+        }
+        MemberData memberData = this.memberDataMap.get(uuid);
+        if (memberData == null) return false;
+        GuildRank currentRank = memberData.getRank();
+        return currentRank.getRankNumber() <= rank.getRankNumber(); // 1 is owner
+    }
+
+    /**
+     * @param uuid of the player to check
+     * @return true if the player is in the guild
+     */
+    public boolean isInGuild(UUID uuid) {
+        return this.memberDataMap.containsKey(uuid);
     }
 
     /**
