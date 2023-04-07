@@ -29,7 +29,7 @@ public class GuildInfo {
      */
     public GuildInfo(GuildData guildData) {
         this.guildUUID = guildData.getGuildUUID();
-        this.ownerUuid = guildData.getOwnerData().getUuid();
+        this.ownerUuid = guildData.getOwnerUuid();
         this.name = guildData.getName();
         this.prefix = guildData.getPrefix();
         this.exp = guildData.getExp();

@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.model.SessionDataMongo;
+import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.GuildBanner;
 import com.runicrealms.runicguilds.guild.GuildRank;
@@ -28,7 +29,6 @@ public class GuildData implements SessionDataMongo {
     private String name = "";
     private String prefix = "";
     private int exp = 0;
-    private OwnerData ownerData;
     private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
     private GuildBankData bankData;
     private SettingsData settingsData;
@@ -42,21 +42,21 @@ public class GuildData implements SessionDataMongo {
     /**
      * Constructor for new guilds (creation)
      *
-     * @param id        of the guild document in mongo
-     * @param guildUUID of the guild
-     * @param name      of the guild
-     * @param prefix    of the guild's name
-     * @param ownerData player owner of the guild
+     * @param id         of the guild document in mongo
+     * @param guildUUID  of the guild
+     * @param name       of the guild
+     * @param prefix     of the guild's name
+     * @param memberData player owner of the guild
      */
-    public GuildData(ObjectId id, GuildUUID guildUUID, String name, String prefix, OwnerData ownerData) {
+    public GuildData(ObjectId id, GuildUUID guildUUID, String name, String prefix, MemberData memberData) {
         this.id = id;
         this.guildUUID = guildUUID;
         this.name = name;
         this.prefix = prefix;
-        this.ownerData = ownerData;
         this.bankData = new GuildBankData();
         this.settingsData = new SettingsData();
         this.guildBanner = new GuildBanner(guildUUID);
+        this.memberDataMap.put(memberData.getUuid(), memberData);
     }
 
     /**
@@ -104,7 +104,7 @@ public class GuildData implements SessionDataMongo {
      * @return the combined score of the guild
      */
     public int calculateGuildScore() {
-        int result = this.ownerData.getMemberData().getScore();
+        int result = 0;
         for (MemberData memberData : this.memberDataMap.values()) {
             result += memberData.getScore();
         }
@@ -167,12 +167,15 @@ public class GuildData implements SessionDataMongo {
         this.name = name;
     }
 
-    public OwnerData getOwnerData() {
-        return ownerData;
-    }
-
-    public void setOwnerData(OwnerData ownerData) {
-        this.ownerData = ownerData;
+    /**
+     * @return the uuid of the owner of this guild
+     */
+    public UUID getOwnerUuid() {
+        for (MemberData memberData : this.memberDataMap.values()) {
+            if (memberData.getRank() != GuildRank.OWNER) continue;
+            return memberData.getUuid();
+        }
+        return null;
     }
 
     public String getPrefix() {
@@ -200,7 +203,8 @@ public class GuildData implements SessionDataMongo {
      */
     public boolean isAtLeastRank(UUID uuid, GuildRank rank) {
         // Return true for all 'min rank' checks if the player is the owner
-        if (this.ownerData.getUuid().equals(uuid)) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        if (guildInfo.getOwnerUuid().equals(uuid)) {
             return true;
         }
         MemberData memberData = this.memberDataMap.get(uuid);
@@ -215,6 +219,17 @@ public class GuildData implements SessionDataMongo {
      */
     public boolean isInGuild(UUID uuid) {
         return this.memberDataMap.containsKey(uuid);
+    }
+
+    /**
+     * Remove selected member from the guild
+     */
+    public void removeMember(UUID uuid, Jedis jedis) {
+        int score = this.memberDataMap.get(uuid).getScore();
+        this.memberDataMap.remove(uuid);
+        RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None", jedis);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        guildInfo.setScore(Math.max(0, guildInfo.getScore() - score));
     }
 
     /**
@@ -233,17 +248,17 @@ public class GuildData implements SessionDataMongo {
         jedis.expire(root + ":" + GuildDataField.PREFIX.getField(), RunicCore.getRedisAPI().getExpireTime());
         jedis.set(root + ":" + GuildDataField.EXP.getField(), String.valueOf(this.exp));
         jedis.expire(root + ":" + GuildDataField.EXP.getField(), RunicCore.getRedisAPI().getExpireTime());
-        // Write owner data
-        this.ownerData.writeToJedis(this.guildUUID, jedis);
-        // Write member data
+        // Write member data (includes owner)
         for (UUID uuid : this.memberDataMap.keySet()) {
             MemberData memberData = this.memberDataMap.get(uuid);
             memberData.writeToJedis(this.guildUUID, uuid, jedis);
         }
-        // todo Write bank data
-//        this.bankData.writeToJedis();
-        // todo Write settings data
-//        this.settingsData.writeToJedis();
+        // Write bank data
+        this.bankData.writeToJedis(null, jedis, () -> {
+        });
+        // Write settings data
+        this.settingsData.writeToJedis(null, jedis, () -> {
+        });
     }
 
 }

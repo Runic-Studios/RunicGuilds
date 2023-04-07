@@ -8,7 +8,10 @@ import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import com.runicrealms.runicguilds.model.*;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
+import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
@@ -207,7 +210,7 @@ public class GuildManager implements GuildsAPI, Listener {
                             new GuildUUID(UUID.randomUUID()),
                             name,
                             prefix,
-                            new OwnerData(ownerUuid, new MemberData(ownerUuid, GuildRank.OWNER, 0))
+                            new MemberData(ownerUuid, GuildRank.OWNER, 0)
                     );
             guildData.writeToJedis(jedis);
             RunicGuilds.getDataAPI().setGuildForPlayer(ownerUuid, name, jedis);

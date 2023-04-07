@@ -6,6 +6,7 @@ import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
+import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
@@ -60,9 +61,6 @@ public class GuildEventListener implements Listener {
 //                            // todo: pub/sub
 //                        }
                     }
-
-                    // Clear owner's guild string in Redis
-                    RunicGuilds.getDataAPI().setGuildForPlayer(guildData.getOwnerData().getUuid(), "None", jedis);
 
 
 //                    if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
@@ -138,10 +136,31 @@ public class GuildEventListener implements Listener {
 
     @EventHandler
     public void onGuildTransfer(GuildOwnershipTransferEvent event) {
-        Player oldOwner = Bukkit.getPlayer(event.getOldOwner());
-        syncDisplays(oldOwner);
+        Player oldOwner = event.getOldOwner();
+
+        // Get the guild data async
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(GuildCommandMapManager.getInvites().get(event.getOldOwner().getUniqueId()));
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            syncMemberDisplays(event.getGuildUUID(), jedis);
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to process guild transfer event!");
+                    ex.printStackTrace();
+                } else {
+                    MemberData oldOwnerData = guildData.getMemberDataMap().get(guildData.getOwnerUuid());
+                    MemberData newOwnerData = guildData.getMemberDataMap().get(event.getNewOwner().getUniqueId());
+                    if (newOwnerData == null) {
+                        event.getOldOwner().sendMessage(GuildUtil.PREFIX + "Error: new owner data could not be found!");
+                        return;
+                    }
+                    oldOwnerData.setRank(GuildRank.OFFICER);
+                    newOwnerData.setRank(GuildRank.OWNER);
+                    syncDisplays(oldOwner);
+                    syncMemberDisplays(event.getGuildUUID(), jedis);
+                    oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully transferred guild ownership. You have been demoted to officer."));
+                    event.getNewOwner().sendMessage(GuildUtil.PREFIX + "You are now the owner of " + guildData.getName() + "!");
+                }
+            });
         }
     }
 
