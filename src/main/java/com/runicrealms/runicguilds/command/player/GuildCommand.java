@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.command.player;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.item.util.ItemRemover;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
@@ -13,6 +14,7 @@ import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.ui.GuildBannerUI;
 import com.runicrealms.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
@@ -21,10 +23,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 @CommandAlias("guild")
+@SuppressWarnings("unused")
 public class GuildCommand extends BaseCommand {
 
     private String combineArgs(String[] args) {
@@ -84,22 +90,39 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
-        Guild guild = guildData.getGuild();
+        // Get the guild of the inviter
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID(), jedis);
+            future.whenComplete((GuildData guildData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to accept guild invite for " + player.getName() + "!");
+                    ex.printStackTrace();
+                } else {
+                    RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
 
-        RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
+                    GuildStage stage = GuildStage.getFromExp(guildInfo.getExp());
+                    if (guildData.getMemberDataMap().size() >= stage.getMaxMembers()) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
+                        return;
+                    }
 
-        if (guild.getMembers().size() >= guild.getGuildStage().getMaxMembers()) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
-            return;
+                    // Let's add a guild member!
+                    guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), GuildRank.RECRUIT, 0));
+                    RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guildData.getName(), jedis);
+                    guildData.writeToJedis(jedis);
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation!"));
+
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent
+                            (
+                                    guildData.getGuildUUID(),
+                                    player.getUniqueId(),
+                                    GuildCommandMapManager.getInvites().get(player.getUniqueId())
+                            ));
+                    GuildCommandMapManager.getInvites().remove(player.getUniqueId());
+                }
+            });
         }
-
-        guild.getMembers().add(new GuildMember(player.getUniqueId(), GuildRank.RECRUIT, 0, player.getName()));
-        RunicGuilds.getGuildsAPI().setJedisGuild(player.getUniqueId(), guild.getGuildName());
-        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation."));
-
-        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent(guildData, player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
-        GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
 
     @Subcommand("bank")
