@@ -145,17 +145,27 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        if (guild.getMember(player.getUniqueId()).getRank() != GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the owner of your guild to execute this command!"));
-            return;
-        }
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            CompletableFuture<MemberData> future = RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), player.getUniqueId(), jedis);
+            future.whenComplete((MemberData memberData, Throwable ex) -> {
+                if (ex != null) {
+                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to open guild banner ui!");
+                    ex.printStackTrace();
+                } else {
+                    if (memberData.getRank() != GuildRank.OWNER) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the owner of your guild to execute this command!"));
+                        return;
+                    }
 
-        if (guild.getGuildExp() < GuildStage.STAGE_2.getExp()) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be at least guild stage two to create a banner!"));
-            return;
-        }
+                    if (guildInfo.getExp() < GuildStage.STAGE_2.getExp()) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be at least guild stage two to create a banner!"));
+                        return;
+                    }
 
-        player.openInventory(new GuildBannerUI(guild).getInventory());
+                    player.openInventory(new GuildBannerUI(guildInfo.getGuildUUID()).getInventory());
+                }
+            });
+        }
     }
 
     @Subcommand("cancel")
