@@ -2,7 +2,7 @@ package com.runicrealms.runicguilds.listener;
 
 import com.runicrealms.libs.taskchain.TaskChain;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.character.api.CharacterSelectEvent;
+import com.runicrealms.plugin.character.api.CharacterLoadedEvent;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.*;
@@ -199,8 +199,8 @@ public class GuildEventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH) // late
-    public void onJoin(CharacterSelectEvent event) {
+    @EventHandler(priority = EventPriority.HIGHEST) // late
+    public void onJoin(CharacterLoadedEvent event) {
         syncDisplays(event.getPlayer());
     }
 
