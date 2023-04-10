@@ -1,9 +1,11 @@
 package com.runicrealms.runicguilds.command.player;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.*;
+import com.runicrealms.libs.acf.BaseCommand;
+import com.runicrealms.libs.acf.annotation.*;
+import com.runicrealms.libs.taskchain.TaskChain;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.item.util.ItemRemover;
+import com.runicrealms.plugin.taskchain.TaskChainUtil;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.CurrencyUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
@@ -31,6 +33,7 @@ import java.util.logging.Level;
 @CommandAlias("guild")
 @SuppressWarnings("unused")
 public class GuildCommand extends BaseCommand {
+    private static final String GUILD_COMMAND_STRING = "guildCommand";
 
     private String combineArgs(String[] args) {
         StringBuilder builder = new StringBuilder();
@@ -144,13 +147,11 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<MemberData> future = RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), player.getUniqueId(), jedis);
-            future.whenComplete((MemberData memberData, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to open guild banner ui!");
-                    ex.printStackTrace();
-                } else {
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(this::testLoadMemberData)
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "There was an error trying to open guild banner ui!")
+                .syncLast(memberData -> {
                     if (memberData.getRank() != GuildRank.OWNER) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the owner of your guild to execute this command!"));
                         return;
@@ -162,9 +163,29 @@ public class GuildCommand extends BaseCommand {
                     }
 
                     player.openInventory(new GuildBannerUI(guildInfo.getGuildUUID()).getInventory());
-                }
-            });
-        }
+                })
+                .execute();
+//        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+//            CompletableFuture<MemberData> future = RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), player.getUniqueId(), jedis);
+//            future.whenComplete((MemberData memberData, Throwable ex) -> {
+//                if (ex != null) {
+//                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to open guild banner ui!");
+//                    ex.printStackTrace();
+//                } else {
+//                    if (memberData.getRank() != GuildRank.OWNER) {
+//                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be the owner of your guild to execute this command!"));
+//                        return;
+//                    }
+//
+//                    if (guildInfo.getExp() < GuildStage.STAGE_2.getExp()) {
+//                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be at least guild stage two to create a banner!"));
+//                        return;
+//                    }
+//
+//                    player.openInventory(new GuildBannerUI(guildInfo.getGuildUUID()).getInventory());
+//                }
+//            });
+//        }
     }
 
     @Subcommand("cancel")
@@ -666,6 +687,13 @@ public class GuildCommand extends BaseCommand {
         for (String message : messages) {
             sender.sendMessage(ColorUtil.format(message));
         }
+    }
+
+    private MemberData testLoadMemberData() {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            // todo:
+        }
+        return new MemberData();
     }
 
     /**

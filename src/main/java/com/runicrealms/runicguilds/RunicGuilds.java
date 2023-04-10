@@ -1,8 +1,11 @@
 package com.runicrealms.runicguilds;
 
-import co.aikar.commands.ConditionFailedException;
-import co.aikar.commands.PaperCommandManager;
 import com.runicrealms.RunicChat;
+import com.runicrealms.libs.acf.ConditionFailedException;
+import com.runicrealms.libs.acf.PaperCommandManager;
+import com.runicrealms.libs.taskchain.BukkitTaskChainFactory;
+import com.runicrealms.libs.taskchain.TaskChain;
+import com.runicrealms.libs.taskchain.TaskChainFactory;
 import com.runicrealms.runicguilds.api.DataAPI;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
@@ -43,6 +46,15 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     private static DataAPI dataAPI;
     private static GuildsAPI guildsAPI;
     private static PaperCommandManager commandManager;
+    private static TaskChainFactory taskChainFactory;
+
+    public static <T> TaskChain<T> newChain() {
+        return taskChainFactory.newChain();
+    }
+
+    public static <T> TaskChain<T> newSharedChain(String name) {
+        return taskChainFactory.newSharedChain(name);
+    }
 
     public static Set<UUID> getPlayersCreatingGuild() {
         return playersCreatingGuild;
@@ -74,6 +86,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         this.saveDefaultConfig();
         dataAPI = new DataManager();
         guildsAPI = new GuildManager();
+        taskChainFactory = BukkitTaskChainFactory.create(this);
         GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
         GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
         GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");

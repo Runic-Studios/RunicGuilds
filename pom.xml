@@ -181,12 +181,6 @@
             <artifactId>tabbed</artifactId>
             <version>v1.8</version>
         </dependency>
-        <!-- ACF -->
-        <dependency>
-            <groupId>co.aikar</groupId>
-            <artifactId>acf-paper</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
-        </dependency>
         <!-- HolographicDisplays API -->
         <dependency>
             <groupId>com.gmail.filoghost.holographicdisplays</groupId>
