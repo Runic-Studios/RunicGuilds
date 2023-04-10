@@ -4,11 +4,10 @@ import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildUUID;
+import com.runicrealms.runicguilds.model.MemberData;
 import org.bukkit.entity.Player;
-import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public interface GuildsAPI {
 
@@ -25,12 +24,12 @@ public interface GuildsAPI {
      * Attempts to add guild score to the given player. Runs as a future so that it can retrieve
      * the member data async. Eventually returns true if the operation succeeded, else false
      *
-     * @param guildUUID uuid of the guild
-     * @param player    to add score
-     * @param score     int score to add
+     * @param guildUUID  uuid of the guild
+     * @param memberData of member to add score
+     * @param score      int score to add
      * @return true if successful
      */
-    CompletableFuture<Boolean> addGuildScore(GuildUUID guildUUID, UUID player, Integer score, Jedis jedis);
+    boolean addGuildScore(GuildUUID guildUUID, MemberData memberData, Integer score);
 
     /**
      * Attempts to create a guild

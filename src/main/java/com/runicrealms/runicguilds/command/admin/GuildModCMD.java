@@ -2,17 +2,21 @@ package com.runicrealms.runicguilds.command.admin;
 
 import com.runicrealms.libs.acf.BaseCommand;
 import com.runicrealms.libs.acf.annotation.*;
+import com.runicrealms.libs.taskchain.TaskChain;
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
+import com.runicrealms.runicguilds.guild.GuildReprefixResult;
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
+import com.runicrealms.runicguilds.util.TaskChainUtil;
+import com.runicrealms.runicitems.RunicItems;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -67,9 +71,9 @@ public class GuildModCMD extends BaseCommand {
     }
 
     @Subcommand("bank")
-    @Syntax("<prefix>")
+    @Syntax("<name>")
     @CommandPermission("runicadmin.guilds.bank")
-    @CommandCompletion("prefix @nothing")
+    @CommandCompletion("name @nothing")
     public void onGuildModBankCommand(Player player, String[] args) {
         if (args.length != 1) {
             player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
@@ -77,14 +81,15 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuild(args[0]);
-        if (guildData == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild prefix!"));
+        String guildName = args[0];
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildName);
+        if (guildInfo == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid guild name!"));
             return;
         }
 
-        GuildBankUtil.open(player, 1, args[0]);
-        player.sendMessage(ColorUtil.format(this.prefix + "You have opened the bank of " + guildData.getGuild().getGuildName()));
+        GuildBankUtil.open(player, 1, guildInfo.getGuildUUID());
+        player.sendMessage(ColorUtil.format(this.prefix + "You have opened the bank of " + guildInfo.getName()));
     }
 
     @Subcommand("create")
@@ -204,10 +209,8 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(target.getUniqueId());
-
-        Guild guild = guildData.getGuild();
-        if (guild == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
         }
@@ -220,8 +223,15 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildData, guildData.getGuild().getMember(target.getUniqueId()), amount));
-        sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), target.getUniqueId()))
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, target, "There was an error trying to give guild score!")
+                .syncLast(memberData -> {
+                    Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getGuildUUID(), memberData, amount));
+                    sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
+                })
+                .execute();
     }
 
     @Subcommand("kick")
@@ -349,7 +359,16 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        player.sendMessage(ColorUtil.format(this.prefix + guildData.getGuild().updateGuildPrefix(guildData, args[1]).getMessage()));
+        String newPrefix = args[1];
+        TaskChain<?> chain = RunicItems.newChain();
+        chain
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID()))
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
+                .syncLast(guildData -> {
+                    GuildReprefixResult guildReprefixResult = guildData.updateGuildPrefix(newPrefix);
+                    player.sendMessage(ColorUtil.format(this.prefix + guildReprefixResult.getMessage()));
+                })
+                .execute();
     }
 
     private void sendHelpMessage(CommandSender sender) {

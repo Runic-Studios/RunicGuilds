@@ -91,26 +91,23 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<GuildData> loadGuildData(GuildUUID guildUUID, Jedis jedis) {
-        CompletableFuture<GuildData> future = new CompletableFuture<>();
-        // Step 1: Check Redis
-        GuildData guildData = checkRedisForGuildData(guildUUID, jedis);
-        if (guildData != null) {
-            future.complete(guildData);
-            return future;
+    public GuildData loadGuildData(GuildUUID guildUUID) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            // Step 1: Check Redis
+            GuildData guildData = checkRedisForGuildData(guildUUID, jedis);
+            if (guildData != null) return guildData;
+            // Step 2: Check the Mongo database
+            Query query = new Query();
+            query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
+            MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
+            GuildData result = mongoTemplate.findOne(query, GuildData.class);
+            if (result != null) {
+                result.writeToJedis(jedis);
+                return result;
+            }
+            // No data found!
+            return null;
         }
-        // Step 2: Check the Mongo database
-        Query query = new Query();
-        query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
-        MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
-        GuildData result = mongoTemplate.findOne(query, GuildData.class);
-        if (result != null) {
-            result.writeToJedis(jedis);
-            future.complete(result);
-            return future;
-        }
-        // No data found!
-        return null;
     }
 
     @Override
@@ -136,7 +133,7 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<MemberData> loadMemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis) {
+    public MemberData loadMemberData(GuildUUID guildUUID, UUID uuid) {
         return null;
     }
 
@@ -155,7 +152,7 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public void setGuildForPlayer(UUID uuid, String name, Jedis jedis) {
+    public void setGuildForPlayer(UUID uuid, String name) {
 
     }
 

@@ -6,6 +6,7 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.GuildBanner;
 import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.guild.GuildReprefixResult;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -227,9 +228,56 @@ public class GuildData implements SessionDataMongo {
     public void removeMember(UUID uuid, Jedis jedis) {
         int score = this.memberDataMap.get(uuid).getScore();
         this.memberDataMap.remove(uuid);
-        RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None", jedis);
+        RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
         guildInfo.setScore(Math.max(0, guildInfo.getScore() - score));
+    }
+
+    /**
+     * Attempts to update prefix for the given guild. However, guilds are keyed / stored by prefix, so it
+     * MUST ALWAYS be unique
+     *
+     * @param prefix the intended new prefix
+     * @return a "re-prefix" result
+     */
+    public GuildReprefixResult updateGuildPrefix(String prefix) {
+        // todo: complete
+//        Pattern pattern = Pattern.compile("[a-zA-Z]");
+//        Matcher matcher = pattern.matcher(prefix);
+//        if (!matcher.find() || (prefix.length() > 6 || prefix.length() < 3)) {
+//            return GuildReprefixResult.BAD_PREFIX;
+//        }
+//        Map<Object, SessionData> guildDataMap = RunicGuilds.getGuildsAPI().getGuildDataMap();
+//        for (Object otherGuildPrefix : guildDataMap.keySet()) {
+//            String otherGuildPrefixStr = (String) otherGuildPrefix;
+//            if (otherGuildPrefixStr.equalsIgnoreCase(prefix)) {
+//                GuildData otherGuildData = (GuildData) guildDataMap.get(otherGuildPrefixStr);
+//                if (!otherGuildData.getGuild().getGuildName().equalsIgnoreCase(guildData.getGuild().getGuildName())) {
+//                    return GuildReprefixResult.PREFIX_NOT_UNIQUE;
+//                }
+//            }
+//        }
+//        try {
+//            for (GuildMember member : guildData.getGuild().getMembersWithOwner()) {
+//                if (GuildBankUtil.isViewingBank(member.getUUID())) {
+//                    GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
+//                }
+//                if (players.containsKey(member.getUUID())) {
+//                    players.put(member.getUUID(), prefix);
+//                }
+//            }
+//            guildDataMap.remove(guildData.getGuild().getGuildPrefix());
+//            Guild guild = guildData.getGuild();
+//            guild.setGuildPrefix(prefix);
+//            guildData.getMongoData().set("prefix", prefix);
+//            guildData.getMongoData().save();
+//            GuildData newGuildData = new GuildData(guild, false);
+//            guildDataMap.put(prefix, newGuildData);
+//        } catch (Exception exception) {
+//            exception.printStackTrace();
+        return GuildReprefixResult.INTERNAL_ERROR;
+//        }
+//        return GuildReprefixResult.SUCCESSFUL;
     }
 
     /**

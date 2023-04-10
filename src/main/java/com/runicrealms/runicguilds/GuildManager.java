@@ -36,30 +36,20 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<Boolean> addGuildScore(GuildUUID guildUUID, UUID uuid, Integer score, Jedis jedis) {
-        CompletableFuture<Boolean> resultFuture = new CompletableFuture<>();
-        CompletableFuture<MemberData> future = RunicGuilds.getDataAPI().loadMemberData(guildUUID, uuid, jedis);
-        future.whenComplete((MemberData memberData, Throwable ex) -> {
-            if (ex != null) {
-                Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to give add guild score to " + uuid + "!");
-                ex.printStackTrace();
-                resultFuture.complete(false);
-            } else {
-                GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
-                if (guildInfo == null) {
-                    resultFuture.complete(false);
-                    return;
-                }
-                Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent
-                        (
-                                guildInfo.getGuildUUID(),
-                                memberData,
-                                score
-                        ));
-                resultFuture.complete(true);
-            }
-        });
-        return resultFuture;
+    public boolean addGuildScore(GuildUUID guildUUID, MemberData memberData, Integer score) {
+        UUID uuid = memberData.getUuid();
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        if (guildInfo == null) {
+            Bukkit.getLogger().info("A guild was not found to add guild score for " + uuid);
+            return false;
+        }
+        Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent
+                (
+                        guildInfo.getGuildUUID(),
+                        memberData,
+                        score
+                ));
+        return true;
     }
 
     @Override
@@ -211,7 +201,7 @@ public class GuildManager implements GuildsAPI, Listener {
                             new MemberData(ownerUuid, GuildRank.OWNER, 0)
                     );
             guildData.writeToJedis(jedis);
-            RunicGuilds.getDataAPI().setGuildForPlayer(ownerUuid, name, jedis);
+            RunicGuilds.getDataAPI().setGuildForPlayer(ownerUuid, name);
             // Ensure there is a local copy of some fields for fast lookup
             GuildInfo guildInfo = new GuildInfo(guildData);
             RunicGuilds.getDataAPI().addGuildInfoToMemory(guildInfo);

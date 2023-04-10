@@ -1,25 +1,22 @@
 package com.runicrealms.runicguilds.listener;
 
-import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.libs.taskchain.TaskChain;
 import com.runicrealms.plugin.api.NpcClickEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.model.SettingsData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
-import org.bukkit.Bukkit;
+import com.runicrealms.runicguilds.util.TaskChainUtil;
+import com.runicrealms.runicitems.RunicItems;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 public class NpcClickListener implements Listener {
 
@@ -60,13 +57,12 @@ public class NpcClickListener implements Listener {
             // Initiate bank open logic
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
             // Call redis async
-            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-                CompletableFuture<MemberData> future = RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), uuid, jedis);
-                future.whenComplete((MemberData memberData, Throwable ex) -> {
-                    if (ex != null) {
-                        Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to open the guild bank!");
-                        ex.printStackTrace();
-                    } else {
+
+            TaskChain<?> chain = RunicItems.newChain();
+            chain
+                    .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), uuid))
+                    .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
+                    .syncLast(memberData -> {
                         // If this is NOT the owner
                         if (guildInfo.getOwnerUuid() != event.getPlayer().getUniqueId()) {
                             // Perform a rank check
@@ -76,12 +72,10 @@ public class NpcClickListener implements Listener {
                                 return;
                             }
                         }
-
+                        // Open the bank!
                         GuildBankUtil.open(event.getPlayer(), 1);
-                    }
-                });
-            }
-            return;
+                    })
+                    .execute();
         }
     }
 

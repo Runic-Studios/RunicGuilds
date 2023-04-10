@@ -63,10 +63,9 @@ public interface DataAPI {
      * Loads the guild data from redis and/or mongo (if it exists!)
      *
      * @param guildUUID of the GUILD
-     * @param jedis     a new jedis resource
      * @return a future, which will eventually have the data
      */
-    CompletableFuture<GuildData> loadGuildData(GuildUUID guildUUID, Jedis jedis);
+    GuildData loadGuildData(GuildUUID guildUUID);
 
     /**
      * Loads the guild data from redis and/or mongo (if it exists!)
@@ -89,10 +88,9 @@ public interface DataAPI {
      *
      * @param guildUUID of the guild
      * @param uuid      of the guild member
-     * @param jedis     the jedis resource
      * @return the data for the guild member
      */
-    CompletableFuture<MemberData> loadMemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis);
+    MemberData loadMemberData(GuildUUID guildUUID, UUID uuid);
 
     /**
      * Loads the settings for this guild (currently only bank settings)
@@ -119,6 +117,6 @@ public interface DataAPI {
      * @param uuid of the player
      * @param name of the guild "None" if none
      */
-    void setGuildForPlayer(UUID uuid, String name, Jedis jedis);
+    void setGuildForPlayer(UUID uuid, String name);
 
 }
