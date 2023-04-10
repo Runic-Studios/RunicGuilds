@@ -11,7 +11,6 @@ import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildReprefixResult;
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
-import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -246,16 +245,18 @@ public class GuildModCMD extends BaseCommand {
         }
 
         UUID uuid = GuildUtil.getOfflinePlayerUUID(args[0]);
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(uuid);
+        if (uuid == null) {
+            player.sendMessage(ColorUtil.format(this.prefix + "The specified player was not found!"));
+            return;
+        }
 
-        if (guildData.getGuild() == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;
         }
 
-        Guild guild = guildData.getGuild();
-
-        if (guild.getOwner().getUUID().toString().equalsIgnoreCase(uuid.toString())) {
+        if (guildInfo.getOwnerUuid().toString().equalsIgnoreCase(uuid.toString())) {
             player.sendMessage(ColorUtil.format(this.prefix + "That user is the guild owner. To disband the guild, use /guildmod disband [prefix]."));
             return;
         }
@@ -264,7 +265,7 @@ public class GuildModCMD extends BaseCommand {
             GuildBankUtil.close(Bukkit.getPlayer(args[0]));
         }
 
-        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guild, uuid, player.getUniqueId(), true));
+        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getGuildUUID(), uuid, player.getUniqueId(), true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
     }
 
@@ -299,12 +300,16 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        // todo: here's the problem...
-        GuildData guildData = RunicGuilds.getGuildsAPI().getGuildData(targetUUID);
-        Guild guild = guildData.getGuild();
-        GuildMember targetMember = guild.getMember(targetUUID);
-        Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildData, targetMember, targetMember.getScore(), true));
-        player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
+        // todo: this doesn't actually reset anything
+        TaskChain<?> chain = RunicItems.newChain();
+        chain
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), targetUUID))
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
+                .syncLast(memberData -> {
+                    Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getGuildUUID(), memberData, memberData.getScore()));
+                    player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
+                })
+                .execute();
     }
 
     @Subcommand("set name")
