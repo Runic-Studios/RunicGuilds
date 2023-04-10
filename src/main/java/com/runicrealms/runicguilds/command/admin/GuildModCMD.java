@@ -15,7 +15,6 @@ import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
-import com.runicrealms.runicitems.RunicItems;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -301,7 +300,7 @@ public class GuildModCMD extends BaseCommand {
         }
 
         // todo: this doesn't actually reset anything
-        TaskChain<?> chain = RunicItems.newChain();
+        TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), targetUUID))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
@@ -365,7 +364,7 @@ public class GuildModCMD extends BaseCommand {
         }
 
         String newPrefix = args[1];
-        TaskChain<?> chain = RunicItems.newChain();
+        TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")

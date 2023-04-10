@@ -7,7 +7,6 @@ import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.SettingsData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
-import com.runicrealms.runicitems.RunicItems;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
@@ -58,7 +57,7 @@ public class NpcClickListener implements Listener {
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
             // Call redis async
 
-            TaskChain<?> chain = RunicItems.newChain();
+            TaskChain<?> chain = RunicGuilds.newChain();
             chain
                     .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), uuid))
                     .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")

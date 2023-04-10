@@ -86,7 +86,7 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<List<ScoreContainer>> loadAllGuildScores(Jedis jedis) {
+    public List<ScoreContainer> loadAllGuildScores() {
         return null;
     }
 

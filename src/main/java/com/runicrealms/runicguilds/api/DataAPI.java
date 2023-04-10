@@ -54,10 +54,9 @@ public interface DataAPI {
      * Checks Redis for all guilds' score field, then returns a list of containers
      * with the guild's uuid and score. Used for banners/leaderboards
      *
-     * @param jedis a new jedis resource
      * @return a future, which will eventually have the scores
      */
-    CompletableFuture<List<ScoreContainer>> loadAllGuildScores(Jedis jedis);
+    List<ScoreContainer> loadAllGuildScores();
 
     /**
      * Loads the guild data from redis and/or mongo (if it exists!)

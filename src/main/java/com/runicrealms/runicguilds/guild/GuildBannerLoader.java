@@ -1,19 +1,17 @@
 package com.runicrealms.runicguilds.guild;
 
 import com.google.common.collect.Lists;
-import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.libs.taskchain.TaskChain;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.ScoreContainer;
+import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
-import redis.clients.jedis.Jedis;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 /**
  * Loader that periodically retrieves the guild score for ALL guilds in redis (active guilds),
@@ -66,14 +64,11 @@ public class GuildBannerLoader extends BukkitRunnable {
         List<PostedGuildBanner> posted = Lists.newArrayList(RunicGuilds.getPostedGuildBanners());
         posted.forEach(PostedGuildBanner::remove); // Remove existing banners
 
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<List<ScoreContainer>> future = RunicGuilds.getDataAPI().loadAllGuildScores(jedis);
-            future.whenComplete((List<ScoreContainer> guildScores, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to retrieve guild scores!");
-                    ex.printStackTrace();
-                } else {
-                    // Success!
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadAllGuildScores())
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load all guild scores!")
+                .syncLast(guildScores -> {
                     List<ScoreContainer> guildsToDisplay = new ArrayList<>();
                     Comparator<ScoreContainer> comparator = Comparator.comparing(ScoreContainer::getScore).reversed();
                     guildScores.sort(comparator);
@@ -87,8 +82,7 @@ public class GuildBannerLoader extends BukkitRunnable {
                     }
 
                     Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guildsToDisplay));
-                }
-            });
-        }
+                })
+                .execute();
     }
 }

@@ -15,7 +15,6 @@ import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
-import com.runicrealms.runicitems.RunicItems;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -80,7 +79,7 @@ public class GuildEventListener implements Listener {
     public void onGuildDisband(GuildDisbandEvent event) {
         // Set guild data to "None" in redis / mongo, close guild bank
         Player player = event.getWhoDisbanded();
-        TaskChain<?> chain = RunicItems.newChain();
+        TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(event.getGuildUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
