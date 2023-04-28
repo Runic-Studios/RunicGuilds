@@ -5,16 +5,11 @@ import com.runicrealms.plugin.character.api.CharacterSelectEvent;
 import com.runicrealms.plugin.database.event.MongoSaveEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.DataAPI;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
@@ -42,22 +37,48 @@ public class DataManager implements DataAPI, Listener {
         /*
         Loads guilds into memory on startup
          */
-        String database = RunicCore.getDataAPI().getMongoDatabase().getName();
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            Set<String> guildKeys = jedis.smembers(database + ":guilds");
-            for (String guildUUIDString : guildKeys) {
-                Bukkit.broadcastMessage("loading guild!");
-                UUID guildUUID = UUID.fromString(guildUUIDString);
-                GuildData guildData = loadGuildData(guildUUID);
-                guildInfoMap.put(guildUUID, new GuildInfo(guildData));
+        // todo: prevent startup until this is finished (does it need a delay?)
+        // todo: never remove smembers from jedis? that way we know wht to get from mongo and redis? idk
+        Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
+            Bukkit.getLogger().severe("loading guilds into memory!");
+            String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                Set<String> guildKeys = jedis.smembers(database + ":guilds:ids");
+                for (String guildUUIDString : guildKeys) {
+                    Bukkit.getLogger().severe("found guild!");
+                    UUID guildUUID = UUID.fromString(guildUUIDString);
+                    GuildData guildData = new GuildData(guildUUID, jedis);
+                    guildInfoMap.put(guildUUID, new GuildInfo(guildData));
+                }
             }
-        }
+        }, 10 * 20L);
         Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
     }
 
     @Override
     public void addGuildInfoToMemory(GuildInfo guildInfo) {
         this.guildInfoMap.put(guildInfo.getGuildUUID().getUUID(), guildInfo);
+    }
+
+    @Override
+    public GuildData checkRedisForGuildData(UUID guildUUID, Jedis jedis) {
+        String key = GuildData.getJedisKey(new GuildUUID(guildUUID));
+        if (jedis.exists(key)) {
+            Bukkit.getLogger().severe("guild found in redis");
+            jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
+            return new GuildData(guildUUID, jedis);
+        }
+        return null;
+    }
+
+    @Override
+    public String getGuildForPlayer(UUID uuid) {
+        // Load from Redis
+        String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            String key = database + ":" + uuid + ":guild";
+            return jedis.get(key);
+        }
     }
 
     @Override
@@ -93,6 +114,26 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
+    public GuildData loadGuildData(UUID guildUUID) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            // Step 1: Check Redis
+            GuildData guildData = checkRedisForGuildData(guildUUID, jedis);
+            if (guildData != null) return guildData;
+//            // Step 2: Check the Mongo database
+//            Query query = new Query();
+//            query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
+//            MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
+//            GuildData result = mongoTemplate.findOne(query, GuildData.class);
+//            if (result != null) {
+//                result.writeToJedis(jedis);
+//                return result;
+//            }
+            // No data found!
+            return null;
+        }
+    }
+
+    @Override
     public GuildData loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis) {
         // todo: redis
         // todo: mongo projection
@@ -117,6 +158,7 @@ public class DataManager implements DataAPI, Listener {
         memberKeys.forEach(memberKey -> {
             String[] subKeys = memberKey.split(":");
             String uuidString = subKeys[subKeys.length - 1];
+            Bukkit.broadcastMessage("uuidString is " + uuidString);
             MemberData memberData = loadMemberData(guildUUID, UUID.fromString(uuidString));
             result.put(memberData.getUuid(), memberData);
         });
@@ -158,38 +200,8 @@ public class DataManager implements DataAPI, Listener {
         }
     }
 
-    @Override
-    public GuildData checkRedisForGuildData(UUID guildUUID, Jedis jedis) {
-        String key = GuildData.getJedisKey(new GuildUUID(guildUUID));
-        if (jedis.exists(key)) {
-            jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
-            return new GuildData(guildUUID, jedis);
-        }
-        return null;
-    }
-
     public HashMap<UUID, GuildInfo> getGuildInfoMap() {
         return guildInfoMap;
-    }
-
-    @Override
-    public GuildData loadGuildData(UUID guildUUID) {
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            // Step 1: Check Redis
-            GuildData guildData = checkRedisForGuildData(guildUUID, jedis);
-            if (guildData != null) return guildData;
-            // Step 2: Check the Mongo database
-            Query query = new Query();
-            query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
-            MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
-            GuildData result = mongoTemplate.findOne(query, GuildData.class);
-            if (result != null) {
-                result.writeToJedis(jedis);
-                return result;
-            }
-            // No data found!
-            return null;
-        }
     }
 
     @EventHandler(priority = EventPriority.LOW) // early
@@ -225,12 +237,12 @@ public class DataManager implements DataAPI, Listener {
         event.markPluginSaved("guilds");
     }
 
-    /**
-     * Updates the guild section of tab for all online players
-     */
-    private void updateGuildTabs() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            GuildUtil.updateGuildTabColumn(player);
-        }
-    }
+//    /**
+//     * Updates the guild section of tab for all online players
+//     */
+//    private void updateGuildTabs() {
+//        for (Player player : Bukkit.getOnlinePlayers()) {
+//            GuildUtil.updateGuildTabColumn(player);
+//        }
+//    }
 }

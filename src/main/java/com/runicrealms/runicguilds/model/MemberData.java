@@ -15,7 +15,7 @@ public class MemberData implements SessionDataRedis {
     }};
     private GuildRank rank;
     private Integer score;
-    private UUID uuid; // Not a redundant field. Needed when we project member data
+    private UUID uuid; // Of the PLAYER. Not a redundant field. Needed when we project member data
 
     @SuppressWarnings("unused")
     public MemberData() {

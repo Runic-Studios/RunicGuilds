@@ -25,6 +25,7 @@ import java.util.*;
 public class GuildData implements SessionDataMongo {
     public static final List<String> FIELDS = new ArrayList<>() {{
         add(GuildDataField.EXP.getField());
+        add(GuildDataField.GUILD_UUID.getField());
         add(GuildDataField.NAME.getField());
         add(GuildDataField.PREFIX.getField());
     }};
@@ -82,6 +83,9 @@ public class GuildData implements SessionDataMongo {
         this.name = fieldsMap.get(GuildDataField.NAME.getField());
         this.prefix = fieldsMap.get(GuildDataField.PREFIX.getField());
         this.exp = Integer.parseInt(fieldsMap.get(GuildDataField.EXP.getField()));
+//        this.name = key + ":name";
+//        this.prefix = key + ":prefix";
+//        this.exp = Integer.parseInt(key + ":exp");
         this.memberDataMap = RunicGuilds.getDataAPI().loadGuildMembers(getGuildUUID(), jedis);
         // todo: remaining fields
 //        this.bankData;
@@ -254,24 +258,43 @@ public class GuildData implements SessionDataMongo {
     }
 
     /**
+     * ?
+     *
+     * @param uuid
+     * @return
+     */
+    public Map<String, String> toMap(UUID uuid) {
+        return new HashMap<>() {{
+            put(GuildDataField.EXP.getField(), String.valueOf(exp));
+            put(GuildDataField.GUILD_UUID.getField(), String.valueOf(guildUUID.getUUID()));
+            put(GuildDataField.NAME.getField(), name);
+            put(GuildDataField.PREFIX.getField(), prefix);
+        }};
+    }
+
+    /**
      * A jedis write method that writes the underlying data structures
      *
      * @param jedis some new jedis resource
      */
     public void writeToJedis(Jedis jedis) {
         String root = getJedisKey(this.guildUUID);
-        // Include this guild in the guild set
+        // Include this guild in the guild set (used to load on startup)
         String database = RunicCore.getDataAPI().getMongoDatabase().getName();
-        jedis.sadd(database + ":guilds", this.guildUUID.getUUID().toString());
+        jedis.sadd(database + ":guilds:ids", this.guildUUID.getUUID().toString());
         // Write basic fields
-        jedis.set(root + ":" + GuildDataField.GUILD_UUID.getField(), this.guildUUID.getUUID().toString());
-        jedis.expire(root + ":" + GuildDataField.GUILD_UUID.getField(), RunicCore.getRedisAPI().getExpireTime());
-        jedis.set(root + ":" + GuildDataField.NAME.getField(), this.name);
-        jedis.expire(root + ":" + GuildDataField.NAME.getField(), RunicCore.getRedisAPI().getExpireTime());
-        jedis.set(root + ":" + GuildDataField.PREFIX.getField(), this.prefix);
-        jedis.expire(root + ":" + GuildDataField.PREFIX.getField(), RunicCore.getRedisAPI().getExpireTime());
-        jedis.set(root + ":" + GuildDataField.EXP.getField(), String.valueOf(this.exp));
-        jedis.expire(root + ":" + GuildDataField.EXP.getField(), RunicCore.getRedisAPI().getExpireTime());
+//        jedis.set(root + ":" + GuildDataField.GUILD_UUID.getField(), this.guildUUID.getUUID().toString());
+//        jedis.expire(root + ":" + GuildDataField.GUILD_UUID.getField(), RunicCore.getRedisAPI().getExpireTime());
+//        jedis.set(root + ":" + GuildDataField.NAME.getField(), this.name);
+//        jedis.expire(root + ":" + GuildDataField.NAME.getField(), RunicCore.getRedisAPI().getExpireTime());
+//        jedis.set(root + ":" + GuildDataField.PREFIX.getField(), this.prefix);
+//        jedis.expire(root + ":" + GuildDataField.PREFIX.getField(), RunicCore.getRedisAPI().getExpireTime());
+//        jedis.set(root + ":" + GuildDataField.EXP.getField(), String.valueOf(this.exp));
+//        jedis.expire(root + ":" + GuildDataField.EXP.getField(), RunicCore.getRedisAPI().getExpireTime());
+
+        jedis.hmset(root, this.toMap(this.guildUUID.getUUID()));
+
+
         // Write member data (includes owner)
         if (memberDataMap != null) { // Exclude projection
             for (UUID uuid : this.memberDataMap.keySet()) {

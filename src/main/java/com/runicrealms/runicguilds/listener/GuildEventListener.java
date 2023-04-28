@@ -186,6 +186,14 @@ public class GuildEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST) // late
     public void onJoin(CharacterLoadedEvent event) {
+        // Ensure player is mapped to their guild in-memory
+        UUID uuid = event.getPlayer().getUniqueId();
+        String guildName = RunicGuilds.getDataAPI().getGuildForPlayer(uuid);
+        if (guildName != null) {
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildName);
+            RunicGuilds.getDataAPI().getPlayerToGuildMap().put(uuid, guildInfo.getGuildUUID().getUUID());
+        }
+        // Sync scoreboard, tab
         syncDisplays(event.getPlayer());
     }
 
@@ -210,11 +218,15 @@ public class GuildEventListener implements Listener {
     private void syncDisplays(Player player) {
         if (player == null) return; // Player went offline
 //        Bukkit.broadcastMessage("syncing guild displays");
-        GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player);
-        if (guild != null) {
-            RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName());
-        } else {
-            RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
+        String guildName = RunicGuilds.getDataAPI().getGuildForPlayer(player.getUniqueId());
+        Bukkit.broadcastMessage("guild name is " + guildName);
+        if (guildName != null) {
+            GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(guildName);
+            if (guild != null) {
+                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName());
+            } else {
+                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
+            }
         }
         RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
         GuildUtil.updateGuildTabColumn(player);

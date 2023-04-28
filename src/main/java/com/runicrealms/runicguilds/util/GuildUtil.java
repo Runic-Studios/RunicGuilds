@@ -143,11 +143,12 @@ public class GuildUtil {
         Bukkit.broadcastMessage("updating tab");
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
+            Bukkit.broadcastMessage("guild info not found");
             tableTabList.set(1, 0, new TextTabItem
                     (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
         } else {
             // Load all the members and owner
-//            Bukkit.broadcastMessage("guild info found for tab");
+            Bukkit.broadcastMessage("guild info found for tab");
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
                 getMembersAndPopulate(tableTabList, guildInfo, jedis);
             }

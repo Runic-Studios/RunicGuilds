@@ -27,6 +27,12 @@ public interface DataAPI {
     GuildData checkRedisForGuildData(UUID guildUUID, Jedis jedis);
 
     /**
+     * @param uuid of the player
+     * @return the player's stored guild in Redis/Mongo
+     */
+    String getGuildForPlayer(UUID uuid);
+
+    /**
      * Returns a container of basic guild info for guild (if it exists)
      *
      * @param name of the guild to lookup
