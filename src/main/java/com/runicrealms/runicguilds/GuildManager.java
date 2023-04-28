@@ -62,6 +62,8 @@ public class GuildManager implements GuildsAPI, Listener {
                             owner.getUniqueId(),
                             modCreated
                     ));
+        } else {
+            // todo: Handle failure
         }
         return result;
     }
@@ -189,11 +191,15 @@ public class GuildManager implements GuildsAPI, Listener {
                             prefix,
                             new MemberData(ownerUuid, GuildRank.OWNER, 0)
                     );
+            // todo: write to mongo?
             guildData.writeToJedis(jedis);
             RunicGuilds.getDataAPI().setGuildForPlayer(ownerUuid, name);
-            // Ensure there is a local copy of some fields for fast lookup
+            // Cache latency-sensitive fields in-memory
             GuildInfo guildInfo = new GuildInfo(guildData);
             RunicGuilds.getDataAPI().addGuildInfoToMemory(guildInfo);
+            RunicGuilds.getDataAPI().getPlayerToGuildMap().put(ownerUuid, guildInfo.getGuildUUID().getUUID());
+            Bukkit.broadcastMessage("adding guild info to memory");
+            Bukkit.broadcastMessage("guildUUID is " + guildInfo.getGuildUUID().getUUID());
         }
         return GuildCreationResult.SUCCESSFUL;
     }

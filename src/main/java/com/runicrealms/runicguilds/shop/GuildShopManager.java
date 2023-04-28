@@ -17,10 +17,13 @@ import java.util.*;
 public class GuildShopManager {
 
     public GuildShopManager() {
-        getGuildHeraldShop();
+        loadGuildHeraldShop();
     }
 
-    public RunicShopGeneric getGuildHeraldShop() {
+    /**
+     * Loads the shop which allows players to purchase a guild
+     */
+    public void loadGuildHeraldShop() {
         LinkedHashSet<RunicShopItem> shopItems = new LinkedHashSet<>();
         ItemStack purchaseGuildItemStack = new ItemStack(Material.WRITABLE_BOOK);
         ItemMeta tradeMeta = purchaseGuildItemStack.getItemMeta();
@@ -38,15 +41,17 @@ public class GuildShopManager {
             purchaseGuildItemStack.setItemMeta(tradeMeta);
         }
         Map<String, Integer> requiredItems = new HashMap<String, Integer>() {{
-            put("Coin", 1500);
+            put("coin", 1500);
         }};
         shopItems.add(new RunicShopItem(requiredItems, purchaseGuildItemStack, runGuildHeraldBuy()));
         shopItems.forEach(runicShopItem -> runicShopItem.setRemovePayment(false));
-        return new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", RunicGuilds.GUILD_HERALDS, shopItems, new int[]{13});
+        new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", RunicGuilds.GUILD_HERALDS, shopItems, new int[]{13});
     }
 
     private RunicItemRunnable runGuildHeraldBuy() {
         return player -> {
+            player.closeInventory();
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
             if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
                 if (!RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
                     player.sendMessage

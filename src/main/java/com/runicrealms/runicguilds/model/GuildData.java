@@ -78,7 +78,7 @@ public class GuildData implements SessionDataMongo {
      * @return the root key path
      */
     public static String getJedisKey(GuildUUID guildUUID) {
-        return guildUUID + ":guildUUID";
+        return guildUUID.getUUID().toString();
     }
 
     /**
@@ -286,7 +286,8 @@ public class GuildData implements SessionDataMongo {
      * @param jedis some new jedis resource
      */
     public void writeToJedis(Jedis jedis) {
-        String root = getJedisKey(this.guildUUID);
+        String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+        String root = database + ":guilds:" + getJedisKey(this.guildUUID);
         // Write basic fields
         jedis.set(root + ":" + GuildDataField.GUILD_UUID.getField(), this.guildUUID.getUUID().toString());
         jedis.expire(root + ":" + GuildDataField.GUILD_UUID.getField(), RunicCore.getRedisAPI().getExpireTime());

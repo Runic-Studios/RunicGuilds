@@ -29,9 +29,9 @@ import java.util.UUID;
  */
 public class DataManager implements DataAPI, Listener {
     // Maps a PLAYER uuid to a GUILD uuid
-    private final HashMap<UUID, GuildUUID> playerToGuildMap;
+    private final HashMap<UUID, UUID> playerToGuildMap;
     // Contains some latency-sensitive data for fastest lookup.
-    private final HashMap<GuildUUID, GuildInfo> guildInfoMap; // todo: write to this on jedis lookups for specific fields
+    private final HashMap<UUID, GuildInfo> guildInfoMap; // todo: write to this on jedis lookups for specific fields
 
     public DataManager() {
         playerToGuildMap = new HashMap<>();
@@ -50,7 +50,7 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public void addGuildInfoToMemory(GuildInfo guildInfo) {
-        this.guildInfoMap.put(guildInfo.getGuildUUID(), guildInfo);
+        this.guildInfoMap.put(guildInfo.getGuildUUID().getUUID(), guildInfo);
     }
 
     @Override
@@ -75,13 +75,13 @@ public class DataManager implements DataAPI, Listener {
     @Override
     public GuildInfo getGuildInfo(UUID uuid) {
         if (this.playerToGuildMap.get(uuid) == null) return null;
-        GuildUUID guildUUID = this.playerToGuildMap.get(uuid);
+        UUID guildUUID = this.playerToGuildMap.get(uuid);
         return this.guildInfoMap.get(guildUUID);
     }
 
     @Override
     public GuildInfo getGuildInfo(GuildUUID guildUUID) {
-        return this.guildInfoMap.get(guildUUID);
+        return this.guildInfoMap.get(guildUUID.getUUID());
     }
 
     // todo: load
@@ -156,11 +156,12 @@ public class DataManager implements DataAPI, Listener {
 
     }
 
-    public HashMap<GuildUUID, GuildInfo> getGuildInfoMap() {
+    public HashMap<UUID, GuildInfo> getGuildInfoMap() {
         return guildInfoMap;
     }
 
-    public HashMap<UUID, GuildUUID> getPlayerToGuildMap() {
+    @Override
+    public HashMap<UUID, UUID> getPlayerToGuildMap() {
         return playerToGuildMap;
     }
 

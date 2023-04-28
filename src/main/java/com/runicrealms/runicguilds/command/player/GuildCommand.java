@@ -201,9 +201,16 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildConfirmCommand(Player player, String[] args) {
+        // Creating a guild
+        if (RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
+            boolean result = this.createGuildFromCommand(player, args);
+            return;
+        }
+
+        // Ensure a guild exists for all other commands
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         if (guildInfo == null) {
-            player.sendMessage(GuildUtil.PREFIX + "A guild was not found.");
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "A guild was not found."));
             return;
         }
 
@@ -213,9 +220,6 @@ public class GuildCommand extends BaseCommand {
         } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
             // Transferring ownership
             this.transferOwnership(player, guildInfo.getGuildUUID());
-        } else if (RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
-            // Creating guild
-            boolean result = this.createGuildFromCommand(player, args);
         } else {
             // Not confirming
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have nothing to confirm."));

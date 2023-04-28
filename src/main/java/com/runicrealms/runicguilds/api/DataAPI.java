@@ -50,6 +50,13 @@ public interface DataAPI {
     GuildInfo getGuildInfo(GuildUUID guildUUID);
 
     /**
+     * Data structure that maps a PLAYER uuid to a GUILD uuid
+     *
+     * @return map of player uuid to guild uuid
+     */
+    HashMap<UUID, UUID> getPlayerToGuildMap();
+
+    /**
      * Checks Redis for all guilds' score field, then returns a list of containers
      * with the guild's uuid and score. Used for banners/leaderboards
      *

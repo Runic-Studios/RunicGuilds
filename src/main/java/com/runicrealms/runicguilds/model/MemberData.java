@@ -35,13 +35,12 @@ public class MemberData implements SessionDataRedis {
     }
 
     /**
-     * ?
-     *
-     * @param uuid of the guild
-     * @return
+     * @param guildUUID of the guild
+     * @param uuid      of the member
+     * @return the root key in Jedis
      */
     public static String getJedisKey(GuildUUID guildUUID, UUID uuid) {
-        return guildUUID + ":members:" + uuid;
+        return "guilds:" + guildUUID.getUUID() + ":members:" + uuid;
     }
 
     @Override
@@ -111,18 +110,19 @@ public class MemberData implements SessionDataRedis {
     }
 
     /**
-     * ?
+     * Writes all member data for the guild
      *
-     * @param guildUUID
-     * @param playerUUID
-     * @param jedis
+     * @param guildUUID  of the guild
+     * @param playerUUID of this member
+     * @param jedis      a jedis resource/thread
      */
     public void writeToJedis(GuildUUID guildUUID, UUID playerUUID, Jedis jedis) {
+        String database = RunicCore.getDataAPI().getMongoDatabase().getName();
         // Inform the server that this guild member should be saved to mongo on next task (jedis data is refreshed)
-        jedis.sadd("markedForSave:guilds", guildUUID.toString());
+        jedis.sadd(database + ":markedForSave:guilds", guildUUID.getUUID().toString());
         String key = getJedisKey(guildUUID, playerUUID);
-        jedis.hmset(key, this.toMap(guildUUID.getUUID()));
-        jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
+        jedis.hmset(database + ":" + key, this.toMap(guildUUID.getUUID()));
+        jedis.expire(database + ":" + key, RunicCore.getRedisAPI().getExpireTime());
     }
 
 }
