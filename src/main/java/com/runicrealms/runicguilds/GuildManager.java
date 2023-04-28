@@ -86,7 +86,7 @@ public class GuildManager implements GuildsAPI, Listener {
                 GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
                 guildInfo.setExp(guildInfo.getExp() + exp);
                 // Update in Redis
-                GuildData guildData = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID, jedis);
+                GuildData guildData = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID);
                 guildData.setExp(guildInfo.getExp());
                 guildData.writeToJedis(jedis);
             }
@@ -109,7 +109,7 @@ public class GuildManager implements GuildsAPI, Listener {
     public void removeGuildMember(GuildUUID guildUUID, UUID toRemove) {
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-                GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID, jedis);
+                GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID);
                 guildDataNoBank.removeMember(toRemove, jedis);
                 guildDataNoBank.writeToJedis(jedis);
                 // todo: edit their 'guild' tag in Redis?

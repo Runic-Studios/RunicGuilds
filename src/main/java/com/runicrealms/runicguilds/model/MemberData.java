@@ -64,19 +64,6 @@ public class MemberData implements SessionDataRedis {
         return "guilds:" + guildUUID.getUUID() + ":members:" + uuid;
     }
 
-
-    public Map<String, String> getDataMapFromJedis(GuildUUID guildUUID, UUID uuid, Jedis jedis, int... ignored) {
-        Map<String, String> fieldsMap = new HashMap<>();
-        List<String> fields = new ArrayList<>(getFields());
-        String[] fieldsToArray = fields.toArray(new String[0]);
-        String rootKey = getJedisKey(guildUUID, uuid);
-        List<String> values = jedis.hmget(rootKey + ":member:" + uuid, fieldsToArray);
-        for (int i = 0; i < fieldsToArray.length; i++) {
-            fieldsMap.put(fieldsToArray[i], values.get(i));
-        }
-        return fieldsMap;
-    }
-
     @Override
     public Map<String, String> getDataMapFromJedis(UUID uuid, Jedis jedis, int... ints) {
         return null;
@@ -99,25 +86,6 @@ public class MemberData implements SessionDataRedis {
     @Override
     public void writeToJedis(UUID guildUUID, Jedis jedis, int... ignored) {
 
-    }
-
-    /**
-     * ?
-     *
-     * @param guildUUID
-     * @param playerUuid
-     * @param jedis
-     * @return
-     */
-    public Map<String, String> getDataMapFromRedis(GuildUUID guildUUID, UUID playerUuid, Jedis jedis) {
-        Map<String, String> fieldsMap = new HashMap<>();
-        List<String> fields = new ArrayList<>(getFields());
-        String[] fieldsToArray = fields.toArray(new String[0]);
-        List<String> values = jedis.hmget(getJedisKey(guildUUID, playerUuid), fieldsToArray);
-        for (int i = 0; i < fieldsToArray.length; i++) {
-            fieldsMap.put(fieldsToArray[i], values.get(i));
-        }
-        return fieldsMap;
     }
 
     public GuildRank getRank() {
@@ -156,7 +124,7 @@ public class MemberData implements SessionDataRedis {
         // Inform the server that this guild member should be saved to mongo on next task (jedis data is refreshed)
         jedis.sadd(database + ":markedForSave:guilds", guildUUID.getUUID().toString());
         String key = getJedisKey(guildUUID, playerUUID);
-        jedis.hmset(database + ":" + key, this.toMap(guildUUID.getUUID()));
+        jedis.hmset(database + ":" + key, this.toMap(playerUUID));
         jedis.expire(database + ":" + key, RunicCore.getRedisAPI().getExpireTime());
     }
 

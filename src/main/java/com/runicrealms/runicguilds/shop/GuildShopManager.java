@@ -68,7 +68,7 @@ public class GuildShopManager {
                 }
             } else {
                 player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.5f, 1.0f);
-                player.sendMessage(ChatColor.YELLOW + "You cannot create a guild because you are already in one!");
+                player.sendMessage(ChatColor.YELLOW + "You're already in a guild!");
             }
         };
     }

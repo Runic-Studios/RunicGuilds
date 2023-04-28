@@ -84,10 +84,9 @@ public interface DataAPI {
      * Uses projection to exclude Bank data from the result
      *
      * @param guildUUID of the GUILD
-     * @param jedis     a new jedis resource
      * @return a GuildData object with no bank data
      */
-    GuildData loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis);
+    GuildData loadGuildDataNoBank(GuildUUID guildUUID);
 
     /**
      * Loads only the guild member map from redis/mongo

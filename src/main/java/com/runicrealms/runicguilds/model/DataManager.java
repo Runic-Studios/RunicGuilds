@@ -134,8 +134,22 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public GuildData loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis) {
-        // todo: redis
+    public GuildData loadGuildDataNoBank(GuildUUID guildUUID) {
+        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            // Step 1: Check Redis
+            // todo: omit bank data
+            GuildData guildData = checkRedisForGuildData(guildUUID.getUUID(), jedis);
+            if (guildData != null) return guildData;
+        }
+//            // Step 2: Check the Mongo database
+//            Query query = new Query();
+//            query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
+//            MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
+//            GuildData result = mongoTemplate.findOne(query, GuildData.class);
+//            if (result != null) {
+//                result.writeToJedis(jedis);
+//                return result;
+//            }
         // todo: mongo projection
         /*
                 // Find our top-level document
@@ -147,6 +161,7 @@ public class DataManager implements DataAPI, Listener {
                 .include("coreCharacterDataMap." + slot + "." + CharacterField.CLASS_EXP.getField());
         CorePlayerData corePlayerData = RunicCore.getDataAPI().getMongoTemplate().findOne(query, CorePlayerData.class);
          */
+        // No data found!
         return null;
     }
 

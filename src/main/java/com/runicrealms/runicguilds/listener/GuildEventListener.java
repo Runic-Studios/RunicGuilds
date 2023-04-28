@@ -96,9 +96,9 @@ public class GuildEventListener implements Listener {
         guildInfo.setExp(guildInfo.getExp() + event.getAmount());
         // Get the guild data async and update
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
+            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID());
+            guildDataNoBank.setExp(amount);
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-                GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
-                guildDataNoBank.setExp(amount);
                 guildDataNoBank.writeToJedis(jedis);
             }
         });
@@ -161,11 +161,7 @@ public class GuildEventListener implements Listener {
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> {
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-                        return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
-                    }
-                })
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
                 .syncLast(guildDataNoBank -> {
                     MemberData oldOwnerData = guildDataNoBank.getMemberDataMap().get(guildDataNoBank.getOwnerUuid());
