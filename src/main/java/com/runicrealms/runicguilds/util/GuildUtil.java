@@ -146,7 +146,7 @@ public class GuildUtil {
             tableTabList.set(1, 0, new TextTabItem
                     (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
         } else {
-            // Load all the members and owner as a CompletableFuture
+            // Load all the members and owner
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
                 getMembersAndPopulate(tableTabList, guildInfo, jedis);
             }

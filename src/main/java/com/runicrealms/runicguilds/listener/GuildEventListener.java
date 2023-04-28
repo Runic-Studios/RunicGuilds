@@ -25,9 +25,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Handles logic for what to do whenever a particular custom guild event is called
@@ -83,9 +84,7 @@ public class GuildEventListener implements Listener {
         chain
                 .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(event.getGuildUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
-                .syncLast(guildData -> {
-                    disbandGuild(guildData, player);
-                })
+                .syncLast(guildData -> disbandGuild(guildData, player))
                 .execute();
     }
 
@@ -109,11 +108,8 @@ public class GuildEventListener implements Listener {
     public void onGuildInvitationAccept(GuildInvitationAcceptedEvent event) {
         Player whoWasInvited = Bukkit.getPlayer(event.getInvited());
         syncDisplays(whoWasInvited);
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            syncMemberDisplays(event.getGuildUUID(), jedis);
-//            event.getGuildData().writeToJedis(jedis);
-            // todo: player guild jedis key?
-        }
+        syncMemberDisplays(event.getGuildUUID());
+        // todo: player guild jedis key?
     }
 
     @EventHandler
@@ -130,10 +126,8 @@ public class GuildEventListener implements Listener {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
             syncDisplays(player);
         }
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            syncMemberDisplays(event.getGuildUUID(), jedis);
-            RunicGuilds.getDataAPI().setGuildForPlayer(whoWasKicked.getUniqueId(), "None");
-        }
+        syncMemberDisplays(event.getGuildUUID());
+        RunicGuilds.getDataAPI().setGuildForPlayer(whoWasKicked.getUniqueId(), "None");
         Player player = Bukkit.getPlayer(event.getKicker());
         if (player != null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
@@ -144,9 +138,7 @@ public class GuildEventListener implements Listener {
     public void onGuildLeave(GuildMemberLeaveEvent event) {
         Player whoLeft = Bukkit.getPlayer(event.getMember());
         syncDisplays(whoLeft);
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            syncMemberDisplays(event.getGuildUUID(), jedis);
-        }
+        syncMemberDisplays(event.getGuildUUID());
     }
 
     /**
@@ -165,18 +157,19 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildTransfer(GuildOwnershipTransferEvent event) {
         Player oldOwner = event.getOldOwner();
-
-        // Get the guild data async
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(GuildCommandMapManager.getInvites().get(event.getOldOwner().getUniqueId()));
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
-            future.whenComplete((GuildData guildData, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to process guild transfer event!");
-                    ex.printStackTrace();
-                } else {
-                    MemberData oldOwnerData = guildData.getMemberDataMap().get(guildData.getOwnerUuid());
-                    MemberData newOwnerData = guildData.getMemberDataMap().get(event.getNewOwner().getUniqueId());
+        // Load members async, populate inventory async, then open inv sync
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> {
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID(), jedis);
+                    }
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
+                .syncLast(guildDataNoBank -> {
+                    MemberData oldOwnerData = guildDataNoBank.getMemberDataMap().get(guildDataNoBank.getOwnerUuid());
+                    MemberData newOwnerData = guildDataNoBank.getMemberDataMap().get(event.getNewOwner().getUniqueId());
                     if (newOwnerData == null) {
                         event.getOldOwner().sendMessage(GuildUtil.PREFIX + "Error: new owner data could not be found!");
                         return;
@@ -184,12 +177,11 @@ public class GuildEventListener implements Listener {
                     oldOwnerData.setRank(GuildRank.OFFICER);
                     newOwnerData.setRank(GuildRank.OWNER);
                     syncDisplays(oldOwner);
-                    syncMemberDisplays(event.getGuildUUID(), jedis);
+                    syncMemberDisplays(event.getGuildUUID());
                     oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully transferred guild ownership. You have been demoted to officer."));
-                    event.getNewOwner().sendMessage(GuildUtil.PREFIX + "You are now the owner of " + guildData.getName() + "!");
-                }
-            });
-        }
+                    event.getNewOwner().sendMessage(GuildUtil.PREFIX + "You are now the owner of " + guildDataNoBank.getName() + "!");
+                })
+                .execute();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST) // late
@@ -218,12 +210,10 @@ public class GuildEventListener implements Listener {
     private void syncDisplays(Player player) {
         if (player == null) return;
         GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            if (guild != null) {
-                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName());
-            } else {
-                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
-            }
+        if (guild != null) {
+            RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName());
+        } else {
+            RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
         }
         RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
         GuildUtil.updateGuildTabColumn(player);
@@ -234,20 +224,23 @@ public class GuildEventListener implements Listener {
      *
      * @param guildUUID of the guild to sync
      */
-    private void syncMemberDisplays(GuildUUID guildUUID, Jedis jedis) {
-        CompletableFuture<HashMap<UUID, MemberData>> future = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
-        future.whenComplete((HashMap<UUID, MemberData> memberDataMap, Throwable ex) -> {
-            if (ex != null) {
-                Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed sync member displays");
-                ex.printStackTrace();
-            } else {
-                List<MemberData> memberDataList = new ArrayList<>(memberDataMap.values());
-                for (MemberData member : memberDataList) {
-                    Player playerMember = Bukkit.getPlayer(member.getUuid());
-                    if (playerMember == null) continue;
-                    syncDisplays(playerMember);
-                }
-            }
-        });
+    private void syncMemberDisplays(GuildUUID guildUUID) {
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> {
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        return RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
+                    }
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
+                .syncLast(guildMembers -> {
+                    List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
+                    for (MemberData member : memberDataList) {
+                        Player playerMember = Bukkit.getPlayer(member.getUuid());
+                        if (playerMember == null) continue;
+                        syncDisplays(playerMember);
+                    }
+                })
+                .execute();
     }
 }

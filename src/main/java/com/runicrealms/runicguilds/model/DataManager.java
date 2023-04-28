@@ -169,10 +169,10 @@ public class DataManager implements DataAPI, Listener {
 //        UUID uuid = event.getPlayer().getUniqueId();
 //        GuildUUID guildUUID = findIfPlayerHasUUID
 //        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-//            CompletableFuture<GuildData> future = loadGuildData(uuid, jedis);
+//            GuildData  = loadGuildData(uuid, jedis);
 //            // todo: create an index for player UUID in members and/or owner
 //            // todo: no need to lookup entire guild here. just load the guild name
-//            future.whenComplete((GuildData guildData, Throwable ex) -> {
+//            .whenComplete((GuildData guildData, Throwable ex) -> {
 //                if (ex != null) {
 //                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to load on select for player " + uuid);
 //                    ex.printStackTrace();

@@ -21,8 +21,7 @@ public interface GuildsAPI {
     void addBankViewer(GuildUUID guildUUID, UUID uuid);
 
     /**
-     * Attempts to add guild score to the given player. Runs as a future so that it can retrieve
-     * the member data async. Eventually returns true if the operation succeeded, else false
+     * Attempts to add guild score to the given player.
      *
      * @param guildUUID  uuid of the guild
      * @param memberData of member to add score

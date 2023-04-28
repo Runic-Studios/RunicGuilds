@@ -27,7 +27,6 @@ import org.bukkit.entity.Player;
 import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 @CommandAlias("guild")
