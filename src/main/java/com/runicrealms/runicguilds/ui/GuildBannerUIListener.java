@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -50,11 +51,12 @@ public class GuildBannerUIListener implements Listener {
 
     /**
      * @param ui
-     * @param player
+     * @param humanEntity
      * @param dummy
      * @param meta
      */
-    private void finish(GuildBannerUI ui, HumanEntity player, ItemStack dummy, BannerMeta meta) {
+    private void finish(GuildBannerUI ui, HumanEntity humanEntity, ItemStack dummy, BannerMeta meta) {
+        if (!(humanEntity instanceof Player player)) return;
         if (ui.getSelectedPattern() != null) {
             meta.removePattern(meta.getPatterns().size() - 1);
             dummy.setItemMeta(meta);
@@ -72,14 +74,14 @@ public class GuildBannerUIListener implements Listener {
         }
         ui.getBanner().setBanner(dummy.getType(), (BannerMeta) dummy.getItemMeta());
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo != null) {
-            player.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
+            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
             // todo: update the banner here?
         } else {
-            player.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
+            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
         }
-        player.closeInventory();
+        humanEntity.closeInventory();
     }
 
     /**

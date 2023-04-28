@@ -40,7 +40,7 @@ public class GuildShopManager {
             tradeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             purchaseGuildItemStack.setItemMeta(tradeMeta);
         }
-        Map<String, Integer> requiredItems = new HashMap<String, Integer>() {{
+        Map<String, Integer> requiredItems = new HashMap<>() {{
             put("coin", 1500);
         }};
         shopItems.add(new RunicShopItem(requiredItems, purchaseGuildItemStack, runGuildHeraldBuy()));
@@ -52,7 +52,7 @@ public class GuildShopManager {
         return player -> {
             player.closeInventory();
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
-            if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+            if (!RunicGuilds.getGuildsAPI().isInGuild(player)) {
                 if (!RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
                     player.sendMessage
                             (ChatColor.YELLOW + "Creating a guild will cost you " + RunicGuilds.GUILD_COST +

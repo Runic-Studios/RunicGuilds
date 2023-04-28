@@ -7,6 +7,7 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.DataAPI;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -73,15 +74,20 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public GuildInfo getGuildInfo(UUID uuid) {
-        if (this.playerToGuildMap.get(uuid) == null) return null;
-        UUID guildUUID = this.playerToGuildMap.get(uuid);
+    public GuildInfo getGuildInfo(GuildUUID guildUUID) {
+        return this.guildInfoMap.get(guildUUID.getUUID());
+    }
+
+    @Override
+    public GuildInfo getGuildInfo(OfflinePlayer player) {
+        if (this.playerToGuildMap.get(player.getUniqueId()) == null) return null;
+        UUID guildUUID = this.playerToGuildMap.get(player.getUniqueId());
         return this.guildInfoMap.get(guildUUID);
     }
 
     @Override
-    public GuildInfo getGuildInfo(GuildUUID guildUUID) {
-        return this.guildInfoMap.get(guildUUID.getUUID());
+    public HashMap<UUID, UUID> getPlayerToGuildMap() {
+        return playerToGuildMap;
     }
 
     // todo: load
@@ -158,11 +164,6 @@ public class DataManager implements DataAPI, Listener {
 
     public HashMap<UUID, GuildInfo> getGuildInfoMap() {
         return guildInfoMap;
-    }
-
-    @Override
-    public HashMap<UUID, UUID> getPlayerToGuildMap() {
-        return playerToGuildMap;
     }
 
     @EventHandler(priority = EventPriority.LOW) // early

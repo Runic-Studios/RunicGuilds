@@ -1,10 +1,10 @@
 package com.runicrealms.runicguilds.api;
 
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
-import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -56,10 +56,10 @@ public interface GuildsAPI {
     void giveExperience(GuildUUID guildUUID, int exp);
 
     /**
-     * @param uuid to check
+     * @param offlinePlayer to check
      * @return true if player in guild
      */
-    boolean isInGuild(UUID uuid);
+    boolean isInGuild(OfflinePlayer offlinePlayer);
 
     /**
      * Removes the player from the list of bank viewers. This is stored in Redis, ensuring data
@@ -77,14 +77,5 @@ public interface GuildsAPI {
      * @param toRemove  uuid of player to remove
      */
     void removeGuildMember(GuildUUID guildUUID, UUID toRemove);
-
-    /**
-     * Attempts to rename the given guild
-     *
-     * @param guildUUID uuid of the guild
-     * @param name      the intended new name
-     * @return a rename result
-     */
-    GuildRenameResult renameGuild(GuildUUID guildUUID, String name);
 
 }

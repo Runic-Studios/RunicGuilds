@@ -80,7 +80,7 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildAcceptCommand(Player player) {
-        if (RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (RunicGuilds.getGuildsAPI().isInGuild(player)) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot use this command since you are in a guild."));
             return;
         }
@@ -91,7 +91,8 @@ public class GuildCommand extends BaseCommand {
         }
 
         // Get the guild of the inviter
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
@@ -136,7 +137,7 @@ public class GuildCommand extends BaseCommand {
     @Subcommand("bank")
     @Conditions("is-player|is-op")
     public void onGuildBankCommand(Player player) {
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player)) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
@@ -147,7 +148,7 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildBannerCommand(Player player) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -208,7 +209,7 @@ public class GuildCommand extends BaseCommand {
         }
 
         // Ensure a guild exists for all other commands
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "A guild was not found."));
             return;
@@ -236,7 +237,8 @@ public class GuildCommand extends BaseCommand {
         }
 
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have decline the guild invitation."));
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(GuildCommandMapManager.getInvites().get(player.getUniqueId())); // Guild of the inviter
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer); // Guild of the inviter
         Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guildInfo.getGuildUUID(), player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
         GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
@@ -252,7 +254,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -277,7 +279,7 @@ public class GuildCommand extends BaseCommand {
                     }
 
                     // Get member data of command user
-                    if (!guildDataNoBank.isAtLeastRank(player.getUniqueId(), GuildRank.OFFICER)) {
+                    if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to demote other players."));
                         return;
                     }
@@ -306,7 +308,7 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildDisbandCommand(Player player) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -333,11 +335,11 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildInfoCommand(Player player) {
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(player)) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
         }
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         player.openInventory(new GuildInfoUI(player, guildInfo).getInventory());
     }
 
@@ -352,7 +354,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -367,7 +369,7 @@ public class GuildCommand extends BaseCommand {
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
-                    if (!guildDataNoBank.isAtLeastRank(player.getUniqueId(), GuildRank.RECRUITER)) {
+                    if (!guildDataNoBank.isAtLeastRank(player, GuildRank.RECRUITER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank recruiter or higher to invite other players."));
                         return;
                     }
@@ -384,7 +386,7 @@ public class GuildCommand extends BaseCommand {
                         return;
                     }
 
-                    if (RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) {
+                    if (RunicGuilds.getGuildsAPI().isInGuild(target)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is already in a guild."));
                         return;
                     }
@@ -408,7 +410,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -423,7 +425,7 @@ public class GuildCommand extends BaseCommand {
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
-                    if (!guildDataNoBank.isAtLeastRank(player.getUniqueId(), GuildRank.OFFICER)) {
+                    if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to kick other players."));
                         return;
                     }
@@ -461,7 +463,7 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("@nothing")
     public void onGuildLeaveCommand(Player player) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -505,7 +507,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -526,7 +528,7 @@ public class GuildCommand extends BaseCommand {
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
-                    if (!guildDataNoBank.isAtLeastRank(player.getUniqueId(), GuildRank.OFFICER)) {
+                    if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to promote other players."));
                         return;
                     }
@@ -566,7 +568,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;
@@ -619,7 +621,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
             return;

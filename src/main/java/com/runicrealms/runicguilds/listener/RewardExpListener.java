@@ -10,8 +10,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
-import java.util.UUID;
-
 /**
  * Listener for the guild stage exp bonus defined in the GuildStage enum
  */
@@ -24,7 +22,6 @@ public class RewardExpListener implements Listener {
             return; // Only mobs or party kills
 
         Player player = event.getPlayer();
-        UUID uuid = player.getUniqueId();
 
         // Ensure this perk can be unlocked
         StageReward expStageReward = StageReward.EXP_BONUS;
@@ -32,7 +29,7 @@ public class RewardExpListener implements Listener {
         if (guildStage == null) return;
 
         // Ensure there is a guild
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) return;
 
         // Ensure guild has perk unlocked

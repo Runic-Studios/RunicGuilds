@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.api;
 
 import com.runicrealms.runicguilds.model.*;
+import org.bukkit.OfflinePlayer;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
@@ -36,18 +37,18 @@ public interface DataAPI {
     /**
      * Returns a container of basic guild info for player (if it exists)
      *
-     * @param uuid of the player to lookup
+     * @param guildUUID of the guild to lookup
      * @return some basic info about their guilds, like exp, name, etc.
      */
-    GuildInfo getGuildInfo(UUID uuid);
+    GuildInfo getGuildInfo(GuildUUID guildUUID);
 
     /**
-     * Returns a container of basic guild info for guild (if it exists)
+     * Returns a container of basic guild info for player (if it exists)
      *
-     * @param guildUUID of the guild
-     * @return some basic info like exp, name, etc.
+     * @param player to lookup
+     * @return some basic info about their guilds, like exp, name, etc.
      */
-    GuildInfo getGuildInfo(GuildUUID guildUUID);
+    GuildInfo getGuildInfo(OfflinePlayer player);
 
     /**
      * Data structure that maps a PLAYER uuid to a GUILD uuid

@@ -6,7 +6,6 @@ import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
@@ -15,6 +14,7 @@ import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -36,7 +36,7 @@ public class GuildManager implements GuildsAPI, Listener {
     @Override
     public boolean addGuildScore(GuildUUID guildUUID, MemberData memberData, Integer score) {
         UUID uuid = memberData.getUuid();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
         if (guildInfo == null) {
             Bukkit.getLogger().info("A guild was not found to add guild score for " + uuid);
             return false;
@@ -55,7 +55,7 @@ public class GuildManager implements GuildsAPI, Listener {
         GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent
                     (
                             guildInfo.getGuildUUID(),
@@ -94,8 +94,8 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public boolean isInGuild(UUID uuid) {
-        return RunicGuilds.getDataAPI().getGuildInfo(uuid) != null;
+    public boolean isInGuild(OfflinePlayer offlinePlayer) {
+        return RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer) != null;
     }
 
     @Override
@@ -115,30 +115,6 @@ public class GuildManager implements GuildsAPI, Listener {
                 // todo: edit their 'guild' tag in Redis?
             }
         });
-    }
-
-    @Override
-    public GuildRenameResult renameGuild(GuildUUID guildUUID, String name) {
-        if (name.length() > 16) {
-            return GuildRenameResult.NAME_TOO_LONG;
-        }
-        // todo: ensure prefix unique
-//        for (Object obj : guildDataMap.keySet()) {
-//            String otherGuildPrefix = (String) obj;
-//            GuildData guildDataOther = (GuildData) guildDataMap.get(otherGuildPrefix);
-//            if (guildDataOther.getGuild().getGuildName().equalsIgnoreCase(name)) {
-//                return GuildRenameResult.NAME_NOT_UNIQUE;
-//            }
-//        }
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
-            guildInfo.setName(name);
-            RunicGuilds.getDataAPI().renameGuildInRedis(guildUUID, name, jedis);
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return GuildRenameResult.INTERNAL_ERROR;
-        }
-        return GuildRenameResult.SUCCESSFUL;
     }
 
     /**

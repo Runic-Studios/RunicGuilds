@@ -9,6 +9,7 @@ import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.GuildReprefixResult;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -198,17 +199,17 @@ public class GuildData implements SessionDataMongo {
     /**
      * Checks whether the given player has AT LEAST the specified rank
      *
-     * @param uuid of the player to check
-     * @param rank the minimum rank they must have achieved
+     * @param player to check
+     * @param rank   the minimum rank they must have achieved
      * @return true if player is at least rank
      */
-    public boolean isAtLeastRank(UUID uuid, GuildRank rank) {
+    public boolean isAtLeastRank(Player player, GuildRank rank) {
         // Return true for all 'min rank' checks if the player is the owner
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
-        if (guildInfo.getOwnerUuid().equals(uuid)) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        if (guildInfo.getOwnerUuid().equals(player.getUniqueId())) {
             return true;
         }
-        MemberData memberData = this.memberDataMap.get(uuid);
+        MemberData memberData = this.memberDataMap.get(player.getUniqueId());
         if (memberData == null) return false;
         GuildRank currentRank = memberData.getRank();
         return currentRank.getRankNumber() <= rank.getRankNumber(); // 1 is owner
@@ -229,7 +230,8 @@ public class GuildData implements SessionDataMongo {
         int score = this.memberDataMap.get(uuid).getScore();
         this.memberDataMap.remove(uuid);
         RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
         guildInfo.setScore(Math.max(0, guildInfo.getScore() - score));
     }
 

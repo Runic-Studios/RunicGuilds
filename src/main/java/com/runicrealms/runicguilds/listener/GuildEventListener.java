@@ -157,7 +157,7 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildTransfer(GuildOwnershipTransferEvent event) {
         Player oldOwner = event.getOldOwner();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(GuildCommandMapManager.getInvites().get(event.getOldOwner().getUniqueId()));
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(oldOwner); // GuildCommandMapManager.getInvites().get(event.getOldOwner().getUniqueId()
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
@@ -208,8 +208,9 @@ public class GuildEventListener implements Listener {
      * @param player to sync
      */
     private void syncDisplays(Player player) {
-        if (player == null) return;
-        GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        if (player == null) return; // Player went offline
+        Bukkit.broadcastMessage("syncing guild displays");
+        GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guild != null) {
             RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName());
         } else {

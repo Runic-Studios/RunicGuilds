@@ -16,6 +16,7 @@ import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -112,7 +113,7 @@ public class GuildModCMD extends BaseCommand {
         GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(owner, args[1], args[2], true);
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guildInfo.getGuildUUID(), uuid, true));
         }
     }
@@ -158,7 +159,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
         if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -207,7 +208,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
         if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -243,28 +244,28 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        UUID uuid = GuildUtil.getOfflinePlayerUUID(args[0]);
-        if (uuid == null) {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
+        if (!offlinePlayer.hasPlayedBefore()) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player was not found!"));
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;
         }
 
-        if (guildInfo.getOwnerUuid().toString().equalsIgnoreCase(uuid.toString())) {
+        if (guildInfo.getOwnerUuid().toString().equalsIgnoreCase(offlinePlayer.getUniqueId().toString())) {
             player.sendMessage(ColorUtil.format(this.prefix + "That user is the guild owner. To disband the guild, use /guildmod disband [prefix]."));
             return;
         }
 
-        if (GuildBankUtil.isViewingBank(uuid)) {
-            GuildBankUtil.close(Bukkit.getPlayer(args[0]));
+        if (GuildBankUtil.isViewingBank(offlinePlayer.getUniqueId())) {
+            GuildBankUtil.close((Player) offlinePlayer);
         }
 
-        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getGuildUUID(), uuid, player.getUniqueId(), true));
+        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getGuildUUID(), offlinePlayer.getUniqueId(), player.getUniqueId(), true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
     }
 
@@ -293,7 +294,7 @@ public class GuildModCMD extends BaseCommand {
         }
 
         UUID targetUUID = target.getUniqueId();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(targetUUID);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;
@@ -309,36 +310,6 @@ public class GuildModCMD extends BaseCommand {
                     player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
                 })
                 .execute();
-    }
-
-    @Subcommand("set name")
-    @Conditions("is-player")
-    @Syntax("<player> <name>")
-    @CommandCompletion("@players name @nothing")
-    public void onGuildSetNameCommand(Player player, String[] args) {
-        if (args.length < 2) {
-            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
-            this.sendHelpMessage(player);
-            return;
-        }
-
-        Player target = Bukkit.getPlayerExact(args[0]);
-        if (target == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid player!"));
-            return;
-        }
-
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
-        if (guildInfo == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "The targeted player must be in a guild execute this command!"));
-            return;
-        }
-
-        player.sendMessage(ColorUtil.format(this.prefix + RunicGuilds.getGuildsAPI().renameGuild
-                (
-                        guildInfo.getGuildUUID(),
-                        this.combineArgs(args)
-                ).getMessage()));
     }
 
     @Subcommand("set prefix")
@@ -357,7 +328,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "&eThis player is not in a guild!"));
             return;

@@ -52,10 +52,6 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         return taskChainFactory.newChain();
     }
 
-    public static <T> TaskChain<T> newSharedChain(String name) {
-        return taskChainFactory.newSharedChain(name);
-    }
-
     public static Set<UUID> getPlayersCreatingGuild() {
         return playersCreatingGuild;
     }

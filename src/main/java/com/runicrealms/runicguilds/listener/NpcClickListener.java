@@ -48,7 +48,7 @@ public class NpcClickListener implements Listener {
         for (Integer bankerId : RunicGuilds.GUILD_BANKERS) {
             // Ensure we are talking to a guild banker
             if (bankerId != event.getNpc().getId()) continue;
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getPlayer());
             if (guildInfo == null) {
                 event.getPlayer().sendMessage(ChatColor.YELLOW + "You have to be in a guild to use the guild bank.");
                 return;
