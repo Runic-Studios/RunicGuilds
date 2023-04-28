@@ -149,9 +149,21 @@ public class GuildEventListener implements Listener {
         MemberData member = event.getMemberData();
         int score = member.getScore();
         member.setScore(score + event.getScore());
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            event.getMemberData().writeToJedis(event.getGuildUUID(), event.getMemberData().getUuid(), jedis);
-        }
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getGuildUUID());
+        // Load guild data async then recalculate score
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> {
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        event.getMemberData().writeToJedis(event.getGuildUUID(), event.getMemberData().getUuid(), jedis);
+                    }
+                    return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID());
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "GuildScoreChangeEvent failed to load!")
+                .syncLast(guildDataNoBank -> {
+                    guildInfo.setScore(guildDataNoBank.calculateGuildScore());
+                })
+                .execute();
     }
 
     @EventHandler
