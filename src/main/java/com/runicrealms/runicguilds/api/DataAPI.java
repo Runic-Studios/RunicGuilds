@@ -24,7 +24,7 @@ public interface DataAPI {
      * @param jedis     the jedis resource
      * @return a GuildData object if it is found in redis
      */
-    GuildData checkRedisForGuildData(GuildUUID guildUUID, Jedis jedis);
+    GuildData checkRedisForGuildData(UUID guildUUID, Jedis jedis);
 
     /**
      * Returns a container of basic guild info for guild (if it exists)
@@ -71,7 +71,7 @@ public interface DataAPI {
      * @param guildUUID of the GUILD
      * @return a GuildData object
      */
-    GuildData loadGuildData(GuildUUID guildUUID);
+    GuildData loadGuildData(UUID guildUUID);
 
     /**
      * Loads the guild data from redis and/or mongo (if it exists!)

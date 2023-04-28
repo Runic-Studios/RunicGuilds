@@ -9,7 +9,6 @@ import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
-import com.runicrealms.runicguilds.guild.GuildReprefixResult;
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
@@ -308,40 +307,6 @@ public class GuildModCMD extends BaseCommand {
                 .syncLast(memberData -> {
                     Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getGuildUUID(), memberData, memberData.getScore()));
                     player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
-                })
-                .execute();
-    }
-
-    @Subcommand("set prefix")
-    @Syntax("<player> <prefix>")
-    @CommandCompletion("@players prefix @nothing")
-    public void onGuildSetPrefixCommand(Player player, String[] args) {
-        if (args.length != 2) {
-            player.sendMessage(ColorUtil.format(this.prefix + "You have use improper arguments to execute this command!"));
-            this.sendHelpMessage(player);
-            return;
-        }
-
-        Player target = Bukkit.getPlayerExact(args[0]);
-        if (target == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "You have entered an invalid player!"));
-            return;
-        }
-
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
-        if (guildInfo == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "&eThis player is not in a guild!"));
-            return;
-        }
-
-        String newPrefix = args[1];
-        TaskChain<?> chain = RunicGuilds.newChain();
-        chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID()))
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
-                .syncLast(guildData -> {
-                    GuildReprefixResult guildReprefixResult = guildData.updateGuildPrefix(newPrefix);
-                    player.sendMessage(ColorUtil.format(this.prefix + guildReprefixResult.getMessage()));
                 })
                 .execute();
     }

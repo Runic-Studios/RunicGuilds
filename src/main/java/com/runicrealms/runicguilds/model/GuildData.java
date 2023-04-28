@@ -6,7 +6,6 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.GuildBanner;
 import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.guild.GuildReprefixResult;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -16,8 +15,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import redis.clients.jedis.Jedis;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * This is our top-level Data Transfer Object (DTO) that handles read-writing to redis and mongo
@@ -25,6 +23,11 @@ import java.util.UUID;
 @Document(collection = "guilds")
 @SuppressWarnings("unused")
 public class GuildData implements SessionDataMongo {
+    public static final List<String> FIELDS = new ArrayList<>() {{
+        add(GuildDataField.EXP.getField());
+        add(GuildDataField.NAME.getField());
+        add(GuildDataField.PREFIX.getField());
+    }};
     @Id
     private ObjectId id;
     private GuildUUID guildUUID;
@@ -64,12 +67,26 @@ public class GuildData implements SessionDataMongo {
     /**
      * Constructor for retrieving data from Redis
      *
-     * @param guildUUID of the GUILD in Redis
-     * @param jedis     a new jedis resource
+     * @param uuid  of the GUILD in Redis
+     * @param jedis a new jedis resource
      */
-    public GuildData(GuildUUID guildUUID, Jedis jedis) {
-        this.guildUUID = guildUUID;
-        // todo: initialize ALL other fields
+    public GuildData(UUID uuid, Jedis jedis) {
+        this.guildUUID = new GuildUUID(uuid);
+        Map<String, String> fieldsMap = new HashMap<>();
+        String[] fieldsToArray = FIELDS.toArray(new String[0]);
+        String key = GuildData.getJedisKey(guildUUID);
+        List<String> values = jedis.hmget(key, fieldsToArray);
+        for (int i = 0; i < fieldsToArray.length; i++) {
+            fieldsMap.put(fieldsToArray[i], values.get(i));
+        }
+        this.name = fieldsMap.get(GuildDataField.NAME.getField());
+        this.prefix = fieldsMap.get(GuildDataField.PREFIX.getField());
+        this.exp = Integer.parseInt(fieldsMap.get(GuildDataField.EXP.getField()));
+        this.memberDataMap = RunicGuilds.getDataAPI().loadGuildMembers(getGuildUUID(), jedis);
+        // todo: remaining fields
+//        this.bankData;
+//        this.settingsData;
+//        this.guildBanner;
     }
 
     /**
@@ -79,7 +96,8 @@ public class GuildData implements SessionDataMongo {
      * @return the root key path
      */
     public static String getJedisKey(GuildUUID guildUUID) {
-        return guildUUID.getUUID().toString();
+        String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+        return database + ":guilds:" + guildUUID.getUUID().toString();
     }
 
     /**
@@ -236,60 +254,15 @@ public class GuildData implements SessionDataMongo {
     }
 
     /**
-     * Attempts to update prefix for the given guild. However, guilds are keyed / stored by prefix, so it
-     * MUST ALWAYS be unique
-     *
-     * @param prefix the intended new prefix
-     * @return a "re-prefix" result
-     */
-    public GuildReprefixResult updateGuildPrefix(String prefix) {
-        // todo: complete
-//        Pattern pattern = Pattern.compile("[a-zA-Z]");
-//        Matcher matcher = pattern.matcher(prefix);
-//        if (!matcher.find() || (prefix.length() > 6 || prefix.length() < 3)) {
-//            return GuildReprefixResult.BAD_PREFIX;
-//        }
-//        Map<Object, SessionData> guildDataMap = RunicGuilds.getGuildsAPI().getGuildDataMap();
-//        for (Object otherGuildPrefix : guildDataMap.keySet()) {
-//            String otherGuildPrefixStr = (String) otherGuildPrefix;
-//            if (otherGuildPrefixStr.equalsIgnoreCase(prefix)) {
-//                GuildData otherGuildData = (GuildData) guildDataMap.get(otherGuildPrefixStr);
-//                if (!otherGuildData.getGuild().getGuildName().equalsIgnoreCase(guildData.getGuild().getGuildName())) {
-//                    return GuildReprefixResult.PREFIX_NOT_UNIQUE;
-//                }
-//            }
-//        }
-//        try {
-//            for (GuildMember member : guildData.getGuild().getMembersWithOwner()) {
-//                if (GuildBankUtil.isViewingBank(member.getUUID())) {
-//                    GuildBankUtil.close(Bukkit.getPlayer(member.getUUID()));
-//                }
-//                if (players.containsKey(member.getUUID())) {
-//                    players.put(member.getUUID(), prefix);
-//                }
-//            }
-//            guildDataMap.remove(guildData.getGuild().getGuildPrefix());
-//            Guild guild = guildData.getGuild();
-//            guild.setGuildPrefix(prefix);
-//            guildData.getMongoData().set("prefix", prefix);
-//            guildData.getMongoData().save();
-//            GuildData newGuildData = new GuildData(guild, false);
-//            guildDataMap.put(prefix, newGuildData);
-//        } catch (Exception exception) {
-//            exception.printStackTrace();
-        return GuildReprefixResult.INTERNAL_ERROR;
-//        }
-//        return GuildReprefixResult.SUCCESSFUL;
-    }
-
-    /**
      * A jedis write method that writes the underlying data structures
      *
      * @param jedis some new jedis resource
      */
     public void writeToJedis(Jedis jedis) {
+        String root = getJedisKey(this.guildUUID);
+        // Include this guild in the guild set
         String database = RunicCore.getDataAPI().getMongoDatabase().getName();
-        String root = database + ":guilds:" + getJedisKey(this.guildUUID);
+        jedis.sadd(database + ":guilds", this.guildUUID.getUUID().toString());
         // Write basic fields
         jedis.set(root + ":" + GuildDataField.GUILD_UUID.getField(), this.guildUUID.getUUID().toString());
         jedis.expire(root + ":" + GuildDataField.GUILD_UUID.getField(), RunicCore.getRedisAPI().getExpireTime());

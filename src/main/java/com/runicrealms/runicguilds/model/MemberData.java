@@ -8,9 +8,10 @@ import redis.clients.jedis.Jedis;
 import java.util.*;
 
 public class MemberData implements SessionDataRedis {
-    public static final List<String> FIELDS = new ArrayList<String>() {{
+    public static final List<String> FIELDS = new ArrayList<>() {{
         add(GuildDataField.RANK.getField());
         add(GuildDataField.SCORE.getField());
+        add(GuildDataField.UUID.getField());
     }};
     private GuildRank rank;
     private Integer score;
@@ -19,6 +20,26 @@ public class MemberData implements SessionDataRedis {
     @SuppressWarnings("unused")
     public MemberData() {
         // Default constructor for Spring
+    }
+
+    /**
+     * Constructor to load values from Jedis
+     *
+     * @param guildUUID of the guild
+     * @param uuid      of the member
+     * @param jedis     a jedis resource
+     */
+    public MemberData(GuildUUID guildUUID, UUID uuid, Jedis jedis) {
+        Map<String, String> fieldsMap = new HashMap<>();
+        String[] fieldsToArray = FIELDS.toArray(new String[0]);
+        String key = GuildData.getJedisKey(guildUUID);
+        List<String> values = jedis.hmget(key + ":members:" + uuid, fieldsToArray);
+        for (int i = 0; i < fieldsToArray.length; i++) {
+            fieldsMap.put(fieldsToArray[i], values.get(i));
+        }
+        this.uuid = uuid;
+        this.rank = GuildRank.getByIdentifier((fieldsMap.get(GuildDataField.RANK.getField())));
+        this.score = Integer.parseInt(fieldsMap.get(GuildDataField.SCORE.getField()));
     }
 
     /**
@@ -43,8 +64,21 @@ public class MemberData implements SessionDataRedis {
         return "guilds:" + guildUUID.getUUID() + ":members:" + uuid;
     }
 
+
+    public Map<String, String> getDataMapFromJedis(GuildUUID guildUUID, UUID uuid, Jedis jedis, int... ignored) {
+        Map<String, String> fieldsMap = new HashMap<>();
+        List<String> fields = new ArrayList<>(getFields());
+        String[] fieldsToArray = fields.toArray(new String[0]);
+        String rootKey = getJedisKey(guildUUID, uuid);
+        List<String> values = jedis.hmget(rootKey + ":member:" + uuid, fieldsToArray);
+        for (int i = 0; i < fieldsToArray.length; i++) {
+            fieldsMap.put(fieldsToArray[i], values.get(i));
+        }
+        return fieldsMap;
+    }
+
     @Override
-    public Map<String, String> getDataMapFromJedis(UUID uuid, Jedis jedis, int... ignored) {
+    public Map<String, String> getDataMapFromJedis(UUID uuid, Jedis jedis, int... ints) {
         return null;
     }
 
@@ -55,9 +89,10 @@ public class MemberData implements SessionDataRedis {
 
     @Override
     public Map<String, String> toMap(UUID uuid, int... ints) {
-        return new HashMap<String, String>() {{
+        return new HashMap<>() {{
             put(GuildDataField.RANK.getField(), rank.getIdentifier());
             put(GuildDataField.SCORE.getField(), String.valueOf(score));
+            put(GuildDataField.UUID.getField(), String.valueOf(uuid));
         }};
     }
 

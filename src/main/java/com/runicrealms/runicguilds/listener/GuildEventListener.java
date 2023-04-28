@@ -82,7 +82,7 @@ public class GuildEventListener implements Listener {
         Player player = event.getWhoDisbanded();
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(event.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(event.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
                 .syncLast(guildData -> disbandGuild(guildData, player))
                 .execute();
@@ -209,7 +209,7 @@ public class GuildEventListener implements Listener {
      */
     private void syncDisplays(Player player) {
         if (player == null) return; // Player went offline
-        Bukkit.broadcastMessage("syncing guild displays");
+//        Bukkit.broadcastMessage("syncing guild displays");
         GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guild != null) {
             RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName());

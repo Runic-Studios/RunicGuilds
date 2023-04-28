@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class GuildUtil {
     public static final String PREFIX = "&r&6&lGuilds »&r &e";
@@ -141,12 +140,14 @@ public class GuildUtil {
         if (tableTabList == null) {
             return; // tab not setup yet
         }
+        Bukkit.broadcastMessage("updating tab");
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             tableTabList.set(1, 0, new TextTabItem
                     (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
         } else {
             // Load all the members and owner
+//            Bukkit.broadcastMessage("guild info found for tab");
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
                 getMembersAndPopulate(tableTabList, guildInfo, jedis);
             }
@@ -160,11 +161,9 @@ public class GuildUtil {
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
                 .syncLast(memberDataMap -> {
                     List<UUID> onlineMembers = memberDataMap.values().stream().map(MemberData::getUuid)
-                            .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                            .collect(Collectors.toList());
-                    onlineMembers.add(guildInfo.getOwnerUuid());
+                            .filter(uuid -> Bukkit.getPlayer(uuid) != null).toList();
                     tableTabList.set(1, 0, new TextTabItem
-                            (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD))); // +1 for owner
+                            (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
                     int j = 0;
                     for (UUID guildMember : onlineMembers) {
                         if (j > 19) break;

@@ -7,7 +7,8 @@ public enum GuildDataField {
     NAME("name"),
     PREFIX("prefix"),
     RANK("rank"),
-    SCORE("score");
+    SCORE("score"),
+    UUID("uuid"); // Used for member data
 
     private final String field;
 
