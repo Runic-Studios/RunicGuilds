@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.api.WriteCallback;
 import com.runicrealms.plugin.model.SessionDataRedis;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import redis.clients.jedis.Jedis;
@@ -54,7 +53,7 @@ public class SettingsData implements SessionDataRedis {
     }
 
     @Override
-    public void writeToJedis(UUID uuid, Jedis jedis, WriteCallback writeCallback, int... ints) {
+    public void writeToJedis(UUID uuid, Jedis jedis, int... ints) {
 
     }
 

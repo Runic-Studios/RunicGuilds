@@ -305,13 +305,11 @@ public class GuildData implements SessionDataMongo {
         }
         // Write bank data
         if (bankData != null) { // Exclude projection
-            this.bankData.writeToJedis(null, jedis, () -> {
-            });
+            this.bankData.writeToJedis(this.guildUUID.getUUID(), jedis);
         }
         // Write settings data
         if (settingsData != null) { // Exclude projection
-            this.settingsData.writeToJedis(null, jedis, () -> {
-            });
+            this.settingsData.writeToJedis(this.guildUUID.getUUID(), jedis);
         }
     }
 

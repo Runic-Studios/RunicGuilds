@@ -56,7 +56,6 @@ public class NpcClickListener implements Listener {
             // Initiate bank open logic
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
             // Call redis async
-
             TaskChain<?> chain = RunicGuilds.newChain();
             chain
                     .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), uuid))

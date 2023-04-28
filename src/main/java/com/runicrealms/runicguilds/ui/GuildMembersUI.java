@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds.ui;
 
+import com.runicrealms.libs.taskchain.TaskChain;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
@@ -8,6 +9,7 @@ import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildUtil;
+import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -21,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 public class GuildMembersUI implements InventoryHolder {
     private final Inventory inventory;
@@ -60,28 +60,32 @@ public class GuildMembersUI implements InventoryHolder {
         this.inventory.setItem(8, GUIUtil.CLOSE_BUTTON);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         GuildUUID guildUUID = guildInfo.getGuildUUID();
-        // Load guild members as a CompletableFuture
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<HashMap<UUID, MemberData>> future = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
-            future.whenComplete((HashMap<UUID, MemberData> memberDataMap, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to load on ui");
-                    ex.printStackTrace();
-                } else {
-                    List<MemberData> memberDataList = new ArrayList<>(memberDataMap.values());
-                    memberDataList.sort(new RankCompare());
-                    for (MemberData guildMember : memberDataList) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guildMember.getUuid());
-                        this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
-                                (
-                                        offlinePlayer.getPlayer(),
-                                        ChatColor.GOLD + offlinePlayer.getName(), // Last known name
-                                        ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
-                                                "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
-                                ));
+        // Load members async, populate inventory async, then open inv sync
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> {
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        HashMap<UUID, MemberData> guildMembers = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
+                        List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
+                        memberDataList.sort(new RankCompare());
+                        for (MemberData guildMember : memberDataList) {
+                            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guildMember.getUuid());
+                            this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
+                                    (
+                                            offlinePlayer.getPlayer(),
+                                            ChatColor.GOLD + offlinePlayer.getName(), // Last known name
+                                            ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
+                                                    "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
+                                    ));
+                        }
+                        return guildMembers;
                     }
-                }
-            });
-        }
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
+                .syncLast(memberData -> {
+                    // Open the UI!
+                    player.openInventory(this.inventory);
+                })
+                .execute();
     }
 }

@@ -19,7 +19,6 @@ import redis.clients.jedis.Jedis;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Manager for handling guild data and keeping it consistent across the network
@@ -41,7 +40,7 @@ public class DataManager implements DataAPI, Listener {
         /*
         Loads guilds into memory on startup
          */
-        // todo: for every guild in redis... create a GuildInfo
+        // todo: for every guild in redis... create a GuildInfo? Never remove from redis?
         /*
         Tab update task
          */
@@ -85,6 +84,7 @@ public class DataManager implements DataAPI, Listener {
         return this.guildInfoMap.get(guildUUID);
     }
 
+    // todo: load
     @Override
     public List<ScoreContainer> loadAllGuildScores() {
         return null;
@@ -111,7 +111,7 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<GuildData> loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis) {
+    public GuildData loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis) {
         // todo: redis
         // todo: mongo projection
         /*
@@ -128,7 +128,7 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis) {
+    public HashMap<UUID, MemberData> loadGuildMembers(GuildUUID guildUUID, Jedis jedis) {
         return null;
     }
 
@@ -138,7 +138,7 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public CompletableFuture<GuildData> loadSettingsData(GuildUUID guildUUID, Jedis jedis) {
+    public GuildData loadSettingsData(GuildUUID guildUUID, Jedis jedis) {
         // todo: load the guild data and only project basic fields and settings
         return null;
     }

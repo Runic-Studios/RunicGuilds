@@ -6,7 +6,6 @@ import redis.clients.jedis.Jedis;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public interface DataAPI {
 
@@ -54,7 +53,7 @@ public interface DataAPI {
      * Checks Redis for all guilds' score field, then returns a list of containers
      * with the guild's uuid and score. Used for banners/leaderboards
      *
-     * @return a future, which will eventually have the scores
+     * @return all guild scores
      */
     List<ScoreContainer> loadAllGuildScores();
 
@@ -62,24 +61,24 @@ public interface DataAPI {
      * Loads the guild data from redis and/or mongo (if it exists!)
      *
      * @param guildUUID of the GUILD
-     * @return a future, which will eventually have the data
+     * @return a GuildData object
      */
     GuildData loadGuildData(GuildUUID guildUUID);
 
     /**
      * Loads the guild data from redis and/or mongo (if it exists!)
-     * Uses projection to exclude Bank data from the future
+     * Uses projection to exclude Bank data from the result
      *
      * @param guildUUID of the GUILD
      * @param jedis     a new jedis resource
-     * @return a future, which will eventually have the data
+     * @return a GuildData object with no bank data
      */
-    CompletableFuture<GuildData> loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis);
+    GuildData loadGuildDataNoBank(GuildUUID guildUUID, Jedis jedis);
 
     /**
      * Loads only the guild member map from redis/mongo
      */
-    CompletableFuture<HashMap<UUID, MemberData>> loadGuildMembers(GuildUUID guildUUID, Jedis jedis);
+    HashMap<UUID, MemberData> loadGuildMembers(GuildUUID guildUUID, Jedis jedis);
 
     /**
      * Loads the data for a single guild member. Checks Redis first, then falls back to a projection
@@ -98,7 +97,7 @@ public interface DataAPI {
      * @param jedis     a new jedis resource
      * @return the settings of the guild
      */
-    CompletableFuture<GuildData> loadSettingsData(GuildUUID guildUUID, Jedis jedis);
+    GuildData loadSettingsData(GuildUUID guildUUID, Jedis jedis);
 
     /**
      * Renames the guild by updating its shared field in redis

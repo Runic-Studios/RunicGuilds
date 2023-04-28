@@ -21,8 +21,6 @@ import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,22 +78,17 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @Override
     public void giveExperience(GuildUUID guildUUID, int exp) {
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
-            guildInfo.setExp(guildInfo.getExp() + exp);
-            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID, jedis);
-            future.whenComplete((GuildData guildData, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to give guild experience!");
-                    ex.printStackTrace();
-                } else {
-                    guildData.writeToJedis(jedis);
-                }
-            });
-        } catch (Exception ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "There was an error trying to give guild experience!");
-            ex.printStackTrace();
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
+            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                // Update in-memory
+                GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+                guildInfo.setExp(guildInfo.getExp() + exp);
+                // Update in Redis
+                GuildData guildData = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID, jedis);
+                guildData.setExp(guildInfo.getExp());
+                guildData.writeToJedis(jedis);
+            }
+        });
     }
 
     @Override
@@ -112,18 +105,14 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @Override
     public void removeGuildMember(GuildUUID guildUUID, UUID toRemove) {
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-            CompletableFuture<GuildData> future = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID, jedis);
-            future.whenComplete((GuildData guildData, Throwable ex) -> {
-                if (ex != null) {
-                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to remove player from guild");
-                    ex.printStackTrace();
-                } else {
-                    guildData.removeMember(toRemove, jedis);
-                    guildData.writeToJedis(jedis);
-                }
-            });
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
+            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID, jedis);
+                guildDataNoBank.removeMember(toRemove, jedis);
+                guildDataNoBank.writeToJedis(jedis);
+                // todo: edit their 'guild' tag in Redis?
+            }
+        });
     }
 
     @Override
