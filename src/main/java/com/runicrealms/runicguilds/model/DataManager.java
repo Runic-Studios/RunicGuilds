@@ -103,6 +103,11 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
+    public HashMap<UUID, GuildInfo> getGuildInfoMap() {
+        return guildInfoMap;
+    }
+
+    @Override
     public HashMap<UUID, UUID> getPlayerToGuildMap() {
         return playerToGuildMap;
     }
@@ -194,14 +199,6 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public void renameGuildInRedis(GuildUUID guildUUID, String name, Jedis jedis) {
-        String root = GuildData.getJedisKey(guildUUID);
-        // Write name
-        jedis.set(root + ":" + GuildDataField.NAME.getField(), name);
-
-    }
-
-    @Override
     public void setGuildForPlayer(UUID uuid, String name) {
         String database = RunicCore.getDataAPI().getMongoDatabase().getName();
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
@@ -213,10 +210,6 @@ public class DataManager implements DataAPI, Listener {
                 jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
             }
         }
-    }
-
-    public HashMap<UUID, GuildInfo> getGuildInfoMap() {
-        return guildInfoMap;
     }
 
     @EventHandler(priority = EventPriority.LOW) // early

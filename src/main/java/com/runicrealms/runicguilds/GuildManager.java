@@ -112,7 +112,6 @@ public class GuildManager implements GuildsAPI, Listener {
                 GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID);
                 guildDataNoBank.removeMember(toRemove, jedis);
                 guildDataNoBank.writeToJedis(jedis);
-                // todo: edit their 'guild' tag in Redis?
             }
         });
     }
@@ -137,25 +136,23 @@ public class GuildManager implements GuildsAPI, Listener {
         if (name.length() > 16) {
             return GuildCreationResult.NAME_TOO_LONG;
         }
-        // todo: Ensure guild name and prefix are unique?
-//        for (Object obj : guildDataMap.keySet()) {
-//            String guildPrefix = (String) obj;
-//            GuildData guildData = (GuildData) guildDataMap.get(guildPrefix);
-//            if (guildData.getGuild().getGuildName().equalsIgnoreCase(name)) {
-//                return GuildCreationResult.NAME_NOT_UNIQUE;
-//            }
-//            if (guildData.getGuild().getOwner().getUUID().toString().equalsIgnoreCase(owner.toString())) {
-//                return GuildCreationResult.CREATOR_IN_GUILD;
-//            }
+
+        for (GuildInfo guildInfo : RunicGuilds.getDataAPI().getGuildInfoMap().values()) {
+            String otherName = guildInfo.getName();
+            String otherPrefix = guildInfo.getPrefix();
+            if (otherName.equalsIgnoreCase(name)) {
+                return GuildCreationResult.NAME_NOT_UNIQUE;
+            }
+            // todo: ensure members cannot make guild
 //            for (GuildMember member : guildData.getGuild().getMembers()) {
 //                if (member.getUUID().toString().equalsIgnoreCase(owner.toString())) {
 //                    return GuildCreationResult.CREATOR_IN_GUILD;
 //                }
 //            }
-//            if (guildPrefix.equalsIgnoreCase(prefix)) {
-//                return GuildCreationResult.PREFIX_NOT_UNIQUE;
-//            }
-//        }
+            if (otherPrefix.equalsIgnoreCase(prefix)) {
+                return GuildCreationResult.PREFIX_NOT_UNIQUE;
+            }
+        }
         // Setup empty bank
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             // Create new guild, write to Redis (will mark it for Mongo save)
@@ -167,7 +164,7 @@ public class GuildManager implements GuildsAPI, Listener {
                             prefix,
                             new MemberData(ownerUuid, GuildRank.OWNER, 0)
                     );
-            // todo: write to mongo?
+            guildData.addDocumentToMongo();
             guildData.writeToJedis(jedis);
             RunicGuilds.getDataAPI().setGuildForPlayer(ownerUuid, name);
             // Cache latency-sensitive fields in-memory

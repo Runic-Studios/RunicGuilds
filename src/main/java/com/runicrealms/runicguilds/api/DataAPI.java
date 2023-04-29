@@ -57,6 +57,11 @@ public interface DataAPI {
     GuildInfo getGuildInfo(OfflinePlayer player);
 
     /**
+     * @return all in-memory guilds. Used for guild creation to ensure names are unique
+     */
+    HashMap<UUID, GuildInfo> getGuildInfoMap();
+
+    /**
      * Data structure that maps a PLAYER uuid to a GUILD uuid
      *
      * @return map of player uuid to guild uuid
@@ -111,15 +116,6 @@ public interface DataAPI {
      * @return the settings of the guild
      */
     GuildData loadSettingsData(GuildUUID guildUUID, Jedis jedis);
-
-    /**
-     * Renames the guild by updating its shared field in redis
-     *
-     * @param guildUUID uuid of the guild
-     * @param name      the new name of the guild
-     * @param jedis     a new Jedis resource
-     */
-    void renameGuildInRedis(GuildUUID guildUUID, String name, Jedis jedis);
 
     /**
      * Player's have a 'foreign' key that specifies the name of their guild.
