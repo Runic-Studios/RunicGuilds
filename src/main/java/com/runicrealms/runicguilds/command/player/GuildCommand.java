@@ -204,7 +204,7 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
-        // Ensure a guild exists for all other commands
+        // Ensure a guild exists for all following commands
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "A guild was not found."));

@@ -272,9 +272,7 @@ public class GuildData implements SessionDataMongo {
      */
     public void writeToJedis(Jedis jedis) {
         String root = getJedisKey(this.guildUUID);
-        // Include this guild in the guild set (used to load on startup)
         String database = RunicCore.getDataAPI().getMongoDatabase().getName();
-        jedis.sadd(database + ":guilds:ids", this.guildUUID.getUUID().toString());
         // Inform the server that this guild should be saved to mongo on next task (jedis data is refreshed)
         jedis.sadd(database + ":" + "markedForSave:guilds", this.guildUUID.getUUID().toString());
         // Write base fields as map

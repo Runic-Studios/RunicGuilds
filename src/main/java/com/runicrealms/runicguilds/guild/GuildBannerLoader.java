@@ -55,7 +55,7 @@ public class GuildBannerLoader extends BukkitRunnable {
     }
 
     /**
-     * A runnable (which can be called async) to sort the guilds, then calls a sync task to spawn
+     * A runnable (should be SYNC) to sort the guilds, then calls a sync task to spawn
      * banners based on the top sorted guilds
      */
     @Override
@@ -80,7 +80,7 @@ public class GuildBannerLoader extends BukkitRunnable {
                         }
                     }
 
-                    Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> this.makeBanners(guildsToDisplay));
+                    this.makeBanners(guildsToDisplay);
                 })
                 .execute();
     }

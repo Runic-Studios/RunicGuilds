@@ -66,12 +66,22 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public String getGuildForPlayer(UUID uuid) {
-        // Load from Redis
+        // 1. Load from memory
+        if (playerToGuildMap.get(uuid) != null) {
+            GuildInfo guildInfo = guildInfoMap.get(playerToGuildMap.get(uuid));
+            return guildInfo.getName();
+        }
+        // 2. Load from Redis
         String database = RunicCore.getDataAPI().getMongoDatabase().getName();
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             String key = database + ":" + uuid + ":guild";
-            return jedis.get(key);
+            if (jedis.exists(key)) {
+                return jedis.get(key);
+            } else {
+                return "None";
+            }
         }
+        // 3. TODO: load from mongo
     }
 
     @Override
@@ -196,6 +206,16 @@ public class DataManager implements DataAPI, Listener {
     @Override
     public void setGuildForPlayer(UUID uuid, String name) {
         String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+        // Set the guild name
+        if (!name.equalsIgnoreCase("none")) {
+            GuildInfo guildInfo = this.getGuildInfo(name);
+            if (guildInfo != null) {
+                this.playerToGuildMap.put(uuid, guildInfo.getGuildUUID().getUUID());
+            }
+        } else {
+            this.playerToGuildMap.remove(uuid);
+        }
+        // Save the data in Redis / core (which saves in Mongo)
         try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
             String key = database + ":" + uuid + ":guild";
             if (name.equalsIgnoreCase("none")) {

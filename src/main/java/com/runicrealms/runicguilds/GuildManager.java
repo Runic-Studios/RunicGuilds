@@ -171,8 +171,8 @@ public class GuildManager implements GuildsAPI, Listener {
             GuildInfo guildInfo = new GuildInfo(guildData);
             RunicGuilds.getDataAPI().addGuildInfoToMemory(guildInfo);
             RunicGuilds.getDataAPI().getPlayerToGuildMap().put(ownerUuid, guildInfo.getGuildUUID().getUUID());
-            Bukkit.broadcastMessage("adding guild info to memory");
-            Bukkit.broadcastMessage("guildUUID is " + guildInfo.getGuildUUID().getUUID());
+//            Bukkit.broadcastMessage("adding guild info to memory");
+//            Bukkit.broadcastMessage("guildUUID is " + guildInfo.getGuildUUID().getUUID());
         }
         return GuildCreationResult.SUCCESSFUL;
     }
