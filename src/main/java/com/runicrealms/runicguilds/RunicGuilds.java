@@ -15,6 +15,7 @@ import com.runicrealms.runicguilds.guild.GuildBannerLoader;
 import com.runicrealms.runicguilds.guild.PostedGuildBanner;
 import com.runicrealms.runicguilds.listener.*;
 import com.runicrealms.runicguilds.model.DataManager;
+import com.runicrealms.runicguilds.model.MongoTask;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.ui.GuildBannerUIListener;
 import com.runicrealms.runicguilds.ui.GuildInfoUIListener;
@@ -34,7 +35,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class RunicGuilds extends JavaPlugin implements Listener {
-
     private static final Set<UUID> playersCreatingGuild = new HashSet<>();
     private static final Set<PostedGuildBanner> postedGuildBanners = new HashSet<>();
     public static int GUILD_COST;
@@ -47,6 +47,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     private static GuildsAPI guildsAPI;
     private static PaperCommandManager commandManager;
     private static TaskChainFactory taskChainFactory;
+    private static MongoTask mongoTask;
 
     public static <T> TaskChain<T> newChain() {
         return taskChainFactory.newChain();
@@ -74,6 +75,10 @@ public class RunicGuilds extends JavaPlugin implements Listener {
 
     public static GuildsAPI getGuildsAPI() {
         return guildsAPI;
+    }
+
+    public static MongoTask getMongoTask() {
+        return mongoTask;
     }
 
     @Override
@@ -132,6 +137,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
 		Shops
 		 */
         new GuildShopManager();
+        mongoTask = new MongoTask();
     }
 
     @EventHandler
@@ -140,6 +146,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         dataAPI = null;
         guildsAPI = null;
         commandManager = null;
+        mongoTask = null;
     }
 
     private void registerEvents(Listener... listeners) {
