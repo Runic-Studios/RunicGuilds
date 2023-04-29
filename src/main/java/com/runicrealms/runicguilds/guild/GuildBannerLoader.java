@@ -20,7 +20,6 @@ import java.util.*;
  * @author BoBoBalloon, Skyfallin
  */
 public class GuildBannerLoader extends BukkitRunnable {
-
     private static final int MAX_POSTED_BANNERS = 3; // how many banners display?
     private static final Map<String, Location> BANNER_LOCATIONS;
 
@@ -50,7 +49,7 @@ public class GuildBannerLoader extends BukkitRunnable {
         for (int i = 1; i <= guildScores.size(); i++) {
             String path = "banners.number" + i;
             Location location = BANNER_LOCATIONS.get(path);
-            PostedGuildBanner banner = new PostedGuildBanner(guildScores.get(i - 1).getGuildUUID(), location);
+            PostedGuildBanner banner = new PostedGuildBanner(guildScores.get(i - 1).guildUUID(), location);
             RunicGuilds.getPostedGuildBanners().add(banner);
         }
     }
@@ -70,7 +69,7 @@ public class GuildBannerLoader extends BukkitRunnable {
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load all guild scores!")
                 .syncLast(guildScores -> {
                     List<ScoreContainer> guildsToDisplay = new ArrayList<>();
-                    Comparator<ScoreContainer> comparator = Comparator.comparing(ScoreContainer::getScore).reversed();
+                    Comparator<ScoreContainer> comparator = Comparator.comparing(ScoreContainer::score).reversed();
                     guildScores.sort(comparator);
 
                     if (guildScores.size() < MAX_POSTED_BANNERS) {

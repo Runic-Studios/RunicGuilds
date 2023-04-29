@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.database.event.MongoSaveEvent;
+import com.runicrealms.plugin.model.CorePlayerData;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.DataAPI;
 import org.bukkit.Bukkit;
@@ -104,10 +105,13 @@ public class DataManager implements DataAPI, Listener {
         return playerToGuildMap;
     }
 
-    // todo: load
     @Override
     public List<ScoreContainer> loadAllGuildScores() {
-        return null;
+        List<ScoreContainer> scoreContainers = new ArrayList<>();
+        for (UUID guildUUID : this.guildInfoMap.keySet()) {
+            scoreContainers.add(new ScoreContainer(guildInfoMap.get(guildUUID).getGuildUUID(), guildInfoMap.get(guildUUID).getScore()));
+        }
+        return scoreContainers;
     }
 
     @Override
@@ -200,6 +204,10 @@ public class DataManager implements DataAPI, Listener {
                 jedis.set(key, name);
                 jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
             }
+            // Update the memoized guild name in core and prepare for mongo save
+            CorePlayerData corePlayerData = RunicCore.getDataAPI().getCorePlayerData(uuid);
+            corePlayerData.setGuild(name);
+            corePlayerData.writeToJedis(jedis);
         }
     }
 

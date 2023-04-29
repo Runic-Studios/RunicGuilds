@@ -13,7 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class GuildBanner {
     //    private final GuildUUID guildUUID;
-    private final ItemStack banner = new ItemStack(Material.STONE); // todo
+    private ItemStack banner = new ItemStack(Material.STONE); // todo
 
     @SuppressWarnings("unused")
     public GuildBanner() {
@@ -22,7 +22,7 @@ public class GuildBanner {
 
     public GuildBanner(GuildUUID guildUUID) {
 //        this.guildUUID = guildUUID;
-//        this.banner = this.makeDefaultBanner(guildUUID);
+        this.banner = this.makeDefaultBanner(guildUUID);
     }
 
     public GuildBanner(GuildUUID guildUUID, ItemStack itemStack) {

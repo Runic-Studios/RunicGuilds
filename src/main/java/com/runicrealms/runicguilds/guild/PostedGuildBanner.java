@@ -15,7 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Class to spawn the guild banners in hub cities for display
+ * Class that represents the spawned guild banners in hub cities for display
  */
 public class PostedGuildBanner {
     public static final NamespacedKey KEY = new NamespacedKey(RunicGuilds.getInstance(), "bannerKey");
@@ -51,14 +51,20 @@ public class PostedGuildBanner {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
-
+        assert world != null;
         ArmorStand bannerBody = (ArmorStand) world.spawnEntity(new Location(world, x - .5, y - 1.45, z + .78), EntityType.ARMOR_STAND);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
         if (guildInfo != null) {
-            this.armorStandSetup(bannerBody, guildInfo.getGuildBanner().getBannerItem());
+            GuildBanner guildBanner = guildInfo.getGuildBanner();
+            if (guildBanner != null) {
+                this.armorStandSetup(bannerBody, guildInfo.getGuildBanner().getBannerItem());
+            } else {
+                // Banner wasn't loaded for some reason, use default banner
+                this.armorStandSetup(bannerBody, new GuildBanner(guildUUID).getBannerItem());
+            }
         }
 
-        ArmorStand logBody = (ArmorStand) location.getWorld().spawnEntity(new Location(world, x - .5, y - 1.6, z + .5), EntityType.ARMOR_STAND);
+        ArmorStand logBody = (ArmorStand) world.spawnEntity(new Location(world, x - .5, y - 1.6, z + .5), EntityType.ARMOR_STAND);
         this.armorStandSetup(logBody, new ItemStack(Material.OAK_LOG, 1));
 
         return new ArmorStand[]{bannerBody, logBody};
