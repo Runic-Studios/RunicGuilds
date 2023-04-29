@@ -4,7 +4,6 @@ import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.model.SessionDataMongo;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
-import com.runicrealms.runicguilds.guild.GuildBanner;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
@@ -38,7 +37,7 @@ public class GuildData implements SessionDataMongo {
     private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
     private GuildBankData bankData;
     private SettingsData settingsData;
-    private GuildBanner guildBanner;
+//    private GuildBanner guildBanner;
 
     @SuppressWarnings("unused")
     public GuildData() {
@@ -61,7 +60,7 @@ public class GuildData implements SessionDataMongo {
         this.prefix = prefix;
         this.bankData = new GuildBankData();
         this.settingsData = new SettingsData();
-        this.guildBanner = new GuildBanner(guildUUID);
+//        this.guildBanner = new GuildBanner(guildUUID);
         this.memberDataMap.put(memberData.getUuid(), memberData);
     }
 
@@ -83,9 +82,6 @@ public class GuildData implements SessionDataMongo {
         this.name = fieldsMap.get(GuildDataField.NAME.getField());
         this.prefix = fieldsMap.get(GuildDataField.PREFIX.getField());
         this.exp = Integer.parseInt(fieldsMap.get(GuildDataField.EXP.getField()));
-//        this.name = key + ":name";
-//        this.prefix = key + ":prefix";
-//        this.exp = Integer.parseInt(key + ":exp");
         this.memberDataMap = RunicGuilds.getDataAPI().loadGuildMembers(getGuildUUID(), jedis);
         // todo: remaining fields
 //        this.bankData;
@@ -151,13 +147,13 @@ public class GuildData implements SessionDataMongo {
         this.exp = exp;
     }
 
-    public GuildBanner getGuildBanner() {
-        return guildBanner;
-    }
-
-    public void setGuildBanner(GuildBanner guildBanner) {
-        this.guildBanner = guildBanner;
-    }
+//    public GuildBanner getGuildBanner() {
+//        return guildBanner;
+//    }
+//
+//    public void setGuildBanner(GuildBanner guildBanner) {
+//        this.guildBanner = guildBanner;
+//    }
 
     public GuildUUID getGuildUUID() {
         return guildUUID;
@@ -258,12 +254,9 @@ public class GuildData implements SessionDataMongo {
     }
 
     /**
-     * ?
-     *
-     * @param uuid
-     * @return
+     * @return a list of mapped fields for Redis
      */
-    public Map<String, String> toMap(UUID uuid) {
+    public Map<String, String> toMap() {
         return new HashMap<>() {{
             put(GuildDataField.EXP.getField(), String.valueOf(exp));
             put(GuildDataField.GUILD_UUID.getField(), String.valueOf(guildUUID.getUUID()));
@@ -282,19 +275,8 @@ public class GuildData implements SessionDataMongo {
         // Include this guild in the guild set (used to load on startup)
         String database = RunicCore.getDataAPI().getMongoDatabase().getName();
         jedis.sadd(database + ":guilds:ids", this.guildUUID.getUUID().toString());
-        // Write basic fields
-//        jedis.set(root + ":" + GuildDataField.GUILD_UUID.getField(), this.guildUUID.getUUID().toString());
-//        jedis.expire(root + ":" + GuildDataField.GUILD_UUID.getField(), RunicCore.getRedisAPI().getExpireTime());
-//        jedis.set(root + ":" + GuildDataField.NAME.getField(), this.name);
-//        jedis.expire(root + ":" + GuildDataField.NAME.getField(), RunicCore.getRedisAPI().getExpireTime());
-//        jedis.set(root + ":" + GuildDataField.PREFIX.getField(), this.prefix);
-//        jedis.expire(root + ":" + GuildDataField.PREFIX.getField(), RunicCore.getRedisAPI().getExpireTime());
-//        jedis.set(root + ":" + GuildDataField.EXP.getField(), String.valueOf(this.exp));
-//        jedis.expire(root + ":" + GuildDataField.EXP.getField(), RunicCore.getRedisAPI().getExpireTime());
-
-        jedis.hmset(root, this.toMap(this.guildUUID.getUUID()));
-
-
+        // Write base fields as map
+        jedis.hmset(root, this.toMap());
         // Write member data (includes owner)
         if (memberDataMap != null) { // Exclude projection
             for (UUID uuid : this.memberDataMap.keySet()) {

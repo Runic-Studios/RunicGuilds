@@ -1,16 +1,12 @@
 package com.runicrealms.runicguilds.ui;
 
-import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
-import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -56,32 +52,32 @@ public class GuildBannerUIListener implements Listener {
      * @param meta
      */
     private void finish(GuildBannerUI ui, HumanEntity humanEntity, ItemStack dummy, BannerMeta meta) {
-        if (!(humanEntity instanceof Player player)) return;
-        if (ui.getSelectedPattern() != null) {
-            meta.removePattern(meta.getPatterns().size() - 1);
-            dummy.setItemMeta(meta);
-        }
-        if (ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() == null) {
-            dummy.setType(Material.WHITE_BANNER);
-        }
-        if (ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() != null) {
-            Pattern pattern = meta.getPattern(meta.getPatterns().size() - 1);
-            PatternType patternType = pattern.getPattern();
-            meta.removePattern(meta.getPatterns().size() - 1);
-            DyeColor dyeColor = (ui.getDummyBanner().getType() == Material.BLACK_BANNER) ? DyeColor.WHITE : DyeColor.BLACK; //if banner is black, dyecolor = white
-            meta.addPattern(new Pattern(dyeColor, patternType));
-            dummy.setItemMeta(meta);
-        }
-        ui.getBanner().setBanner(dummy.getType(), (BannerMeta) dummy.getItemMeta());
-
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-        if (guildInfo != null) {
-            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
-            // todo: update the banner here?
-        } else {
-            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
-        }
-        humanEntity.closeInventory();
+//        if (!(humanEntity instanceof Player player)) return;
+//        if (ui.getSelectedPattern() != null) {
+//            meta.removePattern(meta.getPatterns().size() - 1);
+//            dummy.setItemMeta(meta);
+//        }
+//        if (ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() == null) {
+//            dummy.setType(Material.WHITE_BANNER);
+//        }
+//        if (ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() != null) {
+//            Pattern pattern = meta.getPattern(meta.getPatterns().size() - 1);
+//            PatternType patternType = pattern.getPattern();
+//            meta.removePattern(meta.getPatterns().size() - 1);
+//            DyeColor dyeColor = (ui.getDummyBanner().getType() == Material.BLACK_BANNER) ? DyeColor.WHITE : DyeColor.BLACK; //if banner is black, dyecolor = white
+//            meta.addPattern(new Pattern(dyeColor, patternType));
+//            dummy.setItemMeta(meta);
+//        }
+//        ui.getBanner().setBanner(dummy.getType(), (BannerMeta) dummy.getItemMeta());
+//
+//        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+//        if (guildInfo != null) {
+//            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
+//            // todo: update the banner here?
+//        } else {
+//            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
+//        }
+//        humanEntity.closeInventory();
     }
 
     /**

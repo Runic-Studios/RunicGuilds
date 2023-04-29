@@ -1,14 +1,12 @@
 package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.character.api.CharacterSelectEvent;
 import com.runicrealms.plugin.database.event.MongoSaveEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.DataAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 
@@ -178,7 +176,6 @@ public class DataManager implements DataAPI, Listener {
         memberKeys.forEach(memberKey -> {
             String[] subKeys = memberKey.split(":");
             String uuidString = subKeys[subKeys.length - 1];
-            Bukkit.broadcastMessage("uuidString is " + uuidString);
             MemberData memberData = loadMemberData(guildUUID, UUID.fromString(uuidString));
             result.put(memberData.getUuid(), memberData);
         });
@@ -212,25 +209,6 @@ public class DataManager implements DataAPI, Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW) // early
-    public void onCharacterSelect(CharacterSelectEvent event) {
-//        UUID uuid = event.getPlayer().getUniqueId();
-//        GuildUUID guildUUID = findIfPlayerHasUUID
-//        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-//            GuildData  = loadGuildData(uuid, jedis);
-//            // todo: create an index for player UUID in members and/or owner
-//            // todo: no need to lookup entire guild here. just load the guild name
-//            .whenComplete((GuildData guildData, Throwable ex) -> {
-//                if (ex != null) {
-//                    Bukkit.getLogger().log(Level.SEVERE, "RunicGuilds failed to load on select for player " + uuid);
-//                    ex.printStackTrace();
-//                } else {
-//                    this.playerToGuildMap.put(uuid, guildData.getUuid());
-//                }
-//            });
-//        }
-    }
-
     /**
      * Saves player guild info when the server is shut down
      * Works even if the player is now offline
@@ -244,13 +222,5 @@ public class DataManager implements DataAPI, Listener {
         // todo: complete
         event.markPluginSaved("guilds");
     }
-
-//    /**
-//     * Updates the guild section of tab for all online players
-//     */
-//    private void updateGuildTabs() {
-//        for (Player player : Bukkit.getOnlinePlayers()) {
-//            GuildUtil.updateGuildTabColumn(player);
-//        }
-//    }
+    
 }
