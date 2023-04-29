@@ -96,7 +96,7 @@ public class GuildEventListener implements Listener {
         guildInfo.setExp(guildInfo.getExp() + event.getAmount());
         // Get the guild data async and update
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID());
+            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
             guildDataNoBank.setExp(amount);
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
                 guildDataNoBank.writeToJedis(jedis);
@@ -157,7 +157,7 @@ public class GuildEventListener implements Listener {
                     try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
                         event.getMemberData().writeToJedis(event.getGuildUUID(), event.getMemberData().getUuid(), jedis);
                     }
-                    return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID());
+                    return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "GuildScoreChangeEvent failed to load!")
                 .syncLast(guildDataNoBank -> {
@@ -173,7 +173,7 @@ public class GuildEventListener implements Listener {
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
                 .syncLast(guildDataNoBank -> {
                     MemberData oldOwnerData = guildDataNoBank.getMemberDataMap().get(guildDataNoBank.getOwnerUuid());

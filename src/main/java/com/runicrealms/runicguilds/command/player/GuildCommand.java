@@ -95,7 +95,7 @@ public class GuildCommand extends BaseCommand {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
                 .sync(guildDataNoBank -> {
                     RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
@@ -259,7 +259,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     String name = args[0];
@@ -354,7 +354,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.RECRUITER)) {
@@ -406,7 +406,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
@@ -455,7 +455,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     if (guildDataNoBank.getMemberDataMap().get(player.getUniqueId()).getRank() == GuildRank.OWNER) {
@@ -501,7 +501,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
@@ -611,7 +611,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     if (!guildDataNoBank.getOwnerUuid().equals(player.getUniqueId())) {

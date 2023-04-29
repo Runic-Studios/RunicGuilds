@@ -3,7 +3,7 @@ package com.runicrealms.runicguilds.model;
 public enum GuildDataField {
 
     EXP("exp"),
-    GUILD_UUID("guildUuid"),
+    GUILD_UUID("guildUUID"),
     NAME("name"),
     PREFIX("prefix"),
     RANK("rank"),

@@ -91,7 +91,7 @@ public interface DataAPI {
      * @param guildUUID of the GUILD
      * @return a GuildData object with no bank data
      */
-    GuildData loadGuildDataNoBank(GuildUUID guildUUID);
+    GuildData loadGuildDataNoBank(UUID guildUUID);
 
     /**
      * Loads only the guild member map from redis/mongo
