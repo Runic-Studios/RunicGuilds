@@ -9,12 +9,15 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.*;
+import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -63,16 +66,10 @@ public class GuildEventListener implements Listener {
             RunicGuilds.getDataAPI().setGuildForPlayer(memberData.getUuid(), "None");
             Player playerMember = Bukkit.getPlayer(memberData.getUuid());
             if (playerMember == null) continue;
-//                        if (GuildBankUtil.isViewingBank(member.getUUID())) {
-//                            GuildBankUtil.close(playerMember);
-//                            // todo: pub/sub
-//                        }
+            if (GuildBankUtil.isViewingBank(memberData.getUuid())) {
+                GuildBankUtil.close(playerMember);
+            }
         }
-//                    if (GuildBankUtil.isViewingBank(guild.getOwner().getUUID())) {
-//                        Player playerOwner = Bukkit.getPlayer(guild.getOwner().getUUID());
-//                        if (playerOwner != null)
-//                            GuildBankUtil.close(playerOwner);
-//                    }
         // Sync visual displays
         syncDisplays(player);
         for (UUID uuid : memberDataMap.keySet()) {
@@ -122,6 +119,7 @@ public class GuildEventListener implements Listener {
         if (event.isCancelled()) return;
         int amount = event.getAmount();
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getGuildUUID());
+        GuildStage currentStage = GuildStage.getFromExp(guildInfo.getExp());
         guildInfo.setExp(guildInfo.getExp() + event.getAmount());
         // Get the guild data async and update
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
@@ -129,6 +127,19 @@ public class GuildEventListener implements Listener {
             guildDataNoBank.setExp(amount);
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
                 guildDataNoBank.writeToJedis(jedis);
+            }
+            GuildStage newStage = GuildStage.getFromExp(guildInfo.getExp());
+            if (currentStage == null || newStage == null) return;
+            if (currentStage != newStage) { // Stage upgrade!
+                for (UUID memberUuid : guildDataNoBank.getMemberDataMap().keySet()) {
+                    Player online = Bukkit.getPlayer(memberUuid);
+                    if (online == null) continue; // Player offline
+                    online.playSound(online.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 0.5f);
+                    online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Your guild has advanced a stage! " +
+                            guildInfo.getName() + " is now stage " + newStage.getName() + "!"));
+                    if (newStage.getStageReward().getMessage().equalsIgnoreCase("")) continue;
+                    online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.GREEN + newStage.getStageReward().getMessage()));
+                }
             }
         });
     }

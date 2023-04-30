@@ -39,7 +39,12 @@ public class MemberData implements SessionDataRedis {
         }
         this.uuid = uuid;
         this.rank = GuildRank.getByIdentifier((fieldsMap.get(GuildDataField.RANK.getField())));
-        this.score = Integer.parseInt(fieldsMap.get(GuildDataField.SCORE.getField()));
+        try {
+            this.score = Integer.parseInt(fieldsMap.get(GuildDataField.SCORE.getField()));
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+            this.score = 0;
+        }
     }
 
     /**
