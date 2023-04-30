@@ -162,7 +162,6 @@ public class GuildEventListener implements Listener {
 
     @EventHandler
     public void onGuildLeave(GuildMemberLeaveEvent event) {
-        Bukkit.broadcastMessage("displayed will be synced");
         Player whoLeft = Bukkit.getPlayer(event.getMember());
         syncDisplays(whoLeft);
         syncMemberDisplays(event.getGuildUUID());
@@ -276,7 +275,7 @@ public class GuildEventListener implements Listener {
         if (player == null) return; // Player went offline
 //        Bukkit.broadcastMessage("syncing guild displays");
         String guildName = RunicGuilds.getDataAPI().getGuildForPlayer(player.getUniqueId());
-        Bukkit.broadcastMessage("guild name is " + guildName);
+//        Bukkit.broadcastMessage("guild name is " + guildName);
         if (guildName == null) {
             RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
         } else {

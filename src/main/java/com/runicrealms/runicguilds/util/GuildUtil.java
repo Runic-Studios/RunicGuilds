@@ -176,6 +176,10 @@ public class GuildUtil {
                             .filter(uuid -> Bukkit.getPlayer(uuid) != null).toList();
                     tableTabList.set(1, 0, new TextTabItem
                             (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
+                    // Reset guild column
+                    for (int i = 1; i < 19; i++) {
+                        tableTabList.remove(1, i);
+                    }
                     int j = 0;
                     for (UUID guildMember : onlineMembers) {
                         if (j > 19) break;
