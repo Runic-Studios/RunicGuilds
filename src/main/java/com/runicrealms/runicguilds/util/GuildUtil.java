@@ -144,8 +144,19 @@ public class GuildUtil {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             Bukkit.broadcastMessage("guild info not found");
+            // Reset guild column
+            for (int i = 0; i < 19; i++) {
+                tableTabList.remove(1, i);
+            }
             tableTabList.set(1, 0, new TextTabItem
                     (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
+//            tableTabList.set(1, j + 1, new TextTabItem
+//                    (
+//                            playerMember.getName(),
+//                            RunicCore.getTabAPI().getPing(playerMember),
+//                            Skins.getPlayer(playerMember)
+//                    ));
+//            j++;
         } else {
             // Load all the members and owner
             Bukkit.broadcastMessage("guild info found for tab");
@@ -173,7 +184,7 @@ public class GuildUtil {
                         tableTabList.set(1, j + 1, new TextTabItem
                                 (
                                         playerMember.getName(),
-                                        RunicCore.getTabAPI().getPing(playerMember),
+                                        playerMember.getPing(),
                                         Skins.getPlayer(playerMember)
                                 ));
                         j++;

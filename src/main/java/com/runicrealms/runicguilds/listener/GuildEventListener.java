@@ -285,22 +285,16 @@ public class GuildEventListener implements Listener {
      * @param guildUUID of the guild to sync
      */
     private void syncMemberDisplays(GuildUUID guildUUID) {
-        TaskChain<?> chain = RunicGuilds.newChain();
-        chain
-                .asyncFirst(() -> {
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-                        return RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
-                    }
-                })
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
-                .syncLast(guildMembers -> {
-                    List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
-                    for (MemberData member : memberDataList) {
-                        Player playerMember = Bukkit.getPlayer(member.getUuid());
-                        if (playerMember == null) continue;
-                        syncDisplays(playerMember);
-                    }
-                })
-                .execute();
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
+            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                Map<UUID, MemberData> guildMembers = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
+                List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
+                for (MemberData member : memberDataList) {
+                    Player playerMember = Bukkit.getPlayer(member.getUuid());
+                    if (playerMember == null) continue; // Player must be online
+                    syncDisplays(playerMember);
+                }
+            }
+        });
     }
 }
