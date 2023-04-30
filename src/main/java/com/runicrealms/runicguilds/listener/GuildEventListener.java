@@ -231,7 +231,7 @@ public class GuildEventListener implements Listener {
         // Ensure player is mapped to their guild in-memory
         UUID uuid = event.getPlayer().getUniqueId();
         String guildName = RunicGuilds.getDataAPI().getGuildForPlayer(uuid);
-        if (guildName != null) {
+        if (guildName != null && !guildName.equalsIgnoreCase("none")) {
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildName);
             RunicGuilds.getDataAPI().getPlayerToGuildMap().put(uuid, guildInfo.getGuildUUID().getUUID());
         }
