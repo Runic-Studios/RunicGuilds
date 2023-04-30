@@ -475,15 +475,20 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
-                .syncLast(guildDataNoBank -> {
+                .asyncFirst(() -> {
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
+                    if (guildDataNoBank == null) return null;
                     if (guildDataNoBank.getMemberDataMap().get(player.getUniqueId()).getRank() == GuildRank.OWNER) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
-                        return;
+                        return null;
                     }
-
-                    RunicGuilds.getGuildsAPI().removeGuildMember(guildInfo.getGuildUUID(), player.getUniqueId());
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        guildDataNoBank.removeMember(player.getUniqueId(), jedis);
+                    }
+                    return guildDataNoBank;
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
+                .syncLast(guildDataNoBank -> {
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
                     Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guildDataNoBank.getGuildUUID(), player.getUniqueId()));
                     GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());

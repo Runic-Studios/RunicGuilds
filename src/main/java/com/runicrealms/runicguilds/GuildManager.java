@@ -105,17 +105,6 @@ public class GuildManager implements GuildsAPI, Listener {
         }
     }
 
-    @Override
-    public void removeGuildMember(GuildUUID guildUUID, UUID toRemove) {
-        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-                GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID.getUUID());
-                guildDataNoBank.removeMember(toRemove, jedis);
-                guildDataNoBank.writeToJedis(jedis);
-            }
-        });
-    }
-
     /**
      * Attempts to create a guild
      *

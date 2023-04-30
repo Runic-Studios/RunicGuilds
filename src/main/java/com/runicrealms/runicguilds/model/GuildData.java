@@ -245,12 +245,13 @@ public class GuildData implements SessionDataMongo {
      * Remove selected member from the guild
      */
     public void removeMember(UUID uuid, Jedis jedis) {
-        int score = this.memberDataMap.get(uuid).getScore();
-        this.memberDataMap.remove(uuid);
-        RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        this.memberDataMap.remove(uuid);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
-        guildInfo.setScore(Math.max(0, guildInfo.getScore() - score));
+        RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
+        this.writeToJedis(jedis);
+        // todo: when do we sync displays?
+        guildInfo.setScore(Math.max(0, this.calculateGuildScore()));
     }
 
     /**
@@ -279,6 +280,7 @@ public class GuildData implements SessionDataMongo {
         jedis.hmset(root, this.toMap());
         // Write member data (includes owner)
         if (memberDataMap != null) { // Exclude projection
+            RunicCore.getRedisAPI().removeAllFromRedis(jedis, root + ":members"); // Reset section
             for (UUID uuid : this.memberDataMap.keySet()) {
                 MemberData memberData = this.memberDataMap.get(uuid);
                 memberData.writeToJedis(this.guildUUID, uuid, jedis);

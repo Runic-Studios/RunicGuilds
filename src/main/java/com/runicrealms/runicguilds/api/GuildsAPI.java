@@ -70,12 +70,4 @@ public interface GuildsAPI {
      */
     void removeBankViewer(GuildUUID guildUUID, UUID uuid);
 
-    /**
-     * Removes the specified player (by uuid) from the
-     *
-     * @param guildUUID of the guild
-     * @param toRemove  uuid of player to remove
-     */
-    void removeGuildMember(GuildUUID guildUUID, UUID toRemove);
-
 }

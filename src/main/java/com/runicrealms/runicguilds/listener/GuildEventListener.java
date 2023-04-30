@@ -10,12 +10,9 @@ import com.runicrealms.runicguilds.api.event.*;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.*;
-import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -143,28 +140,29 @@ public class GuildEventListener implements Listener {
 
     @EventHandler
     public void onGuildKick(GuildMemberKickedEvent event) {
-        OfflinePlayer whoWasKicked = Bukkit.getOfflinePlayer(event.getKicked());
-        Player target = Bukkit.getPlayer(event.getKicked());
-        if (target != null && GuildBankUtil.isViewingBank(target.getUniqueId())) {
-            GuildBankUtil.close(target);
-        }
-        RunicGuilds.getGuildsAPI().removeGuildMember(event.getGuildUUID(), whoWasKicked.getUniqueId());
-        if (whoWasKicked.isOnline()) {
-            Player player = whoWasKicked.getPlayer();
-            assert player != null;
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
-            syncDisplays(player);
-        }
-        syncMemberDisplays(event.getGuildUUID());
-        RunicGuilds.getDataAPI().setGuildForPlayer(whoWasKicked.getUniqueId(), "None");
-        Player player = Bukkit.getPlayer(event.getKicker());
-        if (player != null) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
-        }
+//        OfflinePlayer whoWasKicked = Bukkit.getOfflinePlayer(event.getKicked());
+//        Player target = Bukkit.getPlayer(event.getKicked());
+//        if (target != null && GuildBankUtil.isViewingBank(target.getUniqueId())) {
+//            GuildBankUtil.close(target);
+//        }
+//        RunicGuilds.getGuildsAPI().removeGuildMember(event.getGuildUUID(), whoWasKicked.getUniqueId());
+//        if (whoWasKicked.isOnline()) {
+//            Player player = whoWasKicked.getPlayer();
+//            assert player != null;
+//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
+//            syncDisplays(player);
+//        }
+//        syncMemberDisplays(event.getGuildUUID());
+//        RunicGuilds.getDataAPI().setGuildForPlayer(whoWasKicked.getUniqueId(), "None");
+//        Player player = Bukkit.getPlayer(event.getKicker());
+//        if (player != null) {
+//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
+//        }
     }
 
     @EventHandler
     public void onGuildLeave(GuildMemberLeaveEvent event) {
+        Bukkit.broadcastMessage("displayed will be synced");
         Player whoLeft = Bukkit.getPlayer(event.getMember());
         syncDisplays(whoLeft);
         syncMemberDisplays(event.getGuildUUID());
