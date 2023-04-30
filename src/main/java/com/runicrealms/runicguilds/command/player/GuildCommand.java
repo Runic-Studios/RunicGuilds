@@ -95,9 +95,10 @@ public class GuildCommand extends BaseCommand {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
-                .sync(guildDataNoBank -> {
+                .asyncFirst(() -> {
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
+                    if (guildDataNoBank == null) return null;
+
                     RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
 
                     GuildStage stage = GuildStage.getFromExp(guildInfo.getExp());
@@ -109,8 +110,17 @@ public class GuildCommand extends BaseCommand {
                     // Let's add a guild member!
                     guildDataNoBank.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), GuildRank.RECRUIT, 0));
                     RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guildDataNoBank.getName());
-                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation!"));
 
+                    // Save to Redis
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        guildDataNoBank.writeToJedis(jedis);
+                    }
+
+                    return guildDataNoBank;
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
+                .syncLast(guildDataNoBank -> {
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation!"));
                     Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent
                             (
                                     guildDataNoBank.getGuildUUID(),
@@ -118,14 +128,6 @@ public class GuildCommand extends BaseCommand {
                                     GuildCommandMapManager.getInvites().get(player.getUniqueId())
                             ));
                     GuildCommandMapManager.getInvites().remove(player.getUniqueId());
-                    return guildDataNoBank;
-
-                })
-                .asyncLast(guildDataNoBank -> {
-                    // Create a new jedis resource on this thread (prevent concurrency issues)
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
-                        guildDataNoBank.writeToJedis(jedis);
-                    }
                 })
                 .execute();
     }
