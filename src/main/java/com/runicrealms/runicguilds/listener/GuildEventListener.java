@@ -124,7 +124,7 @@ public class GuildEventListener implements Listener {
         // Get the guild data async and update
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
-            guildDataNoBank.setExp(amount);
+            guildDataNoBank.setExp(guildInfo.getExp());
             try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
                 guildDataNoBank.writeToJedis(jedis);
             }
