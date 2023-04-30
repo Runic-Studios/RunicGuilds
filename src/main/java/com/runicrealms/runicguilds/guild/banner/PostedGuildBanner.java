@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.guild;
+package com.runicrealms.runicguilds.guild.banner;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;

@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.guild;
+package com.runicrealms.runicguilds.guild.banner;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
@@ -10,10 +10,12 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.springframework.data.annotation.Transient;
 
 public class GuildBanner {
     //    private final GuildUUID guildUUID;
-    private ItemStack banner = new ItemStack(Material.STONE); // todo
+    @Transient // doesn't get persisted
+    private ItemStack banner = new ItemStack(Material.STONE); // todo, encode / decode
 
     @SuppressWarnings("unused")
     public GuildBanner() {

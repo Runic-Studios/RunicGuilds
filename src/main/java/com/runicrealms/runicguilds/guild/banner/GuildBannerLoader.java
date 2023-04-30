@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.guild;
+package com.runicrealms.runicguilds.guild.banner;
 
 import com.google.common.collect.Lists;
 import com.runicrealms.libs.taskchain.TaskChain;

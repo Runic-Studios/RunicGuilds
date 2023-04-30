@@ -11,8 +11,8 @@ import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
-import com.runicrealms.runicguilds.guild.GuildBannerLoader;
-import com.runicrealms.runicguilds.guild.PostedGuildBanner;
+import com.runicrealms.runicguilds.guild.banner.GuildBannerLoader;
+import com.runicrealms.runicguilds.guild.banner.PostedGuildBanner;
 import com.runicrealms.runicguilds.listener.*;
 import com.runicrealms.runicguilds.model.DataManager;
 import com.runicrealms.runicguilds.model.MongoTask;
@@ -103,7 +103,6 @@ public class RunicGuilds extends JavaPlugin implements Listener {
                         new GuildBankUtil(),
                         new NpcClickListener(),
                         new GuildBannerUIListener(),
-                        new BannerClickListener(),
                         new RewardExpListener(),
                         new RewardDamageListener(),
                         new RewardMountListener(),

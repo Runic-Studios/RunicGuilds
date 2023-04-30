@@ -1,7 +1,6 @@
 package com.runicrealms.runicguilds.util;
 
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
@@ -49,19 +48,18 @@ public class PlaceholderAPI extends PlaceholderExpansion {
                 } else {
                     return "";
                 }
-            case "rank":
-//                if (guildInfo != null) {
-//                    return guild.getMember(player.getUniqueId()).getRank().getName();
-//                } else {
-//                    return GuildRank.MEMBER.getName();
-//                }
-                return GuildRank.MEMBER.getName(); // todo: cache ranks somewhere in-memory
-            case "score":
-//                if (guildInfo != null && guild.getMember(player.getUniqueId()) != null) {
-//                    return String.valueOf(guild.getMember(player.getUniqueId()).getScore());
-//                } else {
-                // todo: cache member data rank and score somewhere
-                return "0";
+//            case "rank":
+////                if (guildInfo != null) {
+////                    return guild.getMember(player.getUniqueId()).getRank().getName();
+////                } else {
+////                    return GuildRank.MEMBER.getName();
+////                }
+//                return GuildRank.MEMBER.getName();
+//            case "score":
+////                if (guildInfo != null && guild.getMember(player.getUniqueId()) != null) {
+////                    return String.valueOf(guild.getMember(player.getUniqueId()).getScore());
+////                } else {
+//                return "0";
 //                }
             default:
                 return "";

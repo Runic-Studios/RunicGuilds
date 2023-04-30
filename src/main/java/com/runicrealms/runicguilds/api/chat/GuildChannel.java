@@ -17,24 +17,9 @@ import java.util.List;
 
 public class GuildChannel extends ChatChannel {
 
-//    /**
-//     * Displays the guild score of the given player, or 0
-//     *
-//     * @param player to check
-//     * @return their guild score
-//     */
-//    private String displayScore(Player player) {
-//        if (RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()) != null
-//                && RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()) != null) {
-//            return String.valueOf(RunicGuilds.getGuildsAPI().getGuild(player.getUniqueId()).getMember(player.getUniqueId()).getScore());
-//        } else {
-//            return "0";
-//        }
-//    }
-
     @Override
     public String getPrefix() {
-        return "&6[Guild] [%guild_rank%] %luckperms_meta_name_color%%player_name%: ";
+        return "&6[Guild] %luckperms_meta_name_color%%player_name%: "; // [%guild_rank%]
     }
 
     @Override
@@ -73,9 +58,9 @@ public class GuildChannel extends ChatChannel {
                 (
                         HoverEvent.Action.SHOW_TEXT,
                         new Text(PlaceholderAPI.setPlaceholders(player,
-                                ChatColor.DARK_AQUA + "Title: " + ChatColor.AQUA + "%core_prefix%" +
-                                        ChatColor.GOLD + "\nGuild Score: %guild_score%"
-                        ))
+                                ChatColor.DARK_AQUA + "Title: " + ChatColor.AQUA + "%core_prefix%"
+
+                        )) // ChatColor.GOLD + "\nGuild Score: %guild_score%"
                 )
         );
         return textComponent;

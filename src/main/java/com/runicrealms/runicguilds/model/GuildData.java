@@ -5,6 +5,7 @@ import com.runicrealms.plugin.model.SessionDataMongo;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.guild.banner.GuildBanner;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -37,7 +38,7 @@ public class GuildData implements SessionDataMongo {
     private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
     private GuildBankData bankData;
     private SettingsData settingsData;
-//    private GuildBanner guildBanner;
+    private GuildBanner guildBanner;
 
     @SuppressWarnings("unused")
     public GuildData() {
@@ -60,7 +61,7 @@ public class GuildData implements SessionDataMongo {
         this.prefix = prefix;
         this.bankData = new GuildBankData();
         this.settingsData = new SettingsData();
-//        this.guildBanner = new GuildBanner(guildUUID);
+        this.guildBanner = new GuildBanner(guildUUID);
         this.memberDataMap.put(memberData.getUuid(), memberData);
     }
 
@@ -86,7 +87,7 @@ public class GuildData implements SessionDataMongo {
         // todo: remaining fields
 //        this.bankData;
 //        this.settingsData;
-//        this.guildBanner;
+        this.guildBanner = new GuildBanner(guildUUID); // todo: custom
     }
 
     /**
@@ -147,13 +148,13 @@ public class GuildData implements SessionDataMongo {
         this.exp = exp;
     }
 
-//    public GuildBanner getGuildBanner() {
-//        return guildBanner;
-//    }
-//
-//    public void setGuildBanner(GuildBanner guildBanner) {
-//        this.guildBanner = guildBanner;
-//    }
+    public GuildBanner getGuildBanner() {
+        return guildBanner;
+    }
+
+    public void setGuildBanner(GuildBanner guildBanner) {
+        this.guildBanner = guildBanner;
+    }
 
     public GuildUUID getGuildUUID() {
         return guildUUID;

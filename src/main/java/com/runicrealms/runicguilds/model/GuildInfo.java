@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.runicguilds.guild.GuildBanner;
+import com.runicrealms.runicguilds.guild.banner.GuildBanner;
 
 import java.util.UUID;
 
@@ -34,7 +34,7 @@ public class GuildInfo {
         this.prefix = guildData.getPrefix();
         this.exp = guildData.getExp();
         this.score = guildData.calculateGuildScore();
-//        this.guildBanner = guildData.getGuildBanner();
+        this.guildBanner = guildData.getGuildBanner();
         this.settingsData = guildData.getSettingsData();
     }
 

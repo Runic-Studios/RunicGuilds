@@ -1,12 +1,16 @@
 package com.runicrealms.runicguilds.ui;
 
+import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
+import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -46,38 +50,40 @@ public class GuildBannerUIListener implements Listener {
     }
 
     /**
-     * @param ui
+     * ?
+     *
+     * @param bannerUI
      * @param humanEntity
      * @param dummy
      * @param meta
      */
-    private void finish(GuildBannerUI ui, HumanEntity humanEntity, ItemStack dummy, BannerMeta meta) {
-//        if (!(humanEntity instanceof Player player)) return;
-//        if (ui.getSelectedPattern() != null) {
-//            meta.removePattern(meta.getPatterns().size() - 1);
-//            dummy.setItemMeta(meta);
-//        }
-//        if (ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() == null) {
-//            dummy.setType(Material.WHITE_BANNER);
-//        }
-//        if (ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() != null) {
-//            Pattern pattern = meta.getPattern(meta.getPatterns().size() - 1);
-//            PatternType patternType = pattern.getPattern();
-//            meta.removePattern(meta.getPatterns().size() - 1);
-//            DyeColor dyeColor = (ui.getDummyBanner().getType() == Material.BLACK_BANNER) ? DyeColor.WHITE : DyeColor.BLACK; //if banner is black, dyecolor = white
-//            meta.addPattern(new Pattern(dyeColor, patternType));
-//            dummy.setItemMeta(meta);
-//        }
-//        ui.getBanner().setBanner(dummy.getType(), (BannerMeta) dummy.getItemMeta());
-//
-//        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-//        if (guildInfo != null) {
-//            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
-//            // todo: update the banner here?
-//        } else {
-//            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
-//        }
-//        humanEntity.closeInventory();
+    private void finish(GuildBannerUI bannerUI, HumanEntity humanEntity, ItemStack dummy, BannerMeta meta) {
+        if (!(humanEntity instanceof Player player)) return;
+        if (bannerUI.getSelectedPattern() != null) {
+            meta.removePattern(meta.getPatterns().size() - 1);
+            dummy.setItemMeta(meta);
+        }
+        if (bannerUI.getSelectedColor() != null && bannerUI.getChosenColor() == null && bannerUI.getChosenPattern() == null) {
+            dummy.setType(Material.WHITE_BANNER);
+        }
+        if (bannerUI.getSelectedColor() != null && bannerUI.getChosenColor() == null && bannerUI.getChosenPattern() != null) {
+            Pattern pattern = meta.getPattern(meta.getPatterns().size() - 1);
+            PatternType patternType = pattern.getPattern();
+            meta.removePattern(meta.getPatterns().size() - 1);
+            DyeColor dyeColor = (bannerUI.getDummyBanner().getType() == Material.BLACK_BANNER) ? DyeColor.WHITE : DyeColor.BLACK; //if banner is black, dyecolor = white
+            meta.addPattern(new Pattern(dyeColor, patternType));
+            dummy.setItemMeta(meta);
+        }
+        bannerUI.getBanner().setBanner(bannerUI.getGuildUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
+
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        if (guildInfo != null) {
+            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
+            // todo: update the banner here?
+        } else {
+            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
+        }
+        humanEntity.closeInventory();
     }
 
     /**
@@ -87,7 +93,9 @@ public class GuildBannerUIListener implements Listener {
      */
     private boolean isBanner(GuildBannerUI ui, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
+        assert meta != null;
         String name = meta.getPersistentDataContainer().get(ui.getKey(), PersistentDataType.STRING);
+        if (name == null) return false;
         return name.equals("banner");
     }
 
@@ -98,6 +106,7 @@ public class GuildBannerUIListener implements Listener {
      */
     private boolean isConcrete(GuildBannerUI ui, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
+        assert meta != null;
         String name = meta.getPersistentDataContainer().get(ui.getKey(), PersistentDataType.STRING);
         for (DyeColor color : DyeColor.values()) {
             if (color.name().equals(name)) {
@@ -110,14 +119,12 @@ public class GuildBannerUIListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inventory = event.getClickedInventory();
-
         if (inventory == null) return;
-        if (!(inventory.getHolder() instanceof GuildBannerUI)) return;
+        if (!(inventory.getHolder() instanceof GuildBannerUI guildBannerUI)) return;
         if (event.getCurrentItem() == null) return;
 
         event.setCancelled(true);
 
-        GuildBannerUI guildBannerUI = (GuildBannerUI) inventory.getHolder();
         BannerMeta meta = (BannerMeta) guildBannerUI.getDummyBanner().getItemMeta();
         assert meta != null;
         ItemStack item = event.getCurrentItem();

@@ -254,12 +254,10 @@ public class DataManager implements DataAPI, Listener {
      */
     @EventHandler
     public void onMongoSave(MongoSaveEvent event) {
-//        // Cancel the task timer
-//        RunicGuilds.getMongoTask().getTask().cancel();
-//        // Manually save all sync
-//        RunicGuilds.getMongoTask().saveAllToMongo();
-        // todo: complete
-        event.markPluginSaved("guilds");
+        // Cancel the task timer
+        RunicGuilds.getMongoTask().getTask().cancel();
+        // Manually save all data (flush players marked for save)
+        RunicGuilds.getMongoTask().saveAllToMongo(() -> event.markPluginSaved("guilds"));
     }
 
 }
