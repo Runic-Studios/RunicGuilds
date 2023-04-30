@@ -250,7 +250,6 @@ public class GuildData implements SessionDataMongo {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
         RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
         this.writeToJedis(jedis);
-        // todo: when do we sync displays?
         guildInfo.setScore(Math.max(0, this.calculateGuildScore()));
     }
 

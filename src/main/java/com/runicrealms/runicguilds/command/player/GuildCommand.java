@@ -424,34 +424,49 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
+        UUID otherPlayerUuid = GuildUtil.getOfflinePlayerUUID(args[0]);
+        if (otherPlayerUuid == null) {
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "UUID of player to remove was not found!"));
+            return;
+        }
+        if (otherPlayerUuid.toString().equalsIgnoreCase(player.getUniqueId().toString())) {
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can't remove yourself from the guild. To leave, type /guild leave."));
+            return;
+        }
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
-                .syncLast(guildDataNoBank -> {
+                .asyncFirst(() -> {
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to kick other players."));
-                        return;
-                    }
-
-                    UUID otherPlayerUuid = GuildUtil.getOfflinePlayerUUID(args[0]);
-                    if (otherPlayerUuid.toString().equalsIgnoreCase(player.getUniqueId().toString())) {
-                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can't remove yourself from the guild. To leave, type /guild leave."));
-                        return;
+                        return null;
                     }
 
                     if (!guildDataNoBank.isInGuild(otherPlayerUuid)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
-                        return;
+                        return null;
                     }
 
                     GuildRank commandSenderRank = guildDataNoBank.getMemberDataMap().get(player.getUniqueId()).getRank();
                     GuildRank targetRank = guildDataNoBank.getMemberDataMap().get(otherPlayerUuid).getRank();
                     if (targetRank.getRankNumber() <= commandSenderRank.getRankNumber()) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can only kick players that are below your rank!"));
-                        return;
+                        return null;
                     }
-                    // Call event to remove player
+                    // Remove player
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        guildDataNoBank.removeMember(otherPlayerUuid, jedis);
+                    }
+                    return guildDataNoBank;
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
+                .syncLast(guildDataNoBank -> {
+                    // Close the bank
+                    Player onlineTarget = Bukkit.getPlayer(otherPlayerUuid);
+                    if (onlineTarget != null && GuildBankUtil.isViewingBank(otherPlayerUuid)) {
+                        GuildBankUtil.close(onlineTarget);
+                    }
+                    // Complete operation and call event to remove player
                     Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent
                             (
                                     guildDataNoBank.getGuildUUID(),
@@ -489,14 +504,15 @@ public class GuildCommand extends BaseCommand {
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
+                    // Close the bank
+                    if (GuildBankUtil.isViewingBank(player.getUniqueId())) {
+                        GuildBankUtil.close(player);
+                    }
+                    // Complete operation and call event
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
                     Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guildDataNoBank.getGuildUUID(), player.getUniqueId()));
                     GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
                     GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
-
-                    if (GuildBankUtil.isViewingBank(player.getUniqueId())) {
-                        GuildBankUtil.close(player);
-                    }
                 })
                 .execute();
     }

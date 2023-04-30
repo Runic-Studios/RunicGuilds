@@ -13,6 +13,8 @@ import com.runicrealms.runicguilds.model.*;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -140,24 +142,18 @@ public class GuildEventListener implements Listener {
 
     @EventHandler
     public void onGuildKick(GuildMemberKickedEvent event) {
-//        OfflinePlayer whoWasKicked = Bukkit.getOfflinePlayer(event.getKicked());
-//        Player target = Bukkit.getPlayer(event.getKicked());
-//        if (target != null && GuildBankUtil.isViewingBank(target.getUniqueId())) {
-//            GuildBankUtil.close(target);
-//        }
-//        RunicGuilds.getGuildsAPI().removeGuildMember(event.getGuildUUID(), whoWasKicked.getUniqueId());
-//        if (whoWasKicked.isOnline()) {
-//            Player player = whoWasKicked.getPlayer();
-//            assert player != null;
-//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
-//            syncDisplays(player);
-//        }
-//        syncMemberDisplays(event.getGuildUUID());
-//        RunicGuilds.getDataAPI().setGuildForPlayer(whoWasKicked.getUniqueId(), "None");
-//        Player player = Bukkit.getPlayer(event.getKicker());
-//        if (player != null) {
-//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
-//        }
+        OfflinePlayer whoWasKicked = Bukkit.getOfflinePlayer(event.getKicked());
+        if (whoWasKicked.isOnline()) {
+            Player player = whoWasKicked.getPlayer();
+            assert player != null;
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
+            syncDisplays(player);
+        }
+        syncMemberDisplays(event.getGuildUUID());
+        Player player = Bukkit.getPlayer(event.getKicker());
+        if (player != null) {
+            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
+        }
     }
 
     @EventHandler
@@ -186,9 +182,7 @@ public class GuildEventListener implements Listener {
                     return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "GuildScoreChangeEvent failed to load!")
-                .syncLast(guildDataNoBank -> {
-                    guildInfo.setScore(guildDataNoBank.calculateGuildScore());
-                })
+                .syncLast(guildDataNoBank -> guildInfo.setScore(guildDataNoBank.calculateGuildScore()))
                 .execute();
     }
 
