@@ -258,42 +258,60 @@ public class GuildCommand extends BaseCommand {
             return;
         }
 
+        String name = args[0];
+        @SuppressWarnings("deprecation")
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
-                .syncLast(guildDataNoBank -> {
-                    String name = args[0];
-                    @SuppressWarnings("deprecation")
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
+                .sync(guildDataNoBank -> {
                     if (!offlinePlayer.hasPlayedBefore() || !guildDataNoBank.isInGuild(offlinePlayer.getUniqueId())) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
-                        return;
+                        return null;
                     }
 
                     // Get member data of command user
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to demote other players."));
-                        return;
+                        return null;
                     }
 
                     GuildRank commandSenderRank = guildDataNoBank.getMemberDataMap().get(player.getUniqueId()).getRank();
                     GuildRank targetRank = guildDataNoBank.getMemberDataMap().get(offlinePlayer.getUniqueId()).getRank();
                     if (targetRank == GuildRank.RECRUIT) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot demote players of the lowest guild rank!"));
-                        return;
+                        return null;
                     }
 
                     if (targetRank.getRankNumber() <= commandSenderRank.getRankNumber()) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can only demote players that are below your rank!"));
-                        return;
+                        return null;
                     }
 
-                    // Demote success!
+                    return guildDataNoBank;
+                })
+                .abortIfNull()
+                .async(guildDataNoBank -> {
+                    GuildRank targetRank = guildDataNoBank.getMemberDataMap().get(offlinePlayer.getUniqueId()).getRank();
                     guildDataNoBank.getMemberDataMap().get(offlinePlayer.getUniqueId()).setRank(GuildRank.getByNumber(targetRank.getRankNumber() + 1));
-                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + offlinePlayer.getName() + " has been demoted."));
-                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent(guildDataNoBank.getGuildUUID(), offlinePlayer.getUniqueId(), player.getUniqueId()));
+                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                        guildDataNoBank.writeToJedis(jedis);
+                    }
+                    return guildDataNoBank;
+                })
+                .syncLast(guildDataNoBank -> {
+                    // Demote success!
+                    GuildRank newRank = guildDataNoBank.getMemberDataMap().get(offlinePlayer.getUniqueId()).getRank();
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + offlinePlayer.getName() + " has been demoted to rank " + newRank + "!"));
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent
+                            (
+                                    guildDataNoBank.getGuildUUID(),
+                                    offlinePlayer.getUniqueId(),
+                                    player.getUniqueId(),
+                                    newRank
+                            ));
                 })
                 .execute();
     }
@@ -543,7 +561,13 @@ public class GuildCommand extends BaseCommand {
                 .syncLast(guildDataNoBank -> {
                     GuildRank newRank = guildDataNoBank.getMemberDataMap().get(target.getUniqueId()).getRank();
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + target.getName() + " has been promoted to rank " + newRank + "!"));
-                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent(guildDataNoBank.getGuildUUID(), target.getUniqueId(), player.getUniqueId()));
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent
+                            (
+                                    guildDataNoBank.getGuildUUID(),
+                                    target.getUniqueId(),
+                                    player.getUniqueId(),
+                                    newRank
+                            ));
                 })
                 .execute();
     }

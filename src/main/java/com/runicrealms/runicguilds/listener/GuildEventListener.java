@@ -84,6 +84,13 @@ public class GuildEventListener implements Listener {
     }
 
     @EventHandler
+    public void onDemote(GuildMemberDemotedEvent event) {
+        Player demoted = Bukkit.getPlayer(event.getDemoted());
+        if (demoted == null) return; // Player offline
+        demoted.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have been demoted to rank " + event.getNewRank() + "!"));
+    }
+
+    @EventHandler
     public void onGuildCreation(GuildCreationEvent event) {
         Player owner = Bukkit.getPlayer(event.getUuid());
         syncDisplays(owner);
@@ -240,6 +247,13 @@ public class GuildEventListener implements Listener {
         corePlayerData.setGuild(guildName);
         // Sync scoreboard, tab
         syncDisplays(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPromote(GuildMemberPromotedEvent event) {
+        Player promoted = Bukkit.getPlayer(event.getPromoted());
+        if (promoted == null) return; // Player offline
+        promoted.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have been promoted to rank " + event.getNewRank() + "!"));
     }
 
     /**
