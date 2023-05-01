@@ -52,7 +52,7 @@ public class PostedGuildBanner {
         double y = location.getY();
         double z = location.getZ();
         assert world != null;
-        ArmorStand bannerBody = (ArmorStand) world.spawnEntity(new Location(world, x - .5, y - 1.45, z + .78), EntityType.ARMOR_STAND);
+        ArmorStand bannerBody = (ArmorStand) world.spawnEntity(new Location(world, x - .5, y - 1.45, z + .78, location.getYaw(), 0), EntityType.ARMOR_STAND);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
         if (guildInfo != null) {
             GuildBanner guildBanner = guildInfo.getGuildBanner();

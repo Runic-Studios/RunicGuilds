@@ -8,6 +8,7 @@ import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -20,23 +21,34 @@ import java.util.*;
  * @author BoBoBalloon, Skyfallin
  */
 public class GuildBannerLoader extends BukkitRunnable {
-    private static final int MAX_POSTED_BANNERS = 3; // how many banners display?
-    private static final Map<String, Location> BANNER_LOCATIONS;
+    private static final int MAX_POSTED_BANNERS = 3; // How many banners to display
+    private static final Map<String, List<Location>> BANNER_LOCATIONS;
 
     static {
         BANNER_LOCATIONS = new HashMap<>();
-        for (int i = 1; i <= MAX_POSTED_BANNERS; i++) {
-            String path = "banners.number" + i;
+        try {
             FileConfiguration config = RunicGuilds.getInstance().getConfig();
-            World world = Bukkit.getWorld(config.getString(path + ".world"));
-            double x = config.getDouble(path + ".x");
-            double y = config.getDouble(path + ".y");
-            double z = config.getDouble(path + ".z");
-            float yaw = (float) config.getDouble(path + ".yaw");
-            Location location = new Location(world, x, y, z);
-            location.setYaw(yaw);
-            location.getChunk().setForceLoaded(true);
-            BANNER_LOCATIONS.put(path, location);
+            ConfigurationSection configSection = config.getConfigurationSection("banners");
+            for (String key : configSection.getKeys(false)) {
+                Bukkit.getLogger().severe(key);
+                ConfigurationSection bannerSection = configSection.getConfigurationSection(key);
+                List<Map<?, ?>> locationMaps = bannerSection.getMapList("locations");
+                List<Location> locations = new ArrayList<>();
+                for (Map<?, ?> locMap : locationMaps) {
+                    World world = Bukkit.getWorld((String) locMap.get("world"));
+                    double x = ((Number) locMap.get("x")).doubleValue();
+                    double y = ((Number) locMap.get("y")).doubleValue();
+                    double z = ((Number) locMap.get("z")).doubleValue();
+                    float yaw = ((Number) locMap.get("yaw")).floatValue();
+                    Location location = new Location(world, x, y, z);
+                    location.setYaw(yaw);
+                    location.getChunk().setForceLoaded(true);
+                    locations.add(location);
+                }
+                BANNER_LOCATIONS.put(key, locations);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
@@ -47,10 +59,16 @@ public class GuildBannerLoader extends BukkitRunnable {
      */
     private void makeBanners(List<ScoreContainer> guildScores) {
         for (int i = 1; i <= guildScores.size(); i++) {
-            String path = "banners.number" + i;
-            Location location = BANNER_LOCATIONS.get(path);
-            PostedGuildBanner banner = new PostedGuildBanner(guildScores.get(i - 1).guildUUID(), location);
-            RunicGuilds.getPostedGuildBanners().add(banner);
+            String path = switch (i) {
+                case 2 -> "second";
+                case 3 -> "third";
+                default -> "first";
+            };
+            List<Location> locations = BANNER_LOCATIONS.get(path);
+            for (Location location : locations) {
+                PostedGuildBanner banner = new PostedGuildBanner(guildScores.get(i - 1).guildUUID(), location);
+                RunicGuilds.getPostedGuildBanners().add(banner);
+            }
         }
     }
 

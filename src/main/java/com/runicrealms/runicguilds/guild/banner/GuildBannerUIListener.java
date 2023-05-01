@@ -1,4 +1,4 @@
-package com.runicrealms.runicguilds.ui;
+package com.runicrealms.runicguilds.guild.banner;
 
 import com.runicrealms.plugin.utilities.ColorUtil;
 import com.runicrealms.plugin.utilities.GUIUtil;
