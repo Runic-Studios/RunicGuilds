@@ -117,7 +117,6 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildExp(GiveGuildEXPEvent event) {
         if (event.isCancelled()) return;
-        int amount = event.getAmount();
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getGuildUUID());
         GuildStage currentStage = GuildStage.getFromExp(guildInfo.getExp());
         guildInfo.setExp(guildInfo.getExp() + event.getAmount());

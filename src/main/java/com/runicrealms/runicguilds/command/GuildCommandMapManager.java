@@ -2,6 +2,12 @@ package com.runicrealms.runicguilds.command;
 
 import java.util.*;
 
+/**
+ * Some guild commands map to multiple functions (e.g. accept, confirm)
+ * This class is used to determine which function should be executed
+ *
+ * @author Excel
+ */
 public class GuildCommandMapManager {
     private static final Map<UUID, UUID> transferOwnership = new HashMap<>();
     private static final Map<UUID, UUID> invites = new HashMap<>();

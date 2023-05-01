@@ -50,12 +50,7 @@ public class GuildBannerUIListener implements Listener {
     }
 
     /**
-     * ?
-     *
-     * @param bannerUI
-     * @param humanEntity
-     * @param dummy
-     * @param meta
+     * Completes the guild banner, updating the color and patterns
      */
     private void finish(GuildBannerUI bannerUI, HumanEntity humanEntity, ItemStack dummy, BannerMeta meta) {
         if (!(humanEntity instanceof Player player)) return;
@@ -70,16 +65,16 @@ public class GuildBannerUIListener implements Listener {
             Pattern pattern = meta.getPattern(meta.getPatterns().size() - 1);
             PatternType patternType = pattern.getPattern();
             meta.removePattern(meta.getPatterns().size() - 1);
-            DyeColor dyeColor = (bannerUI.getDummyBanner().getType() == Material.BLACK_BANNER) ? DyeColor.WHITE : DyeColor.BLACK; //if banner is black, dyecolor = white
+            DyeColor dyeColor = (bannerUI.getDummyBanner().getType() == Material.BLACK_BANNER) ? DyeColor.WHITE : DyeColor.BLACK; // If banner is black, dye color = white
             meta.addPattern(new Pattern(dyeColor, patternType));
             dummy.setItemMeta(meta);
         }
-        bannerUI.getBanner().setBanner(bannerUI.getGuildUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
 
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo != null) {
+            bannerUI.getBanner().setBanner(bannerUI.getGuildUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
+            guildInfo.setGuildBanner(bannerUI.getBanner());
             humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
-            // todo: update the banner here?
         } else {
             humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
         }
@@ -87,9 +82,11 @@ public class GuildBannerUIListener implements Listener {
     }
 
     /**
-     * @param ui
-     * @param item
-     * @return
+     * Used for listening to the InventoryClickEvent
+     *
+     * @param ui   that is open
+     * @param item item that was clicked
+     * @return true if clicked item is a banner
      */
     private boolean isBanner(GuildBannerUI ui, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
@@ -100,9 +97,11 @@ public class GuildBannerUIListener implements Listener {
     }
 
     /**
-     * @param ui
-     * @param item
-     * @return
+     * Used for listening to the InventoryClickEvent
+     *
+     * @param ui   that is open
+     * @param item item that was clicked
+     * @return true if clicked item is concrete
      */
     private boolean isConcrete(GuildBannerUI ui, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
@@ -167,8 +166,7 @@ public class GuildBannerUIListener implements Listener {
     }
 
     /**
-     * @param ui
-     * @param meta
+     * Sets the color of this banner layer / pattern
      */
     private void selectColor(GuildBannerUI ui, BannerMeta meta) {
         DyeColor color = DyeColor.WHITE;

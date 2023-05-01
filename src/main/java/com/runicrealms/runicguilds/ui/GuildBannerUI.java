@@ -56,7 +56,7 @@ public class GuildBannerUI implements InventoryHolder {
     private int page;
 
     public GuildBannerUI(GuildUUID guildUUID) {
-        this.inventory = Bukkit.createInventory(this, 54, ColorUtil.format("&r&6Guild Banner"));
+        this.inventory = Bukkit.createInventory(this, 54, ColorUtil.format("&r&6Banner Editor"));
         this.guildUUID = guildUUID;
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
         if (guildInfo != null) {
@@ -64,19 +64,8 @@ public class GuildBannerUI implements InventoryHolder {
         } else {
             this.banner = new GuildBanner(guildUUID);
         }
-        this.dummyBanner = this.banner();
+        this.dummyBanner = this.setupDummyBanner();
         setupColorMenu();
-    }
-
-    private ItemStack banner() {
-        ItemStack item = new ItemStack(Material.WHITE_BANNER, 1);
-        BannerMeta meta = (BannerMeta) item.getItemMeta();
-        assert meta != null;
-        meta.setDisplayName(ColorUtil.format("&6&lClick &7to finish the banner"));
-        meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-        meta.getPersistentDataContainer().set(this.key, PersistentDataType.STRING, "banner");
-        item.setItemMeta(meta);
-        return item;
     }
 
     public GuildBanner getBanner() {
@@ -223,5 +212,16 @@ public class GuildBannerUI implements InventoryHolder {
         for (int i = 0; i < slots.length; i++) {
             this.inventory.setItem(slots[i], this.getConcrete(colors[i]));
         }
+    }
+
+    private ItemStack setupDummyBanner() {
+        ItemStack item = this.banner.getBannerItem();
+        BannerMeta meta = (BannerMeta) item.getItemMeta();
+        assert meta != null;
+        meta.setDisplayName(ColorUtil.format("&6&lClick &7to finish the banner"));
+        meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+        meta.getPersistentDataContainer().set(this.key, PersistentDataType.STRING, "banner");
+        item.setItemMeta(meta);
+        return item;
     }
 }
