@@ -19,6 +19,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public class PostedGuildBanner {
     public static final NamespacedKey KEY = new NamespacedKey(RunicGuilds.getInstance(), "bannerKey");
+    // constants to adjust the location based on the yaw
+    final double OFFSET_X_YAW_90 = 0.78;
+    final double OFFSET_Z_YAW_90 = 0.5;
     private final GuildUUID guildUUID;
     private final ArmorStand[] banner;
     private final Hologram hologram;
@@ -52,7 +55,18 @@ public class PostedGuildBanner {
         double y = location.getY();
         double z = location.getZ();
         assert world != null;
-        ArmorStand bannerBody = (ArmorStand) world.spawnEntity(new Location(world, x - .5, y - 1.45, z + .78, location.getYaw(), 0), EntityType.ARMOR_STAND);
+        double adjustedX = x - OFFSET_Z_YAW_90;
+        double adjustedZ = z + OFFSET_X_YAW_90;
+        if (location.getYaw() == 90) {
+            adjustedX += OFFSET_Z_YAW_90;
+            adjustedX -= OFFSET_X_YAW_90;
+            adjustedZ -= OFFSET_X_YAW_90;
+            adjustedZ += OFFSET_Z_YAW_90;
+        }
+        ArmorStand bannerBody = (ArmorStand) world.spawnEntity(new Location
+                (
+                        world, adjustedX, y - 1.45, adjustedZ, location.getYaw(), 0
+                ), EntityType.ARMOR_STAND);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
         if (guildInfo != null) {
             GuildBanner guildBanner = guildInfo.getGuildBanner();
