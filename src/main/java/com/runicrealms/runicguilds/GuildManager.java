@@ -1,5 +1,6 @@
 package com.runicrealms.runicguilds;
 
+import com.runicrealms.RunicChat;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -124,6 +125,19 @@ public class GuildManager implements GuildsAPI, Listener {
         }
         if (name.length() > 16) {
             return GuildCreationResult.NAME_TOO_LONG;
+        }
+
+        // Use a regular expression to filter bad words
+        String regex = "(?i)\\b(" + String.join("|", RunicChat.getWordsToFilter()) + ")\\b";
+        String filteredName = name.replaceAll(regex, "***");
+        boolean nameWasFiltered = !filteredName.equals(name);
+        if (nameWasFiltered) {
+            return GuildCreationResult.INAPPROPRIATE_CONTENT;
+        }
+        String filteredPrefix = prefix.replaceAll(regex, "***");
+        boolean prefixWasFiltered = !filteredPrefix.equals(prefix);
+        if (prefixWasFiltered) {
+            return GuildCreationResult.INAPPROPRIATE_CONTENT;
         }
 
         for (GuildInfo guildInfo : RunicGuilds.getDataAPI().getGuildInfoMap().values()) {

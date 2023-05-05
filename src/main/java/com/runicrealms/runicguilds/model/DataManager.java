@@ -225,7 +225,7 @@ public class DataManager implements DataAPI, Listener {
                 jedis.expire(key, RunicCore.getRedisAPI().getExpireTime());
             }
             // Update the memoized guild name in core and prepare for mongo save
-            CorePlayerData corePlayerData = RunicCore.getDataAPI().getCorePlayerData(uuid);
+            CorePlayerData corePlayerData = RunicCore.getDataAPI().loadCorePlayerData(uuid);
             corePlayerData.setGuild(name);
             corePlayerData.writeToJedis(jedis);
         }
