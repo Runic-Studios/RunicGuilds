@@ -9,6 +9,8 @@ import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.api.event.GuildInvitationAcceptedEvent;
 import com.runicrealms.runicguilds.api.event.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.api.event.GuildMemberLeaveEvent;
+import com.runicrealms.runicguilds.api.event.GuildOwnershipTransferedEvent;
+import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.Guild;
 import com.runicrealms.runicguilds.guild.GuildMember;
