@@ -3,7 +3,7 @@ description: Runic Realms Guilds RunicGuilds, by Excel
 version: 1.0
 main: com.runicrealms.runicguilds.RunicGuilds
 api-version: 1.13
-softdepend: [ PlaceholderAPI, RunicRestart, HolograpicDisplays, RunicChat ]
+softdepend: [ PlaceholderAPI, RunicRestart, HolograpicDisplays, RunicChat, RunicCommon ]
 Permissions:
   permissions.guild-mod:
     description: Allows a moderator to execute guildmod command

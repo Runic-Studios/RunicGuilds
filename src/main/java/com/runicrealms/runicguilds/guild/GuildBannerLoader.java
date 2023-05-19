@@ -8,7 +8,8 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *

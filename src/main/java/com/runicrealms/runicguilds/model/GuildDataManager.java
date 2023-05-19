@@ -11,7 +11,11 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.RunicGuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
-import com.runicrealms.runicguilds.guild.*;
+import com.runicrealms.runicguilds.guild.Guild;
+import com.runicrealms.runicguilds.guild.GuildCreationResult;
+import com.runicrealms.runicguilds.guild.GuildMember;
+import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.runicguilds.guild.GuildRenameResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicrestart.RunicRestart;
@@ -24,7 +28,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

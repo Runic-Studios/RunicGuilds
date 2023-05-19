@@ -10,7 +10,11 @@ import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class MemberData implements SessionDataNested {
     private final String prefix; // of the guild
