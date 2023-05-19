@@ -22,6 +22,7 @@ import com.runicrealms.runicguilds.ui.GuildInfoUIListener;
 import com.runicrealms.runicguilds.ui.GuildMembersUIListener;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.PlaceholderAPI;
+import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicrestart.event.ServerShutdownEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -137,6 +138,9 @@ public class RunicGuilds extends JavaPlugin implements Listener {
 		 */
         new GuildShopManager();
         mongoTask = new MongoTask();
+
+        // Anti dupe handler for guild bank
+        RunicItemsAPI.registerAntiDupeInventoryHandler(player -> GuildBankUtil.isViewingBank(player.getUniqueId()));
     }
 
     @EventHandler
