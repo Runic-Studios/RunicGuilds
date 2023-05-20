@@ -1,11 +1,22 @@
 package com.runicrealms.runicguilds.command.admin;
 
-import com.runicrealms.libs.acf.BaseCommand;
-import com.runicrealms.libs.acf.annotation.*;
-import com.runicrealms.libs.taskchain.TaskChain;
-import com.runicrealms.plugin.utilities.ColorUtil;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.CatchUnknown;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Conditions;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.Syntax;
+import co.aikar.taskchain.TaskChain;
+import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.api.event.*;
+import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
+import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
+import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberKickedEvent;
+import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.banner.GuildBannerLoader;

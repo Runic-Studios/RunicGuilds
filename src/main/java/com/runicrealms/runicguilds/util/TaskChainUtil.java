@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.util;
 
-import com.runicrealms.libs.taskchain.TaskChain;
-import com.runicrealms.libs.taskchain.TaskChainAbortAction;
+import co.aikar.taskchain.TaskChain;
+import co.aikar.taskchain.TaskChainAbortAction;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

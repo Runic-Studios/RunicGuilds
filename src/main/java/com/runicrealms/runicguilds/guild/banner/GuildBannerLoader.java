@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.guild.banner;
 
+import co.aikar.taskchain.TaskChain;
 import com.google.common.collect.Lists;
-import com.runicrealms.libs.taskchain.TaskChain;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.ScoreContainer;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
@@ -12,7 +12,11 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Loader that periodically retrieves the guild score for ALL guilds in redis (active guilds),

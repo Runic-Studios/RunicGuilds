@@ -5,7 +5,8 @@ import com.keenant.tabbed.item.TextTabItem;
 import com.keenant.tabbed.tablist.TableTabList;
 import com.keenant.tabbed.util.Skins;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.plugin.common.util.ColorUtil;
+import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.MemberData;
@@ -160,7 +161,7 @@ public class GuildUtil {
         } else {
             // Load all the members and owner
             Bukkit.broadcastMessage("guild info found for tab");
-            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 getMembersAndPopulate(tableTabList, guildInfo, jedis);
             }
         }

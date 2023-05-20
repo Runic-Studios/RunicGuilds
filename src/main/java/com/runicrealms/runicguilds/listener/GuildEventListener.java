@@ -2,15 +2,29 @@ package com.runicrealms.runicguilds.listener;
 
 import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.character.api.CharacterLoadedEvent;
+import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.model.CorePlayerData;
-import com.runicrealms.plugin.utilities.ColorUtil;
+import com.runicrealms.plugin.rdb.RunicDatabase;
+import com.runicrealms.plugin.rdb.event.CharacterLoadedEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.api.event.*;
+import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
+import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
+import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
+import com.runicrealms.runicguilds.api.event.GuildInvitationAcceptedEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberDemotedEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberKickedEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberLeaveEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberPromotedEvent;
+import com.runicrealms.runicguilds.api.event.GuildOwnershipTransferEvent;
+import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import com.runicrealms.runicguilds.model.*;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildDataField;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
+import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
@@ -46,18 +60,18 @@ public class GuildEventListener implements Listener {
         Map<UUID, MemberData> memberDataMap = guildData.getMemberDataMap();
         // 1. Delete from Redis, remove Guild from 'markedForSave'
         String rootKey = GuildData.getJedisKey(guildData.getGuildUUID());
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
             // Removes all sub-keys for the guild
-            RunicCore.getRedisAPI().removeAllFromRedis(jedis, rootKey);
+            RunicDatabase.getAPI().getRedisAPI().removeAllFromRedis(jedis, rootKey);
             jedis.del(rootKey);
             // Guild is no longer marked for save
-            String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+            String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
             jedis.srem(database + ":markedForSave:guilds", String.valueOf(guildData.getGuildUUID().getUUID()));
         }
         // 2. Delete from Mongo
         Query query = new Query();
         query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField() + ".uuid").is(guildData.getGuildUUID().getUUID()));
-        MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
+        MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
         mongoTemplate.remove(query, GuildData.class);
         // 3. Delete from memory
         RunicGuilds.getDataAPI().getGuildInfoMap().remove(guildData.getGuildUUID().getUUID());
@@ -124,7 +138,7 @@ public class GuildEventListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
             guildDataNoBank.setExp(guildInfo.getExp());
-            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 guildDataNoBank.writeToJedis(jedis);
             }
             GuildStage newStage = GuildStage.getFromExp(guildInfo.getExp());
@@ -186,7 +200,7 @@ public class GuildEventListener implements Listener {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         event.getMemberData().writeToJedis(event.getGuildUUID(), event.getMemberData().getUuid(), jedis);
                     }
                     return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
@@ -218,7 +232,7 @@ public class GuildEventListener implements Listener {
                     }
                     oldOwnerData.setRank(GuildRank.OFFICER);
                     newOwnerData.setRank(GuildRank.OWNER);
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         guildDataNoBank.writeToJedis(jedis);
                     }
                     return guildDataNoBank;
@@ -248,7 +262,7 @@ public class GuildEventListener implements Listener {
             }
         }
         // Update their 'guild' quick lookup tag in core
-        CorePlayerData corePlayerData = event.getCharacterSelectEvent().getCorePlayerData();
+        CorePlayerData corePlayerData = (CorePlayerData) event.getCharacterSelectEvent().getSessionDataMongo();
         corePlayerData.setGuild(guildName);
         // Sync scoreboard, tab
         syncDisplays(event.getPlayer());
@@ -305,7 +319,7 @@ public class GuildEventListener implements Listener {
      */
     private void syncMemberDisplays(GuildUUID guildUUID) {
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 Map<UUID, MemberData> guildMembers = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
                 List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
                 for (MemberData member : memberDataList) {

@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.ui;
 
-import com.runicrealms.libs.taskchain.TaskChain;
-import com.runicrealms.plugin.RunicCore;
+import co.aikar.taskchain.TaskChain;
+import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.RankCompare;
@@ -64,7 +64,7 @@ public class GuildMembersUI implements InventoryHolder {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         HashMap<UUID, MemberData> guildMembers = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
                         List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
                         memberDataList.sort(new RankCompare());

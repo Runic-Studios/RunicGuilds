@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.model.SessionDataMongo;
+import com.runicrealms.plugin.rdb.RunicDatabase;
+import com.runicrealms.plugin.rdb.model.SessionDataMongo;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.GuildRank;
@@ -15,7 +15,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * This is our top-level Data Transfer Object (DTO) that handles read-writing to redis and mongo
@@ -97,7 +101,7 @@ public class GuildData implements SessionDataMongo {
      * @return the root key path
      */
     public static String getJedisKey(GuildUUID guildUUID) {
-        String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
         return database + ":guilds:" + guildUUID.getUUID().toString();
     }
 
@@ -114,7 +118,7 @@ public class GuildData implements SessionDataMongo {
     @SuppressWarnings("unchecked")
     @Override
     public GuildData addDocumentToMongo() {
-        MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
+        MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
         return mongoTemplate.save(this);
     }
 
@@ -273,14 +277,14 @@ public class GuildData implements SessionDataMongo {
      */
     public void writeToJedis(Jedis jedis) {
         String root = getJedisKey(this.guildUUID);
-        String database = RunicCore.getDataAPI().getMongoDatabase().getName();
+        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
         // Inform the server that this guild should be saved to mongo on next task (jedis data is refreshed)
         jedis.sadd(database + ":" + "markedForSave:guilds", this.guildUUID.getUUID().toString());
         // Write base fields as map
         jedis.hmset(root, this.toMap());
         // Write member data (includes owner)
         if (memberDataMap != null) { // Exclude projection
-            RunicCore.getRedisAPI().removeAllFromRedis(jedis, root + ":members"); // Reset section
+            RunicDatabase.getAPI().getRedisAPI().removeAllFromRedis(jedis, root + ":members"); // Reset section
             for (UUID uuid : this.memberDataMap.keySet()) {
                 MemberData memberData = this.memberDataMap.get(uuid);
                 memberData.writeToJedis(this.guildUUID, uuid, jedis);

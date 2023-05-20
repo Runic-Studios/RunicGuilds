@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.listener;
 
-import com.runicrealms.libs.taskchain.TaskChain;
+import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.api.NpcClickEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;

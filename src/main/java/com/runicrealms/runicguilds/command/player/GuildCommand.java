@@ -1,24 +1,41 @@
 package com.runicrealms.runicguilds.command.player;
 
-import com.runicrealms.libs.acf.BaseCommand;
-import com.runicrealms.libs.acf.annotation.*;
-import com.runicrealms.libs.taskchain.TaskChain;
-import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.item.util.ItemRemover;
-import com.runicrealms.plugin.utilities.ColorUtil;
-import com.runicrealms.plugin.utilities.CurrencyUtil;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.CatchUnknown;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.Conditions;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.Syntax;
+import co.aikar.taskchain.TaskChain;
+import com.runicrealms.plugin.common.util.ColorUtil;
+import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.api.event.*;
+import com.runicrealms.runicguilds.api.event.GuildInvitationAcceptedEvent;
+import com.runicrealms.runicguilds.api.event.GuildInvitationDeclinedEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberDemotedEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberInvitedEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberKickedEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberLeaveEvent;
+import com.runicrealms.runicguilds.api.event.GuildMemberPromotedEvent;
+import com.runicrealms.runicguilds.api.event.GuildOwnershipTransferEvent;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.banner.GuildBannerUI;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import com.runicrealms.runicguilds.model.*;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
+import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.model.SettingsData;
 import com.runicrealms.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
+import com.runicrealms.runicitems.util.CurrencyUtil;
+import com.runicrealms.runicitems.util.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -70,7 +87,7 @@ public class GuildCommand extends BaseCommand {
             return false;
         }
 
-        ItemRemover.takeItem(player, CurrencyUtil.goldCoin(), RunicGuilds.GUILD_COST);
+        ItemUtils.takeItem(player, CurrencyUtil.goldCoin(), RunicGuilds.GUILD_COST);
         RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + result.getMessage()));
         return true;
@@ -112,7 +129,7 @@ public class GuildCommand extends BaseCommand {
                     RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guildDataNoBank.getName());
 
                     // Save to Redis
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         guildDataNoBank.writeToJedis(jedis);
                     }
 
@@ -296,7 +313,7 @@ public class GuildCommand extends BaseCommand {
                 .async(guildDataNoBank -> {
                     GuildRank targetRank = guildDataNoBank.getMemberDataMap().get(offlinePlayer.getUniqueId()).getRank();
                     guildDataNoBank.getMemberDataMap().get(offlinePlayer.getUniqueId()).setRank(GuildRank.getByNumber(targetRank.getRankNumber() + 1));
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         guildDataNoBank.writeToJedis(jedis);
                     }
                     return guildDataNoBank;
@@ -454,7 +471,7 @@ public class GuildCommand extends BaseCommand {
                         return null;
                     }
                     // Remove player
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         guildDataNoBank.removeMember(otherPlayerUuid, jedis);
                     }
                     return guildDataNoBank;
@@ -497,7 +514,7 @@ public class GuildCommand extends BaseCommand {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
                         return null;
                     }
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         guildDataNoBank.removeMember(player.getUniqueId(), jedis);
                     }
                     return guildDataNoBank;
@@ -574,7 +591,7 @@ public class GuildCommand extends BaseCommand {
                 .async(guildDataNoBank -> {
                     GuildRank targetRank = guildDataNoBank.getMemberDataMap().get(target.getUniqueId()).getRank();
                     guildDataNoBank.getMemberDataMap().get(target.getUniqueId()).setRank(GuildRank.getByNumber(targetRank.getRankNumber() - 1));
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         guildDataNoBank.writeToJedis(jedis);
                     }
                     return guildDataNoBank;
@@ -623,7 +640,7 @@ public class GuildCommand extends BaseCommand {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         return RunicGuilds.getDataAPI().loadSettingsData(guildInfo.getGuildUUID(), jedis);
                     }
                 })

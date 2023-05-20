@@ -1,9 +1,9 @@
 package com.runicrealms.runicguilds.shop;
 
+import com.runicrealms.plugin.common.util.ChatUtils;
 import com.runicrealms.plugin.item.shops.RunicItemRunnable;
 import com.runicrealms.plugin.item.shops.RunicShopGeneric;
 import com.runicrealms.plugin.item.shops.RunicShopItem;
-import com.runicrealms.plugin.utilities.ChatUtils;
 import com.runicrealms.runicguilds.RunicGuilds;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -12,7 +12,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
 public class GuildShopManager {
 

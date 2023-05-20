@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds;
 
 import com.runicrealms.RunicChat;
-import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
@@ -29,7 +29,7 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @Override
     public void addBankViewer(GuildUUID guildUUID, UUID uuid) {
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
             jedis.sadd(GuildBankUtil.getJedisKey(guildUUID, jedis), uuid.toString());
         }
     }
@@ -82,7 +82,7 @@ public class GuildManager implements GuildsAPI, Listener {
     @Override
     public void giveExperience(GuildUUID guildUUID, int exp) {
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+            try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 // Update in-memory
                 GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
                 guildInfo.setExp(guildInfo.getExp() + exp);
@@ -101,7 +101,7 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @Override
     public void removeBankViewer(GuildUUID guildUUID, UUID uuid) {
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
             jedis.srem(GuildBankUtil.getJedisKey(guildUUID, jedis), uuid.toString());
         }
     }
@@ -157,7 +157,7 @@ public class GuildManager implements GuildsAPI, Listener {
             }
         }
         // Setup empty bank
-        try (Jedis jedis = RunicCore.getRedisAPI().getNewJedisResource()) {
+        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
             // Create new guild, write to Redis (will mark it for Mongo save)
             GuildData guildData = new GuildData
                     (

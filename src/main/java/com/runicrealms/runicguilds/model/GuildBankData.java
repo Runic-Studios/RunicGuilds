@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.model.SessionDataRedis;
+import com.runicrealms.plugin.rdb.model.SessionDataRedis;
 import com.runicrealms.runicitems.item.RunicItem;
 import redis.clients.jedis.Jedis;
 
