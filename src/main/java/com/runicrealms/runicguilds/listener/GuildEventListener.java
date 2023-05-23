@@ -6,6 +6,7 @@ import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.model.CorePlayerData;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.rdb.event.CharacterLoadedEvent;
+import com.runicrealms.runicguilds.GuildManager;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -294,22 +295,17 @@ public class GuildEventListener implements Listener {
      * @param player to sync
      */
     private void syncDisplays(Player player) {
-        if (player == null) return; // Player went offline
-//        Bukkit.broadcastMessage("syncing guild displays");
-        String guildName = RunicGuilds.getDataAPI().getGuildForPlayer(player.getUniqueId());
-//        Bukkit.broadcastMessage("guild name is " + guildName);
-        if (guildName == null) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        if (guildInfo == null) {
             RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
+            Bukkit.getLogger().severe("Guild info was null, setting guild for player to null");
         } else {
-            GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(guildName);
-            if (guild != null) {
-                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guild.getName());
-            } else {
-                RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
-            }
+            RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guildInfo.getName());
         }
-        RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
-        GuildUtil.updateGuildTabColumn(player);
+        if (player.isOnline()) {
+            GuildManager.updateGuildTab(player);
+            RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
+        }
     }
 
     /**

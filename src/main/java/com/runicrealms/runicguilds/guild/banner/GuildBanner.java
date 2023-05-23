@@ -13,9 +13,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.springframework.data.annotation.Transient;
 
 public class GuildBanner {
-    //    private final GuildUUID guildUUID;
-    @Transient // doesn't get persisted
-    private ItemStack banner = new ItemStack(Material.STONE); // todo, encode / decode
+    @Transient // Doesn't get persisted
+    private ItemStack banner = new ItemStack(Material.STONE);
+    private String serializedBanner = "";
 
     @SuppressWarnings("unused")
     public GuildBanner() {
@@ -23,7 +23,6 @@ public class GuildBanner {
     }
 
     public GuildBanner(GuildUUID guildUUID) {
-//        this.guildUUID = guildUUID;
         this.banner = this.makeDefaultBanner(guildUUID);
     }
 
@@ -41,9 +40,13 @@ public class GuildBanner {
         return this.banner;
     }
 
-//    public GuildUUID guildUUID() {
-//        return this.guildUUID;
-//    }
+    public String getSerializedBanner() {
+        return serializedBanner;
+    }
+
+    public void setSerializedBanner(String serializedBanner) {
+        this.serializedBanner = serializedBanner;
+    }
 
     private ItemStack makeDefaultBanner(GuildUUID guildUUID) {
         ItemStack item = new ItemStack(Material.WHITE_BANNER, 1);

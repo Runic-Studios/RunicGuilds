@@ -213,6 +213,9 @@ public class GuildBannerUI implements InventoryHolder {
         }
     }
 
+    /**
+     * @return a clone of the banner ItemStack
+     */
     private ItemStack setupDummyBanner() {
         ItemStack item = this.banner.getBannerItem();
         BannerMeta meta = (BannerMeta) item.getItemMeta();

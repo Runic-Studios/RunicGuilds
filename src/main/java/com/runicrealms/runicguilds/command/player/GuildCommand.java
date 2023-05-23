@@ -37,8 +37,10 @@ import com.runicrealms.runicguilds.util.TaskChainUtil;
 import com.runicrealms.runicitems.util.CurrencyUtil;
 import com.runicrealms.runicitems.util.ItemUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import redis.clients.jedis.Jedis;
@@ -137,7 +139,8 @@ public class GuildCommand extends BaseCommand {
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
                 .syncLast(guildDataNoBank -> {
-                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have accepted the guild invitation!"));
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
+                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.GREEN + "You have accepted the guild invitation!"));
                     Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent
                             (
                                     guildDataNoBank.getGuildUUID(),
