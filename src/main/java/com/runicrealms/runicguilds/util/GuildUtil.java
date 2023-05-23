@@ -141,10 +141,10 @@ public class GuildUtil {
         if (tableTabList == null) {
             return; // tab not setup yet
         }
-        Bukkit.broadcastMessage("updating tab");
+//        Bukkit.broadcastMessage("updating tab");
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
-            Bukkit.broadcastMessage("guild info not found");
+//            Bukkit.broadcastMessage("guild info not found");
             // Reset guild column
             for (int i = 0; i < 19; i++) {
                 tableTabList.remove(1, i);
@@ -160,7 +160,7 @@ public class GuildUtil {
 //            j++;
         } else {
             // Load all the members and owner
-            Bukkit.broadcastMessage("guild info found for tab");
+//            Bukkit.broadcastMessage("guild info found for tab");
             try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 getMembersAndPopulate(tableTabList, guildInfo, jedis);
             }
