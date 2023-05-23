@@ -23,6 +23,7 @@ public class GuildInfo {
     private int score;
     private GuildBanner guildBanner;
     private SettingsData settingsData;
+    private UUID ownerUuid;
 
     /**
      * Updates our in-memory guild info cache from some retrieved GuildData object from Redis/Mongo
