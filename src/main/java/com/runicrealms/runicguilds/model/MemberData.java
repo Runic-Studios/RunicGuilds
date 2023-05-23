@@ -14,7 +14,7 @@ public class MemberData implements SessionDataRedis {
         add(GuildDataField.UUID.getField());
     }};
     private GuildRank rank;
-    private Integer score;
+    private Integer score = 0;
     private UUID uuid; // Of the PLAYER. Not a redundant field. Needed when we project member data
 
     @SuppressWarnings("unused")

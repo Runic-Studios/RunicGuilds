@@ -2,6 +2,8 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.runicguilds.guild.banner.GuildBanner;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -14,7 +16,7 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public class GuildInfo {
     private final GuildUUID guildUUID;
-    private UUID ownerUuid;
+    private final List<UUID> membersUuids = new ArrayList<>(); // todo: needs to have a simple wrapper for in-memory members
     private String name;
     private String prefix;
     private int exp;
