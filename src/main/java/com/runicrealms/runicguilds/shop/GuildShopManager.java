@@ -13,10 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 
 public class GuildShopManager {
 
@@ -28,11 +25,11 @@ public class GuildShopManager {
      * Loads the shop which allows players to purchase a guild
      */
     public void loadGuildHeraldShop() {
-        LinkedHashSet<RunicShopItem> shopItems = new LinkedHashSet<>();
+        ArrayList<RunicShopItem> shopItems = new ArrayList<>();
         ItemStack purchaseGuildItemStack = new ItemStack(Material.WRITABLE_BOOK);
         ItemMeta tradeMeta = purchaseGuildItemStack.getItemMeta();
         if (tradeMeta != null) {
-            tradeMeta.setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + "Guild Charter");
+            tradeMeta.setDisplayName(ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "Guild Charter");
             List<String> lore = new ArrayList<>();
             lore.add("");
             lore.addAll(ChatUtils.formattedText
@@ -44,10 +41,7 @@ public class GuildShopManager {
             tradeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             purchaseGuildItemStack.setItemMeta(tradeMeta);
         }
-        Map<String, Integer> requiredItems = new HashMap<>() {{
-            put("coin", 1500);
-        }};
-        shopItems.add(new RunicShopItem(requiredItems, purchaseGuildItemStack, runGuildHeraldBuy()));
+        shopItems.add(new RunicShopItem(1500, purchaseGuildItemStack, runGuildHeraldBuy()));
         shopItems.forEach(runicShopItem -> runicShopItem.setRemovePayment(false));
         new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", RunicGuilds.GUILD_HERALDS, shopItems, new int[]{13});
     }
