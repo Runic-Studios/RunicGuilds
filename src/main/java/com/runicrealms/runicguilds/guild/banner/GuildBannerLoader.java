@@ -34,7 +34,6 @@ public class GuildBannerLoader extends BukkitRunnable {
             FileConfiguration config = RunicGuilds.getInstance().getConfig();
             ConfigurationSection configSection = config.getConfigurationSection("banners");
             for (String key : configSection.getKeys(false)) {
-                Bukkit.getLogger().severe(key);
                 ConfigurationSection bannerSection = configSection.getConfigurationSection(key);
                 List<Map<?, ?>> locationMaps = bannerSection.getMapList("locations");
                 List<Location> locations = new ArrayList<>();
