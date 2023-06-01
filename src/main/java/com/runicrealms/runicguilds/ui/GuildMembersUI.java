@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.ui;
 
 import co.aikar.taskchain.TaskChain;
+import com.runicrealms.plugin.common.util.GUIUtil;
 import com.runicrealms.plugin.rdb.RunicDatabase;
-import com.runicrealms.plugin.utilities.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.RankCompare;
 import com.runicrealms.runicguilds.model.GuildInfo;

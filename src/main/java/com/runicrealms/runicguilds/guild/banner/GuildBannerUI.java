@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.guild.banner;
 
 import com.runicrealms.plugin.common.util.ColorUtil;
-import com.runicrealms.plugin.utilities.GUIUtil;
+import com.runicrealms.plugin.common.util.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;

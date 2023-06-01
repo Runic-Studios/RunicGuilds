@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.ui;
 
-import com.runicrealms.plugin.utilities.GUIUtil;
+import com.runicrealms.plugin.common.util.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import org.bukkit.Material;
 import org.bukkit.Sound;

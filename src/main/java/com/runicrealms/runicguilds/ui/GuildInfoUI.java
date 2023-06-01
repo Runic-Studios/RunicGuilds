@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.common.util.ColorUtil;
-import com.runicrealms.plugin.utilities.GUIUtil;
+import com.runicrealms.plugin.common.util.GUIUtil;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.util.GuildUtil;
