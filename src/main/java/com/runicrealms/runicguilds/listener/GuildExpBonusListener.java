@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.listener;
 
-import com.runicrealms.plugin.events.RunicExpEvent;
+import com.runicrealms.plugin.events.RunicCombatExpEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.guild.stage.StageReward;
@@ -13,12 +13,11 @@ import org.bukkit.event.Listener;
 /**
  * Listener for the guild stage exp bonus defined in the GuildStage enum
  */
-public class RewardExpListener implements Listener {
+public class GuildExpBonusListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void onPlayerGainExperience(RunicExpEvent event) {
-        if (event.getRunicExpSource() != RunicExpEvent.RunicExpSource.MOB
-                && event.getRunicExpSource() != RunicExpEvent.RunicExpSource.PARTY)
+    public void onPlayerGainExperience(RunicCombatExpEvent event) {
+        if (event.getRunicExpSource() != RunicCombatExpEvent.RunicExpSource.MOB)
             return; // Only mobs or party kills
 
         Player player = event.getPlayer();
@@ -35,10 +34,7 @@ public class RewardExpListener implements Listener {
         // Ensure guild has perk unlocked
         if (guildInfo.getExp() < guildStage.getExp()) return;
 
-        int eventExperience = event.getOriginalAmount(); // exp before other bonuses so we don't apply compound bonuses
-        eventExperience *= expStageReward.getBuffPercent(); // determine bonus amount
-
-        event.setFinalAmount(event.getFinalAmount() + eventExperience);
+        event.setBonus(RunicCombatExpEvent.BonusType.GUILD, expStageReward.getBuffPercent());
     }
 
 }
