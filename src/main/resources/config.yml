@@ -28,6 +28,7 @@ guild-heralds:
   - 479 # Zenyth
   - 480 # Naheen
   - 481 # Naz'mora
+  - 729 # Stonehaven
 guild-bankers:
   - 714 # Azana
   - 715 # Azana
@@ -39,6 +40,7 @@ guild-bankers:
   - 721 # Zenyth
   - 722 # Naheen
   - 723 # Naz'mora
+  - 725 # Stonehaven
 time-challengers:
   - 46
   - 47
