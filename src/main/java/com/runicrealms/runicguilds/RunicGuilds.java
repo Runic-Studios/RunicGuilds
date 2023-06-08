@@ -9,6 +9,8 @@ import com.runicrealms.RunicChat;
 import com.runicrealms.runicguilds.api.DataAPI;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
+import com.runicrealms.runicguilds.boss.GuildBossManager;
+import com.runicrealms.runicguilds.command.admin.GuildBossCommand;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
 import com.runicrealms.runicguilds.guild.banner.GuildBannerLoader;
@@ -53,6 +55,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     private static PaperCommandManager commandManager;
     private static TaskChainFactory taskChainFactory;
     private static MongoTask mongoTask;
+    private static GuildBossManager bossManager;
 
     public static <T> TaskChain<T> newChain() {
         return taskChainFactory.newChain();
@@ -86,6 +89,10 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         return mongoTask;
     }
 
+    public static GuildBossManager getBossManager() {
+        return bossManager;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
@@ -93,6 +100,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         dataAPI = new DataManager();
         guildsAPI = new GuildManager();
         taskChainFactory = BukkitTaskChainFactory.create(this);
+        bossManager = new GuildBossManager();
         GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
         GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
         GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");
@@ -130,6 +138,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         });
         commandManager.registerCommand(new GuildCommand());
         commandManager.registerCommand(new GuildModCMD());
+        commandManager.registerCommand(new GuildBossCommand());
 
         // register placeholder tags
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -154,6 +163,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         guildsAPI = null;
         commandManager = null;
         mongoTask = null;
+        bossManager = null;
     }
 
     private void registerEvents(Listener... listeners) {
