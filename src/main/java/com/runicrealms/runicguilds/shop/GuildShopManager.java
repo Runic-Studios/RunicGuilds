@@ -43,7 +43,7 @@ public class GuildShopManager {
         }
         shopItems.add(new RunicShopItem(1500, purchaseGuildItemStack, runGuildHeraldBuy()));
         shopItems.forEach(runicShopItem -> runicShopItem.setRemovePayment(false));
-        new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", RunicGuilds.GUILD_HERALDS, shopItems, new int[]{13});
+        new RunicShopGeneric(45, ChatColor.GOLD + "Guild Herald", RunicGuilds.GUILD_HERALDS, shopItems, new int[]{}); // 13
     }
 
     private RunicItemRunnable runGuildHeraldBuy() {
