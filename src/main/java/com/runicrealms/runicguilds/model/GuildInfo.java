@@ -22,7 +22,6 @@ public class GuildInfo {
     private int exp;
     private int score;
     private GuildBanner guildBanner;
-    private SettingsData settingsData;
     private UUID ownerUuid;
 
     /**
@@ -38,7 +37,6 @@ public class GuildInfo {
         this.exp = guildData.getExp();
         this.score = guildData.calculateGuildScore();
         this.guildBanner = guildData.getGuildBanner();
-        this.settingsData = guildData.getSettingsData();
     }
 
     public int getExp() {
@@ -92,12 +90,5 @@ public class GuildInfo {
     public void setScore(int score) {
         this.score = score;
     }
-
-    public SettingsData getSettingsData() {
-        return settingsData;
-    }
-
-    public void setSettingsData(SettingsData settingsData) {
-        this.settingsData = settingsData;
-    }
+    
 }

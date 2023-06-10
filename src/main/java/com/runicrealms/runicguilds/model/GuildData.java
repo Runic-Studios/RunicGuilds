@@ -8,7 +8,6 @@ import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.banner.GuildBanner;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -40,8 +39,6 @@ public class GuildData implements SessionDataMongo {
     private String prefix = "";
     private int exp = 0;
     private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
-    private GuildBankData bankData;
-    private SettingsData settingsData;
     private GuildBanner guildBanner;
 
     @SuppressWarnings("unused")
@@ -63,8 +60,6 @@ public class GuildData implements SessionDataMongo {
         this.guildUUID = guildUUID;
         this.name = name;
         this.prefix = prefix;
-        this.bankData = new GuildBankData();
-        this.settingsData = new SettingsData();
         this.guildBanner = new GuildBanner(guildUUID);
         this.memberDataMap.put(memberData.getUuid(), memberData);
     }
@@ -136,14 +131,6 @@ public class GuildData implements SessionDataMongo {
         return result;
     }
 
-    public GuildBankData getBankData() {
-        return bankData;
-    }
-
-    public void setBankData(GuildBankData bankData) {
-        this.bankData = bankData;
-    }
-
     public int getExp() {
         return exp;
     }
@@ -211,14 +198,6 @@ public class GuildData implements SessionDataMongo {
         this.prefix = prefix;
     }
 
-    public SettingsData getSettingsData() {
-        return settingsData;
-    }
-
-    public void setSettingsData(SettingsData settingsData) {
-        this.settingsData = settingsData;
-    }
-
     /**
      * Checks whether the given player has AT LEAST the specified rank
      *
@@ -250,24 +229,13 @@ public class GuildData implements SessionDataMongo {
      * Remove selected member from the guild
      */
     public void removeMember(UUID uuid, Jedis jedis) {
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         this.memberDataMap.remove(uuid);
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
-        RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
-        this.writeToJedis(jedis);
-        guildInfo.setScore(Math.max(0, this.calculateGuildScore()));
-    }
-
-    /**
-     * @return a list of mapped fields for Redis
-     */
-    public Map<String, String> toMap() {
-        return new HashMap<>() {{
-            put(GuildDataField.EXP.getField(), String.valueOf(exp));
-            put(GuildDataField.GUILD_UUID.getField(), String.valueOf(guildUUID.getUUID()));
-            put(GuildDataField.NAME.getField(), name);
-            put(GuildDataField.PREFIX.getField(), prefix);
-        }};
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) { // Player is online
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+            RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
+            guildInfo.setScore(Math.max(0, this.calculateGuildScore()));
+        }
     }
 
     /**
@@ -276,28 +244,28 @@ public class GuildData implements SessionDataMongo {
      * @param jedis some new jedis resource
      */
     public void writeToJedis(Jedis jedis) {
-        String root = getJedisKey(this.guildUUID);
-        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-        // Inform the server that this guild should be saved to mongo on next task (jedis data is refreshed)
-        jedis.sadd(database + ":" + "markedForSave:guilds", this.guildUUID.getUUID().toString());
-        // Write base fields as map
-        jedis.hmset(root, this.toMap());
-        // Write member data (includes owner)
-        if (memberDataMap != null) { // Exclude projection
-            RunicDatabase.getAPI().getRedisAPI().removeAllFromRedis(jedis, root + ":members"); // Reset section
-            for (UUID uuid : this.memberDataMap.keySet()) {
-                MemberData memberData = this.memberDataMap.get(uuid);
-                memberData.writeToJedis(this.guildUUID, uuid, jedis);
-            }
-        }
-        // Write bank data
-        if (bankData != null) { // Exclude projection
-            this.bankData.writeToJedis(this.guildUUID.getUUID(), jedis);
-        }
-        // Write settings data
-        if (settingsData != null) { // Exclude projection
-            this.settingsData.writeToJedis(this.guildUUID.getUUID(), jedis);
-        }
+//        String root = getJedisKey(this.guildUUID);
+//        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
+//        // Inform the server that this guild should be saved to mongo on next task (jedis data is refreshed)
+//        jedis.sadd(database + ":" + "markedForSave:guilds", this.guildUUID.getUUID().toString());
+//        // Write base fields as map
+//        jedis.hmset(root, this.toMap());
+//        // Write member data (includes owner)
+//        if (memberDataMap != null) { // Exclude projection
+//            RunicDatabase.getAPI().getRedisAPI().removeAllFromRedis(jedis, root + ":members"); // Reset section
+//            for (UUID uuid : this.memberDataMap.keySet()) {
+//                MemberData memberData = this.memberDataMap.get(uuid);
+//                memberData.writeToJedis(this.guildUUID, uuid, jedis);
+//            }
+//        }
+//        // Write bank data
+//        if (bankData != null) { // Exclude projection
+//            this.bankData.writeToJedis(this.guildUUID.getUUID(), jedis);
+//        }
+//        // Write settings data
+//        if (settingsData != null) { // Exclude projection
+//            this.settingsData.writeToJedis(this.guildUUID.getUUID(), jedis);
+//        }
     }
 
 }

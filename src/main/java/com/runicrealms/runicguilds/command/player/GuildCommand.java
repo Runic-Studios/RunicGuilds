@@ -29,7 +29,6 @@ import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
-import com.runicrealms.runicguilds.model.SettingsData;
 import com.runicrealms.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -617,52 +616,52 @@ public class GuildCommand extends BaseCommand {
     @Conditions("is-player")
     @CommandCompletion("Recruit|Member|Recruiter|Officer yes|no")
     public void onGuildSettingsBankCommand(Player player, String[] args) {
-        if (args.length != 2) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have use improper arguments to execute this command!"));
-            this.sendHelpMessage(player);
-            return;
-        }
-
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-        if (guildInfo == null) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
-            return;
-        }
-
-        GuildRank rank = GuildRank.getByIdentifier(args[0]);
-        if (rank == null) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That isn't a valid guild rank!"));
-            return;
-        }
-
-        if (rank == GuildRank.OWNER) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot deny/allow bank access to the guild owner!"));
-            return;
-        }
-
-        TaskChain<?> chain = RunicGuilds.newChain();
-        chain
-                .asyncFirst(() -> {
-                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                        return RunicGuilds.getDataAPI().loadSettingsData(guildInfo.getGuildUUID(), jedis);
-                    }
-                })
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
-                .syncLast(guildData -> {
-                    SettingsData settingsData = guildData.getSettingsData();
-                    if (args[1].equalsIgnoreCase("yes") || args[1].equalsIgnoreCase("true")) {
-                        settingsData.getBankSettingsMap().put(rank, true);
-                        // guildData.queueToSave();
-                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
-                    } else if (args[1].equalsIgnoreCase("no") || args[1].equalsIgnoreCase("false")) {
-                        settingsData.getBankSettingsMap().put(rank, true);
-                        // guildData.queueToSave();
-                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
-                    } else {
-                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Please enter \"YES\" or \"NO\"."));
-                    }
-                })
-                .execute();
+//        if (args.length != 2) {
+//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have use improper arguments to execute this command!"));
+//            this.sendHelpMessage(player);
+//            return;
+//        }
+//
+//        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+//        if (guildInfo == null) {
+//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are not in a guild!"));
+//            return;
+//        }
+//
+//        GuildRank rank = GuildRank.getByIdentifier(args[0]);
+//        if (rank == null) {
+//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That isn't a valid guild rank!"));
+//            return;
+//        }
+//
+//        if (rank == GuildRank.OWNER) {
+//            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot deny/allow bank access to the guild owner!"));
+//            return;
+//        }
+//
+//        TaskChain<?> chain = RunicGuilds.newChain();
+//        chain
+//                .asyncFirst(() -> {
+//                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
+//                        return RunicGuilds.getDataAPI().loadSettingsData(guildInfo.getGuildUUID(), jedis);
+//                    }
+//                })
+//                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
+//                .syncLast(guildData -> {
+//                    SettingsData settingsData = guildData.getSettingsData();
+//                    if (args[1].equalsIgnoreCase("yes") || args[1].equalsIgnoreCase("true")) {
+//                        settingsData.getBankSettingsMap().put(rank, true);
+//                        // guildData.queueToSave();
+//                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
+//                    } else if (args[1].equalsIgnoreCase("no") || args[1].equalsIgnoreCase("false")) {
+//                        settingsData.getBankSettingsMap().put(rank, true);
+//                        // guildData.queueToSave();
+//                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Updated guild bank permissions."));
+//                    } else {
+//                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Please enter \"YES\" or \"NO\"."));
+//                    }
+//                })
+//                .execute();
     }
 
     @Subcommand("transfer")

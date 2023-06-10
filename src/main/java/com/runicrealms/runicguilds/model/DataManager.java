@@ -1,7 +1,5 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.model.CorePlayerData;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.rdb.event.MongoSaveEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
@@ -221,16 +219,17 @@ public class DataManager implements DataAPI, Listener {
         } else {
             this.playerToGuildMap.remove(uuid);
         }
-        // Save the data in Redis / core (which saves in Mongo)
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            String key = database + ":" + uuid + ":guild";
-            jedis.set(key, name);
-            jedis.expire(key, RunicDatabase.getAPI().getRedisAPI().getExpireTime());
-            // Update the memoized guild name in core and prepare for mongo save
-            CorePlayerData corePlayerData = RunicCore.getPlayerDataAPI().loadCorePlayerData(uuid);
-            corePlayerData.setGuild(name);
-            corePlayerData.writeToJedis(jedis);
-        }
+        // todo: THERE SHOULD BE NO 'GUILD' FIELD IN CORE. RE-THINK THIS
+//        // Save the data in Redis / core (which saves in Mongo)
+//        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
+//            String key = database + ":" + uuid + ":guild";
+//            jedis.set(key, name);
+//            jedis.expire(key, RunicDatabase.getAPI().getRedisAPI().getExpireTime());
+//            // Update the memoized guild name in core and prepare for mongo save
+//            CorePlayerData corePlayerData = RunicCore.getPlayerDataAPI().loadCorePlayerData(uuid);
+//            corePlayerData.setGuild(name);
+//            corePlayerData.writeToJedis(jedis);
+//        }
     }
 
     /**
