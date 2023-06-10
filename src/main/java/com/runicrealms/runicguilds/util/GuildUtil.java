@@ -9,7 +9,6 @@ import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.MemberData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -29,7 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class GuildUtil {
@@ -173,27 +171,29 @@ public class GuildUtil {
                 .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildMembers(guildInfo.getGuildUUID(), jedis))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
                 .syncLast(memberDataMap -> {
-                    List<UUID> onlineMembers = memberDataMap.values().stream().map(MemberData::getUuid)
-                            .filter(uuid -> Bukkit.getPlayer(uuid) != null).toList();
-                    tableTabList.set(1, 0, new TextTabItem
-                            (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
-                    // Reset guild column
-                    for (int i = 1; i < 19; i++) {
-                        tableTabList.remove(1, i);
-                    }
-                    int j = 0;
-                    for (UUID guildMember : onlineMembers) {
-                        if (j > 19) break;
-                        Player playerMember = Bukkit.getPlayer(guildMember);
-                        if (playerMember == null) continue; // Insurance
-                        tableTabList.set(1, j + 1, new TextTabItem
-                                (
-                                        playerMember.getName(),
-                                        playerMember.getPing(),
-                                        Skins.getPlayer(playerMember)
-                                ));
-                        j++;
-                    }
+                    tableTabList.set(3, 0, new TextTabItem
+                            (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
+//                    List<UUID> onlineMembers = memberDataMap.values().stream().map(MemberData::getUuid)
+//                            .filter(uuid -> Bukkit.getPlayer(uuid) != null).toList();
+//                    tableTabList.set(1, 0, new TextTabItem
+//                            (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
+//                    // Reset guild column
+//                    for (int i = 1; i < 19; i++) {
+//                        tableTabList.remove(1, i);
+//                    }
+//                    int j = 0;
+//                    for (UUID guildMember : onlineMembers) {
+//                        if (j > 19) break;
+//                        Player playerMember = Bukkit.getPlayer(guildMember);
+//                        if (playerMember == null) continue; // Insurance
+//                        tableTabList.set(1, j + 1, new TextTabItem
+//                                (
+//                                        playerMember.getName(),
+//                                        playerMember.getPing(),
+//                                        Skins.getPlayer(playerMember)
+//                                ));
+//                        j++;
+//                    }
                 })
                 .execute();
     }

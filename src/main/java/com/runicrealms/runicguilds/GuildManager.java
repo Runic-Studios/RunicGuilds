@@ -26,8 +26,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,39 +41,43 @@ public class GuildManager implements GuildsAPI, Listener {
      */
     public static void updateGuildTab(Player player) {
         TableTabList tableTabList = RunicCore.getTabAPI().getPlayerTabList(player);
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-        if (guildInfo == null) {
-            tableTabList.set(3, 0, new TextTabItem
-                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
-            // Reset members
-            for (int i = 1; i < 20; i++) {
-                tableTabList.remove(3, i);
-            }
-        } else {
-            getMembersAndPopulate(tableTabList, guildInfo);
-        }
+        tableTabList.set(3, 0, new TextTabItem
+                (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
+//        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+//        if (guildInfo == null) {
+//            tableTabList.set(3, 0, new TextTabItem
+//                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
+//            // Reset members
+//            for (int i = 1; i < 20; i++) {
+//                tableTabList.remove(3, i);
+//            }
+//        } else {
+//            getMembersAndPopulate(tableTabList, guildInfo);
+//        }
     }
 
     private static void getMembersAndPopulate(TableTabList tableTabList, GuildInfo guildInfo) {
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadGuildMembers(guildInfo.getGuildUUID(), jedis);
-            List<UUID> onlineMembers = memberDataMap.values().stream().map(MemberData::getUuid)
-                    .filter(uuid -> Bukkit.getPlayer(uuid) != null).toList();
-            tableTabList.set(3, 0, new TextTabItem
-                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
-            // Reset members
-            for (int i = 1; i < 20; i++) {
-                tableTabList.remove(3, i);
-            }
-            int k = 0;
-            for (UUID guildMember : onlineMembers) {
-                Player member = Bukkit.getPlayer(guildMember);
-                if (member == null) continue; // Insurance
-                if (k > 19) break;
-                tableTabList.set(3, k + 1, new TextTabItem(member.getName(), member.getPing(), Skins.getPlayer(member)));
-                k++;
-            }
-        }
+        tableTabList.set(3, 0, new TextTabItem
+                (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
+//        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
+//            Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadGuildMembers(guildInfo.getGuildUUID(), jedis);
+//            List<UUID> onlineMembers = memberDataMap.values().stream().map(MemberData::getUuid)
+//                    .filter(uuid -> Bukkit.getPlayer(uuid) != null).toList();
+//            tableTabList.set(3, 0, new TextTabItem
+//                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
+//            // Reset members
+//            for (int i = 1; i < 20; i++) {
+//                tableTabList.remove(3, i);
+//            }
+//            int k = 0;
+//            for (UUID guildMember : onlineMembers) {
+//                Player member = Bukkit.getPlayer(guildMember);
+//                if (member == null) continue; // Insurance
+//                if (k > 19) break;
+//                tableTabList.set(3, k + 1, new TextTabItem(member.getName(), member.getPing(), Skins.getPlayer(member)));
+//                k++;
+//            }
+//        }
     }
 
     @Override
