@@ -121,23 +121,36 @@ public class GuildEventListener implements Listener {
         GuildStage currentStage = GuildStage.getFromExp(guildInfo.getExp());
         guildInfo.setExp(guildInfo.getExp() + event.getAmount());
         // Get the guild data async and update
-        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
-            guildDataNoBank.setExp(guildInfo.getExp());
-            GuildStage newStage = GuildStage.getFromExp(guildInfo.getExp());
-            if (currentStage == null || newStage == null) return;
-            if (currentStage != newStage) { // Stage upgrade!
-                for (UUID memberUuid : guildDataNoBank.getMemberDataMap().keySet()) {
-                    Player online = Bukkit.getPlayer(memberUuid);
-                    if (online == null) continue; // Player offline
-                    online.playSound(online.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 0.5f);
-                    online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Your guild has advanced a stage! " +
-                            guildInfo.getName() + " is now stage " + newStage.getName() + "!"));
-                    if (newStage.getStageReward().getMessage().equalsIgnoreCase("")) continue;
-                    online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.GREEN + newStage.getStageReward().getMessage()));
-                }
-            }
-        });
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(event.getUUID()))
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to give exp!")
+                .syncLast(guildData -> {
+                    guildData.setExp(guildInfo.getExp());
+                    GuildStage newStage = GuildStage.getFromExp(guildInfo.getExp());
+                    if (currentStage == null || newStage == null) return;
+                    if (currentStage != newStage) { // Stage upgrade!
+                        for (UUID memberUuid : guildData.getMemberDataMap().keySet()) {
+                            Player online = Bukkit.getPlayer(memberUuid);
+                            if (online == null) continue; // Player offline
+                            online.playSound(online.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 0.5f);
+                            online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Your guild has advanced a stage! " +
+                                    guildInfo.getName() + " is now stage " + newStage.getName() + "!"));
+                            if (newStage.getStageReward().getMessage().equalsIgnoreCase("")) continue;
+                            online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.GREEN + newStage.getStageReward().getMessage()));
+                        }
+                    }
+                    RunicGuilds.getGuildWriteOperation().updateGuildData
+                            (
+                                    guildInfo.getUUID(),
+                                    "exp",
+                                    guildData.getExp(),
+                                    () -> {
+
+                                    }
+                            );
+                })
+                .execute();
     }
 
     @EventHandler
