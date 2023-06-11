@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds.util;
 import com.keenant.tabbed.item.TextTabItem;
 import com.keenant.tabbed.tablist.TableTabList;
 import com.keenant.tabbed.util.Skins;
+import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
@@ -149,7 +150,7 @@ public class GuildUtil {
             if (playerMember == null) continue; // Insurance
             tableTabList.set(3, j + 1, new TextTabItem
                     (
-                            playerMember.getName(),
+                            RunicCore.getTabAPI().getPlayerTabList(playerMember) + playerMember.getName(),
                             playerMember.getPing(),
                             Skins.getPlayer(playerMember)
                     ));
