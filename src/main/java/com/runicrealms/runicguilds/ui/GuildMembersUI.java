@@ -63,7 +63,11 @@ public class GuildMembersUI implements InventoryHolder {
                     Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadMemberDataMap(guildUUID);
                     List<MemberData> memberDataList = new ArrayList<>(memberDataMap.values());
                     memberDataList.sort(new RankCompare());
-
+                    return memberDataList;
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
+                .syncLast(memberDataList -> {
+                    // Open the UI!
                     for (MemberData guildMember : memberDataList) {
                         // Use player's last known name to async fill inventory
                         this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
@@ -74,11 +78,6 @@ public class GuildMembersUI implements InventoryHolder {
                                                 "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
                                 ));
                     }
-                    return memberDataList;
-                })
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
-                .syncLast(memberData -> {
-                    // Open the UI!
                     player.openInventory(this.inventory);
                 })
                 .execute();
