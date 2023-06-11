@@ -125,7 +125,6 @@ public class GuildCommand extends BaseCommand {
 
                     // Let's add a guild member!
                     guildDataNoBank.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), GuildRank.RECRUIT, 0));
-                    RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guildDataNoBank.getName());
 
                     // Save to Redis
                     try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {

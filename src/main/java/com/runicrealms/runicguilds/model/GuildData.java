@@ -207,7 +207,6 @@ public class GuildData implements SessionDataMongo {
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) { // Player is online
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-            RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
             guildInfo.setScore(Math.max(0, this.calculateGuildScore()));
         }
     }

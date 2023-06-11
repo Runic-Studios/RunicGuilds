@@ -55,7 +55,6 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onTabUpdate(TabUpdateEvent event) {
-        Bukkit.broadcastMessage("guilds is responding");
         updateGuildTab(event.getPlayer(), event.getTableTabList());
     }
 
@@ -199,11 +198,10 @@ public class GuildManager implements GuildsAPI, Listener {
                     );
             guildData.addDocumentToMongo();
             guildData.writeToJedis(jedis);
-            RunicGuilds.getDataAPI().setGuildForPlayer(ownerUuid, name);
             // Cache latency-sensitive fields in-memory
             GuildInfo guildInfo = new GuildInfo(guildData);
             RunicGuilds.getDataAPI().addGuildInfoToMemory(guildInfo);
-            RunicGuilds.getDataAPI().getPlayerToGuildMap().put(ownerUuid, guildInfo.getUUID());
+//            RunicGuilds.getDataAPI().getPlayerToGuildMap().put(ownerUuid, guildInfo.getUUID());
 //            Bukkit.broadcastMessage("adding guild info to memory");
 //            Bukkit.broadcastMessage("guildUUID is " + guildInfo.getUUID().getUUID());
         }

@@ -65,7 +65,6 @@ public class GuildEventListener implements Listener {
         RunicGuilds.getDataAPI().getGuildInfoMap().remove(guildData.getUUID());
         // 3. Final cleanup
         for (MemberData memberData : memberDataMap.values()) {
-            RunicGuilds.getDataAPI().setGuildForPlayer(memberData.getUuid(), "None");
             Player playerMember = Bukkit.getPlayer(memberData.getUuid());
             if (playerMember == null) continue;
             if (GuildBankUtil.isViewingBank(memberData.getUuid())) {
@@ -239,20 +238,6 @@ public class GuildEventListener implements Listener {
         // Ensure player is mapped to their guild in-memory
         UUID uuid = event.getPlayer().getUniqueId();
         String guildName = RunicGuilds.getDataAPI().loadGuildForPlayer(uuid);
-        Bukkit.broadcastMessage("LOADING GUILD for player");
-        if (guildName != null) {
-            Bukkit.broadcastMessage("guild name is " + guildName);
-        } else {
-            Bukkit.broadcastMessage("guild name is null");
-        }
-        if (guildName != null
-                && !guildName.equalsIgnoreCase("none")
-                && !guildName.equalsIgnoreCase("")) {
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildName);
-            if (guildInfo != null) {
-                RunicGuilds.getDataAPI().getPlayerToGuildMap().put(uuid, guildInfo.getUUID());
-            }
-        }
         // Update their 'guild' quick lookup tag in core
         CorePlayerData corePlayerData = (CorePlayerData) event.getCharacterSelectEvent().getSessionDataMongo();
         corePlayerData.setGuild(guildName);
@@ -286,13 +271,6 @@ public class GuildEventListener implements Listener {
      * @param player to sync
      */
     private void syncDisplays(Player player) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-        if (guildInfo == null) {
-            RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
-            Bukkit.getLogger().severe("Guild info was null, setting guild for player to null");
-        } else {
-            RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), guildInfo.getName());
-        }
         if (player.isOnline()) {
             GuildManager.updateGuildTab(player);
             RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);

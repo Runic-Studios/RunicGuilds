@@ -58,13 +58,6 @@ public interface DataAPI {
     HashMap<UUID, GuildInfo> getGuildInfoMap();
 
     /**
-     * Data structure that maps a PLAYER uuid to a GUILD uuid
-     *
-     * @return map of player uuid to guild uuid
-     */
-    HashMap<UUID, UUID> getPlayerToGuildMap();
-
-    /**
      * Checks Redis for all guilds' score field, then returns a list of containers
      * with the guild's uuid and score. Used for banners/leaderboards
      *
@@ -97,14 +90,5 @@ public interface DataAPI {
      * @return a map of all member uuids to their data
      */
     Map<UUID, MemberData> loadMemberDataMap(UUID guildUUID);
-
-    /**
-     * Player's have a 'foreign' key that specifies the name of their guild.
-     * This is much faster to lookup than parsing through the list of members
-     *
-     * @param uuid of the player
-     * @param name of the guild "None" if none
-     */
-    void setGuildForPlayer(UUID uuid, String name);
 
 }

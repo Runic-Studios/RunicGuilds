@@ -28,13 +28,10 @@ import java.util.UUID;
  * @author Skyfallin
  */
 public class DataManager implements DataAPI, Listener {
-    // Maps a PLAYER uuid to a GUILD uuid
-    private final HashMap<UUID, UUID> playerToGuildMap;
     // Contains some latency-sensitive data for fastest lookup.
     private final HashMap<UUID, GuildInfo> guildInfoMap;
 
     public DataManager() {
-        playerToGuildMap = new HashMap<>();
         this.guildInfoMap = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
         /*
@@ -44,9 +41,7 @@ public class DataManager implements DataAPI, Listener {
         Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
             Set<GuildData> guildDataSet = getGuildDataFromMongo();
             if (guildDataSet.isEmpty()) return; // No guilds created
-            guildDataSet.forEach(guildData -> {
-                guildInfoMap.put(guildData.getUUID(), new GuildInfo(guildData));
-            });
+            guildDataSet.forEach(guildData -> guildInfoMap.put(guildData.getUUID(), new GuildInfo(guildData)));
         }, 10 * 20L);
         Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
     }
@@ -58,12 +53,6 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public String loadGuildForPlayer(UUID uuid) {
-        // 1. Retrieve from indexed memory
-        if (playerToGuildMap.get(uuid) != null) {
-            GuildInfo guildInfo = guildInfoMap.get(playerToGuildMap.get(uuid));
-            return guildInfo.getName();
-        }
-        Bukkit.getLogger().info("searching memory for player guild");
         // 2. Search all in-memory guilds
         return findPlayerGuild(uuid);
     }
@@ -84,19 +73,14 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public GuildInfo getGuildInfo(Player player) {
-        if (this.playerToGuildMap.get(player.getUniqueId()) == null) return null;
-        UUID guildUUID = this.playerToGuildMap.get(player.getUniqueId());
-        return this.guildInfoMap.get(guildUUID);
+        String guildName = loadGuildForPlayer(player.getUniqueId());
+        if (guildName == null) return null;
+        return getGuildInfo(guildName);
     }
 
     @Override
     public HashMap<UUID, GuildInfo> getGuildInfoMap() {
         return guildInfoMap;
-    }
-
-    @Override
-    public HashMap<UUID, UUID> getPlayerToGuildMap() {
-        return playerToGuildMap;
     }
 
     @Override
@@ -111,7 +95,6 @@ public class DataManager implements DataAPI, Listener {
     @Override
     public GuildData loadGuildData(UUID guildUUID) {
         // Step 1: Check the mongo database
-        Bukkit.broadcastMessage("checking for guild uuid of " + guildUUID);
         Query query = new Query();
         query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
         MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
@@ -144,19 +127,6 @@ public class DataManager implements DataAPI, Listener {
             return guildData.getMemberDataMap();
         }
         return null;
-    }
-
-    @Override
-    public void setGuildForPlayer(UUID uuid, String name) {
-        // Set the guild name
-        if (!name.equalsIgnoreCase("none")) {
-            GuildInfo guildInfo = this.getGuildInfo(name);
-            if (guildInfo != null) {
-                this.playerToGuildMap.put(uuid, guildInfo.getUUID());
-            }
-        } else {
-            this.playerToGuildMap.remove(uuid);
-        }
     }
 
     /**
