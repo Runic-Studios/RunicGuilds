@@ -32,18 +32,21 @@ public class GuildUtil {
     public static final String PREFIX = "&r&6&lGuilds »&r &e";
 
     /**
-     * @param player      the item represents
+     * @param uuid        of player the item represents
      * @param name        of the player
      * @param description of this itemStack
      * @return an ItemStack to display in the ui menu
      */
-    public static ItemStack guildMemberItem(Player player, String name, String description) {
+    public static ItemStack guildMemberItem(UUID uuid, String name, String description) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = item.getItemMeta();
         assert meta != null;
 
         SkullMeta skullMeta = (SkullMeta) meta;
-        skullMeta.setOwningPlayer(player);
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) {
+            skullMeta.setOwningPlayer(player);
+        }
 
         ArrayList<String> lore = new ArrayList<>();
         meta.setDisplayName(ColorUtil.format(name));
@@ -141,5 +144,6 @@ public class GuildUtil {
             j++;
         }
     }
+
 
 }

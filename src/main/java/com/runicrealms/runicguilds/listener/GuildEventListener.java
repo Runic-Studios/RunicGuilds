@@ -108,8 +108,10 @@ public class GuildEventListener implements Listener {
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
                 .syncLast(guildData -> {
-                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully disbanded guild."));
-                    GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
+                    if (player != null) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully disbanded guild."));
+                        GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
+                    }
                 })
                 .execute();
     }
@@ -295,7 +297,7 @@ public class GuildEventListener implements Listener {
      * @param player to sync
      */
     private void syncDisplays(Player player) {
-        if (player.isOnline()) {
+        if (player != null) {
             GuildManager.updateGuildTab(player);
             RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
         }

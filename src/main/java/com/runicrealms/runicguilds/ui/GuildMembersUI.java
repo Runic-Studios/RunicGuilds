@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.ui;
 
 import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.common.util.GUIUtil;
+import com.runicrealms.plugin.common.util.OfflinePlayerUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.RankCompare;
 import com.runicrealms.runicguilds.model.GuildInfo;
@@ -10,7 +11,6 @@ import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -64,15 +64,18 @@ public class GuildMembersUI implements InventoryHolder {
                     Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadMemberDataMap(guildUUID);
                     List<MemberData> memberDataList = new ArrayList<>(memberDataMap.values());
                     memberDataList.sort(new RankCompare());
+
                     for (MemberData guildMember : memberDataList) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guildMember.getUuid());
-                        this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
-                                (
-                                        offlinePlayer.getPlayer(),
-                                        ChatColor.GOLD + offlinePlayer.getName(), // Last known name
-                                        ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
-                                                "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
-                                ));
+                        OfflinePlayerUtil.getName(guildInfo.getOwnerUuid()).thenAcceptAsync(value -> {
+                            // Use player's last known name to async fill inventory
+                            this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
+                                    (
+                                            guildMember.getUuid(),
+                                            ChatColor.GOLD + value, // Last known name
+                                            ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
+                                                    "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
+                                    ));
+                        });
                     }
                     return memberDataList;
                 })
