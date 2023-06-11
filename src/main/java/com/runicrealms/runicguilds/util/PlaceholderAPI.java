@@ -36,18 +36,20 @@ public class PlaceholderAPI extends PlaceholderExpansion {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
 
         switch (lowerArg) {
-            case "name":
+            case "name" -> {
                 if (guildInfo != null) {
                     return guildInfo.getName();
                 } else {
                     return "";
                 }
-            case "prefix":
+            }
+            case "prefix" -> {
                 if (guildInfo != null) {
                     return "[" + guildInfo.getPrefix() + "] ";
                 } else {
                     return "";
                 }
+            }
 //            case "rank":
 ////                if (guildInfo != null) {
 ////                    return guild.getMember(player.getUniqueId()).getRank().getName();
@@ -55,14 +57,16 @@ public class PlaceholderAPI extends PlaceholderExpansion {
 ////                    return GuildRank.MEMBER.getName();
 ////                }
 //                return GuildRank.MEMBER.getName();
-//            case "score":
-////                if (guildInfo != null && guild.getMember(player.getUniqueId()) != null) {
-////                    return String.valueOf(guild.getMember(player.getUniqueId()).getScore());
-////                } else {
-//                return "0";
-//                }
-            default:
+            case "score" -> {
+                if (guildInfo != null) {
+                    return String.valueOf(guildInfo.getScore());
+                } else {
+                    return "0";
+                }
+            }
+            default -> {
                 return "";
+            }
         }
     }
 }

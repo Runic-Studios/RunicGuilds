@@ -234,7 +234,7 @@ public class GuildModCMD extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), target.getUniqueId()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID().getUUID(), target.getUniqueId()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, target, "There was an error trying to give guild score!")
                 .syncLast(memberData -> {
                     Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getGuildUUID(), memberData, amount));
@@ -313,7 +313,7 @@ public class GuildModCMD extends BaseCommand {
         // todo: this doesn't actually reset anything
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), targetUUID))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID().getUUID(), targetUUID))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
                 .syncLast(memberData -> {
                     Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getGuildUUID(), memberData, memberData.getScore()));

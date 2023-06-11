@@ -17,7 +17,6 @@ import redis.clients.jedis.Jedis;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -62,31 +61,6 @@ public class GuildData implements SessionDataMongo {
         this.prefix = prefix;
         this.guildBanner = new GuildBanner(guildUUID);
         this.memberDataMap.put(memberData.getUuid(), memberData);
-    }
-
-    /**
-     * Constructor for retrieving data from Redis
-     *
-     * @param uuid  of the GUILD in Redis
-     * @param jedis a new jedis resource
-     */
-    public GuildData(UUID uuid, Jedis jedis) {
-        this.guildUUID = new GuildUUID(uuid);
-        Map<String, String> fieldsMap = new HashMap<>();
-        String[] fieldsToArray = FIELDS.toArray(new String[0]);
-        String key = GuildData.getJedisKey(guildUUID);
-        List<String> values = jedis.hmget(key, fieldsToArray);
-        for (int i = 0; i < fieldsToArray.length; i++) {
-            fieldsMap.put(fieldsToArray[i], values.get(i));
-        }
-        this.name = fieldsMap.get(GuildDataField.NAME.getField());
-        this.prefix = fieldsMap.get(GuildDataField.PREFIX.getField());
-        this.exp = Integer.parseInt(fieldsMap.get(GuildDataField.EXP.getField()));
-        this.memberDataMap = RunicGuilds.getDataAPI().loadGuildMembers(getGuildUUID(), jedis);
-        // todo: remaining fields
-//        this.bankData;
-//        this.settingsData;
-        this.guildBanner = new GuildBanner(guildUUID); // todo: custom
     }
 
     /**

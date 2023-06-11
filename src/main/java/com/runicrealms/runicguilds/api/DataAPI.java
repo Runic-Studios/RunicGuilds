@@ -1,11 +1,15 @@
 package com.runicrealms.runicguilds.api;
 
-import com.runicrealms.runicguilds.model.*;
+import com.runicrealms.runicguilds.model.GuildData;
+import com.runicrealms.runicguilds.model.GuildInfo;
+import com.runicrealms.runicguilds.model.GuildUUID;
+import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.model.ScoreContainer;
 import org.bukkit.OfflinePlayer;
-import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface DataAPI {
@@ -18,19 +22,12 @@ public interface DataAPI {
     void addGuildInfoToMemory(GuildInfo guildInfo);
 
     /**
-     * Checks redis to see if the currently selected GuildData is cached
+     * Scans ALL guild documents to find the document matching player
      *
-     * @param guildUUID of the guild to check
-     * @param jedis     the jedis resource
-     * @return a GuildData object if it is found in redis
-     */
-    GuildData checkRedisForGuildData(UUID guildUUID, Jedis jedis);
-
-    /**
      * @param uuid of the player
      * @return the player's stored guild in Redis/Mongo
      */
-    String getGuildForPlayer(UUID uuid);
+    String loadGuildForPlayer(UUID uuid);
 
     /**
      * Returns a container of basic guild info for guild (if it exists)
@@ -85,20 +82,6 @@ public interface DataAPI {
     GuildData loadGuildData(UUID guildUUID);
 
     /**
-     * Loads the guild data from redis and/or mongo (if it exists!)
-     * Uses projection to exclude Bank data from the result
-     *
-     * @param guildUUID of the GUILD
-     * @return a GuildData object with no bank data
-     */
-    GuildData loadGuildDataNoBank(UUID guildUUID);
-
-    /**
-     * Loads only the guild member map from redis/mongo
-     */
-    HashMap<UUID, MemberData> loadGuildMembers(GuildUUID guildUUID, Jedis jedis);
-
-    /**
      * Loads the data for a single guild member. Checks Redis first, then falls back to a projection
      * in Mongo. Useful for retrieving the player's rank or score
      *
@@ -106,16 +89,15 @@ public interface DataAPI {
      * @param uuid      of the guild member
      * @return the data for the guild member
      */
-    MemberData loadMemberData(GuildUUID guildUUID, UUID uuid);
+    MemberData loadMemberData(UUID guildUUID, UUID uuid);
 
     /**
-     * Loads the settings for this guild (currently only bank settings)
+     * Loads the map of all members from the guildUUID
      *
      * @param guildUUID of the guild
-     * @param jedis     a new jedis resource
-     * @return the settings of the guild
+     * @return a map of all member uuids to their data
      */
-    GuildData loadSettingsData(GuildUUID guildUUID, Jedis jedis);
+    Map<UUID, MemberData> loadMemberDataMap(UUID guildUUID);
 
     /**
      * Player's have a 'foreign' key that specifies the name of their guild.

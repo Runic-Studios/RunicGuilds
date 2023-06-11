@@ -11,12 +11,12 @@ import org.bukkit.event.Listener;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,13 +42,11 @@ public class DataManager implements DataAPI, Listener {
          */
         // todo: prevent startup until this is finished (does it need a delay?)
         Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
-            Set<UUID> guildUuids = getGuildUuidsFromMongo();
-            if (guildUuids.isEmpty()) return; // No guilds created
-            for (UUID guildUUID : guildUuids) {
-                GuildData guildData = loadGuildDataNoBank(guildUUID);
-                guildInfoMap.put(guildUUID, new GuildInfo(guildData));
-            }
-
+            Set<GuildData> guildDataSet = getGuildDataFromMongo();
+            if (guildDataSet.isEmpty()) return; // No guilds created
+            guildDataSet.forEach(guildData -> {
+                guildInfoMap.put(guildData.getGuildUUID().getUUID(), new GuildInfo(guildData));
+            });
         }, 10 * 20L);
         Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
     }
@@ -59,33 +57,15 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public GuildData checkRedisForGuildData(UUID guildUUID, Jedis jedis) {
-        String key = GuildData.getJedisKey(new GuildUUID(guildUUID));
-        if (jedis.exists(key)) {
-            jedis.expire(key, RunicDatabase.getAPI().getRedisAPI().getExpireTime());
-            return new GuildData(guildUUID, jedis);
-        }
-        return null;
-    }
-
-    @Override
-    public String getGuildForPlayer(UUID uuid) {
-        // 1. Load from memory
+    public String loadGuildForPlayer(UUID uuid) {
+        // 1. Retrieve from indexed memory
         if (playerToGuildMap.get(uuid) != null) {
             GuildInfo guildInfo = guildInfoMap.get(playerToGuildMap.get(uuid));
             return guildInfo.getName();
         }
-        // 2. Load from Redis
-        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            String key = database + ":" + uuid + ":guild";
-            if (jedis.exists(key)) {
-                return jedis.get(key);
-            } else {
-                return "None";
-            }
-        }
-        // 3. TODO: load from mongo
+        Bukkit.getLogger().info("searching memory for player guild");
+        // 2. Search all in-memory guilds
+        return findPlayerGuild(uuid);
     }
 
     @Override
@@ -130,86 +110,43 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public GuildData loadGuildData(UUID guildUUID) {
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            // Step 1: Check Redis
-            GuildData guildData = checkRedisForGuildData(guildUUID, jedis);
-            if (guildData != null) return guildData;
-//            // todo: Step 2: Check the Mongo database
-//            Query query = new Query();
-//            query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
-//            MongoTemplate mongoTemplate = RunicCore.getDataAPI().getMongoTemplate();
-//            GuildData result = mongoTemplate.findOne(query, GuildData.class);
-//            if (result != null) {
-//                result.writeToJedis(jedis);
-//                return result;
-//            }
-            // No data found!
-            return null;
-        }
+        // Step 1: Check the mongo database
+        Query query = new Query();
+        query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
+        MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
+        return mongoTemplate.findOne(query, GuildData.class);
     }
 
     @Override
-    public GuildData loadGuildDataNoBank(UUID guildUUID) {
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            // Step 1: Check Redis
-            // todo: omit bank data
-            GuildData guildData = checkRedisForGuildData(guildUUID, jedis);
-            if (guildData != null) return guildData;
-            // Step 2: Check the Mongo database
-            Query query = new Query();
-            query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField() + ".uuid").is(guildUUID));
-            MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
-            GuildData result = mongoTemplate.findOne(query, GuildData.class);
-            if (result != null) {
-                result.writeToJedis(jedis);
-                return result;
-            }
-        }
-        // todo: mongo projection
-        /*
-                // Find our top-level document
-        Query query = new Query(Criteria.where(CharacterField.PLAYER_UUID.getField()).is(this.uuid));
+    public MemberData loadMemberData(UUID guildUUID, UUID uuid) {
+        // Step 1: Check the Mongo database
+        Query query = new Query(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
         // Project only the fields we need
-        query.fields()
-                .include("coreCharacterDataMap." + slot + "." + CharacterField.CLASS_TYPE.getField())
-                .include("coreCharacterDataMap." + slot + "." + CharacterField.CLASS_LEVEL.getField())
-                .include("coreCharacterDataMap." + slot + "." + CharacterField.CLASS_EXP.getField());
-        CorePlayerData corePlayerData = RunicCore.getDataAPI().getMongoTemplate().findOne(query, CorePlayerData.class);
-         */
-        // No data found!
-        return null;
-    }
-
-    @Override
-    public HashMap<UUID, MemberData> loadGuildMembers(GuildUUID guildUUID, Jedis jedis) {
-        HashMap<UUID, MemberData> result = new HashMap<>();
-        String key = GuildData.getJedisKey(guildUUID);
-        Set<String> memberKeys = jedis.keys(key + ":members*");
-        memberKeys.forEach(memberKey -> {
-            String[] subKeys = memberKey.split(":");
-            String uuidString = subKeys[subKeys.length - 1];
-            MemberData memberData = loadMemberData(guildUUID, UUID.fromString(uuidString));
-            result.put(memberData.getUuid(), memberData);
-        });
-        return result;
-    }
-
-    @Override
-    public MemberData loadMemberData(GuildUUID guildUUID, UUID uuid) {
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            return new MemberData(guildUUID, uuid, jedis);
+        query.fields().include("memberDataMap");
+        MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
+        GuildData guildData = mongoTemplate.findOne(query, GuildData.class);
+        if (guildData != null && guildData.getMemberDataMap().get(uuid) != null) {
+            return guildData.getMemberDataMap().get(uuid);
         }
+        return null; // Oh-no!
     }
 
     @Override
-    public GuildData loadSettingsData(GuildUUID guildUUID, Jedis jedis) {
-        // todo: load the guild data and only project basic fields and settings
+    public Map<UUID, MemberData> loadMemberDataMap(UUID guildUUID) {
+        // Step 1: Check the Mongo database
+        Query query = new Query(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
+        // Project only the fields we need
+        query.fields().include("memberDataMap");
+        MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
+        GuildData guildData = mongoTemplate.findOne(query, GuildData.class);
+        if (guildData != null && guildData.getMemberDataMap() != null) {
+            return guildData.getMemberDataMap();
+        }
         return null;
     }
 
     @Override
     public void setGuildForPlayer(UUID uuid, String name) {
-        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
         // Set the guild name
         if (!name.equalsIgnoreCase("none")) {
             GuildInfo guildInfo = this.getGuildInfo(name);
@@ -219,34 +156,38 @@ public class DataManager implements DataAPI, Listener {
         } else {
             this.playerToGuildMap.remove(uuid);
         }
-        // todo: THERE SHOULD BE NO 'GUILD' FIELD IN CORE. RE-THINK THIS
-//        // Save the data in Redis / core (which saves in Mongo)
-//        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-//            String key = database + ":" + uuid + ":guild";
-//            jedis.set(key, name);
-//            jedis.expire(key, RunicDatabase.getAPI().getRedisAPI().getExpireTime());
-//            // Update the memoized guild name in core and prepare for mongo save
-//            CorePlayerData corePlayerData = RunicCore.getPlayerDataAPI().loadCorePlayerData(uuid);
-//            corePlayerData.setGuild(name);
-//            corePlayerData.writeToJedis(jedis);
-//        }
     }
 
     /**
-     * @return the uuid of every guild in mongo
+     * Matches a player to their guild by parsing through the in-memory guild set.
+     * This will become inefficient as the number of guilds increases
+     *
+     * @param playerUuid to search
+     * @return the name of their guild if it is found, else null
      */
-    public Set<UUID> getGuildUuidsFromMongo() {
+    public String findPlayerGuild(UUID playerUuid) {
+        for (GuildInfo guildInfo : this.guildInfoMap.values()) {
+            Set<UUID> uuids = guildInfo.getMembersUuids();
+            if (uuids.contains(playerUuid)) {
+                // Found a match!
+                return guildInfo.getName();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * ?
+     *
+     * @return
+     */
+    public Set<GuildData> getGuildDataFromMongo() {
         MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
         Query query = new Query();
-        // Project Only the UUID field in the result documents
-        query.fields().include(GuildDataField.GUILD_UUID.getField());
+//        // Project Only the UUID field in the result documents
+//        query.fields().include(GuildDataField.GUILD_UUID.getField());
         List<GuildData> guildDataList = mongoTemplate.find(query, GuildData.class);
-        Set<UUID> guildUUIDSet = new HashSet<>();
-        for (GuildData guildData : guildDataList) {
-            // Assuming the getGuildUUID() method returns the GuildUUID object and getUUID() returns the UUID
-            guildUUIDSet.add(guildData.getGuildUUID().getUUID());
-        }
-        return guildUUIDSet;
+        return new HashSet<>(guildDataList);
     }
 
     /**

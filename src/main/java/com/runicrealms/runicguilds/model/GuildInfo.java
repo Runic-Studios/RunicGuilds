@@ -2,8 +2,7 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.runicguilds.guild.banner.GuildBanner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -16,7 +15,7 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public class GuildInfo {
     private final GuildUUID guildUUID;
-    private final List<UUID> membersUuids = new ArrayList<>(); // todo: needs to have a simple wrapper for in-memory members
+    private Set<UUID> membersUuids;
     private String name;
     private String prefix;
     private int exp;
@@ -31,12 +30,21 @@ public class GuildInfo {
      */
     public GuildInfo(GuildData guildData) {
         this.guildUUID = guildData.getGuildUUID();
+        this.membersUuids = guildData.getMemberDataMap().keySet();
         this.ownerUuid = guildData.getOwnerUuid();
         this.name = guildData.getName();
         this.prefix = guildData.getPrefix();
         this.exp = guildData.getExp();
         this.score = guildData.calculateGuildScore();
         this.guildBanner = guildData.getGuildBanner();
+    }
+
+    public Set<UUID> getMembersUuids() {
+        return membersUuids;
+    }
+
+    public void setMembersUuids(Set<UUID> membersUuids) {
+        this.membersUuids = membersUuids;
     }
 
     public int getExp() {
@@ -90,5 +98,5 @@ public class GuildInfo {
     public void setScore(int score) {
         this.score = score;
     }
-    
+
 }

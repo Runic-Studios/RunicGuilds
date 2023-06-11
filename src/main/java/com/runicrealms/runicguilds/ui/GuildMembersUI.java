@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.ui;
 
 import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.common.util.GUIUtil;
-import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.RankCompare;
 import com.runicrealms.runicguilds.model.GuildInfo;
@@ -17,11 +16,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
-import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class GuildMembersUI implements InventoryHolder {
@@ -64,22 +62,20 @@ public class GuildMembersUI implements InventoryHolder {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                        HashMap<UUID, MemberData> guildMembers = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
-                        List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
-                        memberDataList.sort(new RankCompare());
-                        for (MemberData guildMember : memberDataList) {
-                            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guildMember.getUuid());
-                            this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
-                                    (
-                                            offlinePlayer.getPlayer(),
-                                            ChatColor.GOLD + offlinePlayer.getName(), // Last known name
-                                            ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
-                                                    "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
-                                    ));
-                        }
-                        return guildMembers;
+                    Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadMemberDataMap(guildUUID.getUUID());
+                    List<MemberData> memberDataList = new ArrayList<>(memberDataMap.values());
+                    memberDataList.sort(new RankCompare());
+                    for (MemberData guildMember : memberDataList) {
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guildMember.getUuid());
+                        this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
+                                (
+                                        offlinePlayer.getPlayer(),
+                                        ChatColor.GOLD + offlinePlayer.getName(), // Last known name
+                                        ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
+                                                "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
+                                ));
                     }
+                    return memberDataList;
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
                 .syncLast(memberData -> {

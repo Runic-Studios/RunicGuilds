@@ -90,7 +90,7 @@ public class GuildBossManager implements Listener {
             for (UUID damager : damageScores.keySet()) {
                 GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(Bukkit.getOfflinePlayer(damager));
                 if (info == null) continue;
-                MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getGuildUUID(), damager);
+                MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getGuildUUID().getUUID(), damager);
                 Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
                     RunicGuilds.getGuildsAPI().addGuildScore(info.getGuildUUID(), data, damageScores.get(damager));
                     // TODO send "player gained guild score" to all online players

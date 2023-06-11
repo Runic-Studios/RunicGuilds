@@ -43,9 +43,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import redis.clients.jedis.Jedis;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -137,7 +136,7 @@ public class GuildEventListener implements Listener {
         guildInfo.setExp(guildInfo.getExp() + event.getAmount());
         // Get the guild data async and update
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
+            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
             guildDataNoBank.setExp(guildInfo.getExp());
             try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 guildDataNoBank.writeToJedis(jedis);
@@ -204,7 +203,7 @@ public class GuildEventListener implements Listener {
                     try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                         event.getMemberData().writeToJedis(event.getGuildUUID(), event.getMemberData().getUuid(), jedis);
                     }
-                    return RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
+                    return RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "GuildScoreChangeEvent failed to load!")
                 .syncLast(guildDataNoBank -> guildInfo.setScore(guildDataNoBank.calculateGuildScore()))
@@ -219,7 +218,7 @@ public class GuildEventListener implements Listener {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildInfo.getGuildUUID().getUUID());
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
                     if (guildDataNoBank == null) {
                         Bukkit.getLogger().severe("Guild ownership transfer failed!");
                         oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "&cThere was an error processing this command!"));
@@ -253,7 +252,13 @@ public class GuildEventListener implements Listener {
     public void onJoin(CharacterLoadedEvent event) {
         // Ensure player is mapped to their guild in-memory
         UUID uuid = event.getPlayer().getUniqueId();
-        String guildName = RunicGuilds.getDataAPI().getGuildForPlayer(uuid);
+        String guildName = RunicGuilds.getDataAPI().loadGuildForPlayer(uuid);
+        Bukkit.broadcastMessage("LOADING GUILD for player");
+        if (guildName != null) {
+            Bukkit.broadcastMessage("guild name is " + guildName);
+        } else {
+            Bukkit.broadcastMessage("guild name is null");
+        }
         if (guildName != null
                 && !guildName.equalsIgnoreCase("none")
                 && !guildName.equalsIgnoreCase("")) {
@@ -314,15 +319,13 @@ public class GuildEventListener implements Listener {
      * @param guildUUID of the guild to sync
      */
     private void syncMemberDisplays(GuildUUID guildUUID) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+        Set<UUID> members = guildInfo.getMembersUuids();
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                Map<UUID, MemberData> guildMembers = RunicGuilds.getDataAPI().loadGuildMembers(guildUUID, jedis);
-                List<MemberData> memberDataList = new ArrayList<>(guildMembers.values());
-                for (MemberData member : memberDataList) {
-                    Player playerMember = Bukkit.getPlayer(member.getUuid());
-                    if (playerMember == null) continue; // Player must be online
-                    syncDisplays(playerMember);
-                }
+            for (UUID memberUuid : members) {
+                Player playerMember = Bukkit.getPlayer(memberUuid);
+                if (playerMember == null) continue; // Player must be online
+                syncDisplays(playerMember);
             }
         });
     }

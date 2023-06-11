@@ -5,6 +5,7 @@ import com.keenant.tabbed.tablist.TableTabList;
 import com.keenant.tabbed.util.Skins;
 import com.runicrealms.RunicChat;
 import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.plugin.api.event.TabUpdateEvent;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -16,13 +17,15 @@ import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
-import com.runicrealms.runicguilds.util.GuildBankUtil;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 
@@ -32,59 +35,25 @@ import java.util.regex.Pattern;
 
 public class GuildManager implements GuildsAPI, Listener {
 
-//    public GuildManager() {
-//        startTabUpdateTask();
-//    }
-
     /**
-     * Used in the running task to keep party health displays accurate.
+     * ?
+     *
+     * @param player
+     * @param tableTabList
      */
+    public static void updateGuildTab(Player player, TableTabList tableTabList) {
+        tableTabList.set(3, 0, new TextTabItem
+                (ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
+        GuildUtil.updateGuildTabColumn(player, tableTabList);
+    }
+
     public static void updateGuildTab(Player player) {
-        TableTabList tableTabList = RunicCore.getTabAPI().getPlayerTabList(player);
-        tableTabList.set(3, 0, new TextTabItem
-                (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
-//        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-//        if (guildInfo == null) {
-//            tableTabList.set(3, 0, new TextTabItem
-//                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
-//            // Reset members
-//            for (int i = 1; i < 20; i++) {
-//                tableTabList.remove(3, i);
-//            }
-//        } else {
-//            getMembersAndPopulate(tableTabList, guildInfo);
-//        }
+        updateGuildTab(player, RunicCore.getTabAPI().getPlayerTabList(player));
     }
 
-    private static void getMembersAndPopulate(TableTabList tableTabList, GuildInfo guildInfo) {
-        tableTabList.set(3, 0, new TextTabItem
-                (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
-//        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-//            Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadGuildMembers(guildInfo.getGuildUUID(), jedis);
-//            List<UUID> onlineMembers = memberDataMap.values().stream().map(MemberData::getUuid)
-//                    .filter(uuid -> Bukkit.getPlayer(uuid) != null).toList();
-//            tableTabList.set(3, 0, new TextTabItem
-//                    (ChatColor.GOLD + "" + ChatColor.BOLD + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
-//            // Reset members
-//            for (int i = 1; i < 20; i++) {
-//                tableTabList.remove(3, i);
-//            }
-//            int k = 0;
-//            for (UUID guildMember : onlineMembers) {
-//                Player member = Bukkit.getPlayer(guildMember);
-//                if (member == null) continue; // Insurance
-//                if (k > 19) break;
-//                tableTabList.set(3, k + 1, new TextTabItem(member.getName(), member.getPing(), Skins.getPlayer(member)));
-//                k++;
-//            }
-//        }
-    }
-
-    @Override
-    public void addBankViewer(GuildUUID guildUUID, UUID uuid) {
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            jedis.sadd(GuildBankUtil.getJedisKey(guildUUID, jedis), uuid.toString());
-        }
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onTabUpdate(TabUpdateEvent event) {
+        updateGuildTab(event.getPlayer(), event.getTableTabList());
     }
 
     @Override
@@ -140,7 +109,7 @@ public class GuildManager implements GuildsAPI, Listener {
                 GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
                 guildInfo.setExp(guildInfo.getExp() + exp);
                 // Update in Redis
-                GuildData guildData = RunicGuilds.getDataAPI().loadGuildDataNoBank(guildUUID.getUUID());
+                GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildUUID.getUUID());
                 guildData.setExp(guildInfo.getExp());
                 guildData.writeToJedis(jedis);
             }
@@ -150,13 +119,6 @@ public class GuildManager implements GuildsAPI, Listener {
     @Override
     public boolean isInGuild(OfflinePlayer offlinePlayer) {
         return RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer) != null;
-    }
-
-    @Override
-    public void removeBankViewer(GuildUUID guildUUID, UUID uuid) {
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            jedis.srem(GuildBankUtil.getJedisKey(guildUUID, jedis), uuid.toString());
-        }
     }
 
 //    /**
