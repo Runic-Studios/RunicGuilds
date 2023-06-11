@@ -167,15 +167,29 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildKick(GuildMemberKickedEvent event) {
         Player whoWasKicked = Bukkit.getPlayer(event.getKicked());
-        if (whoWasKicked != null) {
-            whoWasKicked.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
-            syncDisplays(whoWasKicked);
-        }
-        syncMemberDisplays(event.getUUID());
-        Player player = Bukkit.getPlayer(event.getKicker());
-        if (player != null) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
-        }
+        GuildData guildData = event.guildData();
+        RunicGuilds.getGuildWriteOperation().updateGuildData
+                (
+                        guildData.getUUID(),
+                        "memberDataMap",
+                        guildData.getMemberDataMap(),
+                        () -> {
+                            // Remove from in-memory store
+                            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildData.getUUID());
+                            if (guildInfo != null) {
+                                guildInfo.getMembersUuids().remove(event.getKicked());
+                            }
+                            if (whoWasKicked != null) {
+                                whoWasKicked.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
+                                syncDisplays(whoWasKicked);
+                            }
+                            syncMemberDisplays(guildData.getOwnerUuid());
+                            Player player = Bukkit.getPlayer(event.getKicker());
+                            if (player != null) {
+                                player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
+                            }
+                        }
+                );
     }
 
     @EventHandler
@@ -242,34 +256,44 @@ public class GuildEventListener implements Listener {
         Player oldOwner = event.getOldOwner();
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(oldOwner);
 
-        // todo: write operation
+
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
-                    if (guildDataNoBank == null) {
+                    GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
+                    if (guildData == null) {
                         Bukkit.getLogger().severe("Guild ownership transfer failed!");
                         oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "&cThere was an error processing this command!"));
                         return null;
                     }
-                    MemberData oldOwnerData = guildDataNoBank.getMemberDataMap().get(guildDataNoBank.getOwnerUuid());
-                    MemberData newOwnerData = guildDataNoBank.getMemberDataMap().get(event.getNewOwner().getUniqueId());
+                    MemberData oldOwnerData = guildData.getMemberDataMap().get(guildData.getOwnerUuid());
+                    MemberData newOwnerData = guildData.getMemberDataMap().get(event.getNewOwner().getUniqueId());
                     if (newOwnerData == null) {
                         event.getOldOwner().sendMessage(GuildUtil.PREFIX + "Error: new owner data could not be found!");
                         return null;
                     }
                     oldOwnerData.setRank(GuildRank.OFFICER);
                     newOwnerData.setRank(GuildRank.OWNER);
-                    return guildDataNoBank;
+                    guildData.getMemberDataMap().put(oldOwnerData.getUuid(), oldOwnerData);
+                    guildData.getMemberDataMap().put(newOwnerData.getUuid(), newOwnerData);
+                    return guildData;
                 })
                 .abortIfNull()
-                .syncLast(guildDataNoBank -> {
+                .syncLast(guildData -> {
                     guildInfo.setOwnerUuid(event.getNewOwner().getUniqueId());
-                    syncDisplays(oldOwner);
-                    syncMemberDisplays(event.getUUID());
-                    oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully transferred guild ownership. You have been demoted to officer."));
-                    event.getNewOwner().sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are now the owner of " + guildDataNoBank.getName() + "!"));
+                    RunicGuilds.getGuildWriteOperation().updateGuildData
+                            (
+                                    guildInfo.getUUID(),
+                                    "memberDataMap",
+                                    guildData.getMemberDataMap(),
+                                    () -> {
+                                        syncDisplays(oldOwner);
+                                        syncMemberDisplays(event.getUUID());
+                                        oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully transferred guild ownership. You have been demoted to officer."));
+                                        event.getNewOwner().sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are now the owner of " + guildData.getName() + "!"));
+                                    }
+                            );
                 })
                 .execute();
     }

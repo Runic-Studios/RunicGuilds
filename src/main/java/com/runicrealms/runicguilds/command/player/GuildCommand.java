@@ -493,16 +493,11 @@ public class GuildCommand extends BaseCommand {
                         return guildDataNoBank;
                     })
                     .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
-                    .syncLast(guildDataNoBank -> {
-                        // Close the bank
-                        Player onlineTarget = Bukkit.getPlayer(otherPlayerUuid);
-                        if (onlineTarget != null && GuildBankUtil.isViewingBank(otherPlayerUuid)) {
-                            GuildBankUtil.close(onlineTarget);
-                        }
+                    .syncLast(guildData -> {
                         // Complete operation and call event to remove player
                         Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent
                                 (
-                                        guildDataNoBank.getUUID(),
+                                        guildData,
                                         otherPlayerUuid,
                                         player.getUniqueId(),
                                         false

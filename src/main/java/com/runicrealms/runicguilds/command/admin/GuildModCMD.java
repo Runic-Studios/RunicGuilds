@@ -16,7 +16,6 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
-import com.runicrealms.runicguilds.api.event.GuildMemberKickedEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
@@ -275,8 +274,9 @@ public class GuildModCMD extends BaseCommand {
                 GuildBankUtil.close(Objects.requireNonNull(Bukkit.getPlayer(uuid)));
             }
 
-            Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getUUID(), uuid, player.getUniqueId(), true));
-            player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
+            // todo: broken
+//            Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getUUID(), uuid, player.getUniqueId(), true));
+//            player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
         });
     }
 
