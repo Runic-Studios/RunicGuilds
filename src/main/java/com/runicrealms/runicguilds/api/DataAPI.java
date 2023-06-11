@@ -5,7 +5,6 @@ import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.model.ScoreContainer;
-import org.bukkit.OfflinePlayer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +50,7 @@ public interface DataAPI {
      * @param player to lookup
      * @return some basic info about their guilds, like exp, name, etc.
      */
-    GuildInfo getGuildInfo(OfflinePlayer player);
+    GuildInfo getGuildInfo(UUID player);
 
     /**
      * @return all in-memory guilds. Used for guild creation to ensure names are unique

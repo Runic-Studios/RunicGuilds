@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.ui;
 
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.common.util.GUIUtil;
+import com.runicrealms.plugin.common.util.OfflinePlayerUtil;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -48,7 +49,7 @@ public class GuildInfoUI implements InventoryHolder {
         return this.player;
     }
 
-    private ItemStack guildInfoItem() {
+    private ItemStack guildInfoItem(String ownerName) {
         ItemStack menuItem = new ItemStack(Material.IRON_HORSE_ARMOR);
         ItemMeta meta = menuItem.getItemMeta();
         if (meta == null) return menuItem;
@@ -60,8 +61,7 @@ public class GuildInfoUI implements InventoryHolder {
         GuildStage stage = GuildStage.getFromExp(guildInfo.getExp());
         lore.add(ColorUtil.format("&eGuild Stage: [&f" + stage.getRank() + "&e/" + GuildStage.getMaxStage().getRank() + "]"));
         lore.add(ColorUtil.format("&eGuild Exp: " + guildInfo.getExp()));
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guildInfo.getOwnerUuid());
-        lore.add(ColorUtil.format("&eGuild Owner: " + offlinePlayer.getName()));
+        lore.add(ColorUtil.format("&eGuild Owner: " + ownerName));
         lore.add(ColorUtil.format("&eMax Members: " + stage.getMaxMembers()));
         lore.add("");
         lore.add(ColorUtil.format("&6Unlocked Guild Perks:"));
@@ -98,14 +98,17 @@ public class GuildInfoUI implements InventoryHolder {
         this.inventory.clear();
         GUIUtil.fillInventoryBorders(this.inventory);
         this.inventory.setItem(8, GUIUtil.CLOSE_BUTTON);
-        this.inventory.setItem(21, guildInfoItem());
-        OfflinePlayer owner = Bukkit.getOfflinePlayer(this.guildInfo.getOwnerUuid());
-        this.inventory.setItem(23, GuildUtil.guildMemberItem
-                (
-                        owner.getPlayer(),
-                        ChatColor.GOLD + "View Members",
-                        ChatColor.GRAY + "View your guild members!"
-                ));
+        OfflinePlayerUtil.getName(guildInfo.getOwnerUuid()).thenAcceptAsync(name -> {
+            this.inventory.setItem(21, guildInfoItem(name));
+            OfflinePlayer owner = Bukkit.getOfflinePlayer(this.guildInfo.getOwnerUuid());
+            this.inventory.setItem(23, GuildUtil.guildMemberItem
+                    (
+                            owner.getPlayer(),
+                            ChatColor.GOLD + "View Members",
+                            ChatColor.GRAY + "View your guild members!"
+                    ));
+        });
+
     }
 
 }

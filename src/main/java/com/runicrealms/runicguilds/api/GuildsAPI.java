@@ -4,8 +4,9 @@ import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public interface GuildsAPI {
 
@@ -45,9 +46,9 @@ public interface GuildsAPI {
     void giveExperience(GuildUUID guildUUID, int exp);
 
     /**
-     * @param offlinePlayer to check
+     * @param player to check
      * @return true if player in guild
      */
-    boolean isInGuild(OfflinePlayer offlinePlayer);
+    boolean isInGuild(UUID player);
 
 }

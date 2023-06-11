@@ -1,12 +1,14 @@
 package com.runicrealms.runicguilds.boss;
 
 import com.runicrealms.plugin.common.RunicCommon;
+import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.common.util.Pair;
 import com.runicrealms.plugin.events.MagicDamageEvent;
 import com.runicrealms.plugin.events.PhysicalDamageEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.MemberData;
+import com.runicrealms.runicguilds.util.GuildUtil;
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import org.bukkit.Bukkit;
@@ -88,12 +90,19 @@ public class GuildBossManager implements Listener {
         // Distribute guild score
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             for (UUID damager : damageScores.keySet()) {
-                GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(Bukkit.getOfflinePlayer(damager));
+                GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(damager);
                 if (info == null) continue;
                 MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getGuildUUID().getUUID(), damager);
                 Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
                     RunicGuilds.getGuildsAPI().addGuildScore(info.getGuildUUID(), data, damageScores.get(damager));
-                    // TODO send "player gained guild score" to all online players
+                    Player damagerPlayer = Bukkit.getPlayer(damager);
+                    if (damagerPlayer == null) return;
+                    info.getMembersUuids().forEach(memberUUID -> {
+                        Player online = Bukkit.getPlayer(memberUUID);
+                        if (online != null) {
+                            online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + damagerPlayer.getName() + " has earned your guild &6" + damageScores.get(damager) + " &eguild points!"));
+                        }
+                    });
                 });
             }
         });

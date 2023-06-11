@@ -5,7 +5,6 @@ import com.runicrealms.plugin.rdb.event.MongoSaveEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.DataAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -83,9 +82,9 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public GuildInfo getGuildInfo(OfflinePlayer player) {
-        if (this.playerToGuildMap.get(player.getUniqueId()) == null) return null;
-        UUID guildUUID = this.playerToGuildMap.get(player.getUniqueId());
+    public GuildInfo getGuildInfo(UUID player) {
+        if (this.playerToGuildMap.get(player) == null) return null;
+        UUID guildUUID = this.playerToGuildMap.get(player);
         return this.guildInfoMap.get(guildUUID);
     }
 

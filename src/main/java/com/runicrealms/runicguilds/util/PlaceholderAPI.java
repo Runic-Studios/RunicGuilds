@@ -33,7 +33,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
         if (player == null) return null;
 
         String lowerArg = arg.toLowerCase();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
 
         switch (lowerArg) {
             case "name" -> {
