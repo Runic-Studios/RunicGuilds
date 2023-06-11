@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.runicguilds.guild.banner.GuildBanner;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ public class GuildInfo {
      */
     public GuildInfo(GuildData guildData) {
         this.guildUUID = guildData.getUUID();
-        this.membersUuids = guildData.getMemberDataMap().keySet();
+        this.membersUuids = new HashSet<>(guildData.getMemberDataMap().keySet()); // Copy set so that it is mutable
         this.ownerUuid = guildData.getOwnerUuid();
         this.name = guildData.getName();
         this.prefix = guildData.getPrefix();

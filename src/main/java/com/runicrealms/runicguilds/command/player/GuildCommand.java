@@ -131,8 +131,7 @@ public class GuildCommand extends BaseCommand {
         }
         // Let's add a guild member!
         guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), GuildRank.RECRUIT, 0));
-        // Add to in-memory cache
-        guildInfo.getMembersUuids().add(player.getUniqueId());
+        // Save to MongoDB with TaskChain
         RunicGuilds.getGuildWriteOperation().updateGuildData
                 (
                         guildInfo.getUUID(),
@@ -147,6 +146,8 @@ public class GuildCommand extends BaseCommand {
                                             player.getUniqueId(),
                                             GuildCommandMapManager.getInvites().get(player.getUniqueId())
                                     ));
+                            // Add to in-memory cache
+                            guildInfo.getMembersUuids().add(player.getUniqueId());
                             GuildCommandMapManager.getInvites().remove(player.getUniqueId());
                         }
                 );
