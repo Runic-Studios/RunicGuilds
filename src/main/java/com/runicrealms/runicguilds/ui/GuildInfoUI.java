@@ -9,7 +9,6 @@ import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -100,10 +99,9 @@ public class GuildInfoUI implements InventoryHolder {
         this.inventory.setItem(8, GUIUtil.CLOSE_BUTTON);
         OfflinePlayerUtil.getName(guildInfo.getOwnerUuid()).thenAcceptAsync(name -> {
             this.inventory.setItem(21, guildInfoItem(name));
-            OfflinePlayer owner = Bukkit.getOfflinePlayer(this.guildInfo.getOwnerUuid());
             this.inventory.setItem(23, GuildUtil.guildMemberItem
                     (
-                            owner.getPlayer(),
+                            this.guildInfo.getOwnerUuid(),
                             ChatColor.GOLD + "View Members",
                             ChatColor.GRAY + "View your guild members!"
                     ));
