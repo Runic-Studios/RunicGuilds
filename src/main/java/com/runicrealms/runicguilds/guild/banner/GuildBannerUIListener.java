@@ -70,7 +70,7 @@ public class GuildBannerUIListener implements Listener {
             dummy.setItemMeta(meta);
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         if (guildInfo != null) {
             bannerUI.getBanner().setBanner(bannerUI.getUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
             guildInfo.setGuildBanner(bannerUI.getBanner());

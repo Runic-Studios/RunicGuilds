@@ -11,6 +11,7 @@ import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
 import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.common.util.ColorUtil;
+import com.runicrealms.plugin.common.util.OfflinePlayerUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -26,12 +27,12 @@ import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @CommandAlias("guildmod")
@@ -123,7 +124,7 @@ public class GuildModCMD extends BaseCommand {
         GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(owner, args[1], args[2], true);
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guildInfo.getUUID(), uuid, true));
         }
     }
@@ -169,7 +170,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
         if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -218,7 +219,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
         if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -254,29 +255,29 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
-        if (!offlinePlayer.hasPlayedBefore()) {
-            player.sendMessage(ColorUtil.format(this.prefix + "The specified player was not found!"));
-            return;
-        }
+        OfflinePlayerUtil.getUUID(args[0]).thenAcceptAsync(uuid -> {
+            if (uuid == null) {
+                player.sendMessage(ColorUtil.format(this.prefix + "The specified player was not found!"));
+                return;
+            }
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+            if (guildInfo == null) {
+                player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
+                return;
+            }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer);
-        if (guildInfo == null) {
-            player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
-            return;
-        }
+            if (guildInfo.getOwnerUuid().toString().equalsIgnoreCase(uuid.toString())) {
+                player.sendMessage(ColorUtil.format(this.prefix + "That user is the guild owner. To disband the guild, use /guildmod disband [prefix]."));
+                return;
+            }
 
-        if (guildInfo.getOwnerUuid().toString().equalsIgnoreCase(offlinePlayer.getUniqueId().toString())) {
-            player.sendMessage(ColorUtil.format(this.prefix + "That user is the guild owner. To disband the guild, use /guildmod disband [prefix]."));
-            return;
-        }
+            if (GuildBankUtil.isViewingBank(uuid)) {
+                GuildBankUtil.close(Objects.requireNonNull(Bukkit.getPlayer(uuid)));
+            }
 
-        if (GuildBankUtil.isViewingBank(offlinePlayer.getUniqueId())) {
-            GuildBankUtil.close((Player) offlinePlayer);
-        }
-
-        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getUUID(), offlinePlayer.getUniqueId(), player.getUniqueId(), true));
-        player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
+            Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getUUID(), uuid, player.getUniqueId(), true));
+            player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
+        });
     }
 
     @Subcommand("forceloadbanners")
@@ -304,7 +305,7 @@ public class GuildModCMD extends BaseCommand {
         }
 
         UUID targetUUID = target.getUniqueId();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;

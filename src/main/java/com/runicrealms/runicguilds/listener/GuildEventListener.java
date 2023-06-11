@@ -30,7 +30,6 @@ import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -155,12 +154,10 @@ public class GuildEventListener implements Listener {
 
     @EventHandler
     public void onGuildKick(GuildMemberKickedEvent event) {
-        OfflinePlayer whoWasKicked = Bukkit.getOfflinePlayer(event.getKicked());
-        if (whoWasKicked.isOnline()) {
-            Player player = whoWasKicked.getPlayer();
-            assert player != null;
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
-            syncDisplays(player);
+        Player whoWasKicked = Bukkit.getPlayer(event.getKicked());
+        if (whoWasKicked != null) {
+            whoWasKicked.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
+            syncDisplays(whoWasKicked);
         }
         syncMemberDisplays(event.getUUID());
         Player player = Bukkit.getPlayer(event.getKicker());
@@ -202,7 +199,7 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildTransfer(GuildOwnershipTransferEvent event) {
         Player oldOwner = event.getOldOwner();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(oldOwner);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(oldOwner.getUniqueId());
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
@@ -289,7 +286,7 @@ public class GuildEventListener implements Listener {
      * @param player to sync
      */
     private void syncDisplays(Player player) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         if (guildInfo == null) {
             RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
             Bukkit.getLogger().severe("Guild info was null, setting guild for player to null");

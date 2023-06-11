@@ -50,7 +50,7 @@ public class GuildShopManager {
         return player -> {
             player.closeInventory();
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
-            if (!RunicGuilds.getGuildsAPI().isInGuild(player)) {
+            if (!RunicGuilds.getGuildsAPI().isInGuild(player.getUniqueId())) {
                 if (!RunicGuilds.getPlayersCreatingGuild().contains(player.getUniqueId())) {
                     player.sendMessage
                             (ChatColor.YELLOW + "Creating a guild will cost you " + RunicGuilds.GUILD_COST +

@@ -3,13 +3,13 @@ package com.runicrealms.runicguilds.util;
 import com.keenant.tabbed.item.TextTabItem;
 import com.keenant.tabbed.tablist.TableTabList;
 import com.keenant.tabbed.util.Skins;
+import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -30,21 +30,6 @@ import java.util.stream.Collectors;
 
 public class GuildUtil {
     public static final String PREFIX = "&r&6&lGuilds »&r &e";
-
-    /**
-     * Gets the uuid of the OfflinePlayer found using name
-     *
-     * @param playerName of the player
-     * @return their uuid
-     */
-    public static UUID getOfflinePlayerUUID(String playerName) {
-        @SuppressWarnings("deprecation")
-        OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
-        if (player.hasPlayedBefore()) {
-            return player.getUniqueId();
-        }
-        return null;
-    }
 
     /**
      * @param player      the item represents
@@ -119,7 +104,7 @@ public class GuildUtil {
      * @param tableTabList the tab list (probably from a tab list update event)
      */
     public static void updateGuildTabColumn(Player player, TableTabList tableTabList) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         // Reset guild column
         for (int i = 0; i < 19; i++) {
             tableTabList.remove(1, i);
@@ -149,7 +134,7 @@ public class GuildUtil {
             if (playerMember == null) continue; // Insurance
             tableTabList.set(3, j + 1, new TextTabItem
                     (
-                            playerMember.getName(),
+                            RunicCore.getTabAPI().getTablistNameColor(playerMember) + playerMember.getName(),
                             playerMember.getPing(),
                             Skins.getPlayer(playerMember)
                     ));

@@ -30,15 +30,15 @@ public class GuildChannel extends ChatChannel {
     @Override
     public List<Player> getRecipients(Player player) {
         List<Player> recipients = new ArrayList<>();
-        GuildInfo guildInfoSender = RunicGuilds.getDataAPI().getGuildInfo(player);
+        GuildInfo guildInfoSender = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         if (guildInfoSender == null) {
             player.sendMessage(ChatColor.RED + "You must be in a guild to use guild chat!");
             return recipients;
         }
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (target == null) continue;
-            if (!RunicGuilds.getGuildsAPI().isInGuild(target)) continue;
-            UUID guildUUID = RunicGuilds.getDataAPI().getGuildInfo(target).getUUID();
+            if (!RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) continue;
+            UUID guildUUID = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId()).getUUID();
             if (guildInfoSender.getUUID() == guildUUID) {
                 recipients.add(target);
             }

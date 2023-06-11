@@ -20,7 +20,6 @@ import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -82,7 +81,7 @@ public class GuildManager implements GuildsAPI, Listener {
         GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent
                     (
                             guildInfo.getUUID(),
@@ -121,8 +120,8 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public boolean isInGuild(OfflinePlayer offlinePlayer) {
-        return RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer) != null;
+    public boolean isInGuild(UUID player) {
+        return RunicGuilds.getDataAPI().getGuildInfo(player) != null;
     }
 
 //    /**

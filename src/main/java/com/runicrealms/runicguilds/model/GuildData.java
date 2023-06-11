@@ -181,7 +181,7 @@ public class GuildData implements SessionDataMongo {
      */
     public boolean isAtLeastRank(Player player, GuildRank rank) {
         // Return true for all 'min rank' checks if the player is the owner
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
         if (guildInfo.getOwnerUuid().equals(player.getUniqueId())) {
             return true;
         }
@@ -206,7 +206,7 @@ public class GuildData implements SessionDataMongo {
         this.memberDataMap.remove(uuid);
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) { // Player is online
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
             RunicGuilds.getDataAPI().setGuildForPlayer(uuid, "None");
             guildInfo.setScore(Math.max(0, this.calculateGuildScore()));
         }
