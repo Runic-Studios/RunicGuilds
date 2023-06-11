@@ -111,6 +111,7 @@ public class DataManager implements DataAPI, Listener {
     @Override
     public GuildData loadGuildData(UUID guildUUID) {
         // Step 1: Check the mongo database
+        Bukkit.broadcastMessage("checking for guild uuid of " + guildUUID);
         Query query = new Query();
         query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
         MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();

@@ -56,26 +56,20 @@ public class GuildEventListener implements Listener {
      * Disbands the guild, removing its data from Redis, Mongo, and local memory
      */
     private void disbandGuild(GuildData guildData, Player player) {
+        if (guildData == null) {
+            Bukkit.broadcastMessage("guild data is null!!!");
+            return;
+        }
         // Store a reference to the guild members
         Map<UUID, MemberData> memberDataMap = guildData.getMemberDataMap();
-        // 1. Delete from Redis, remove Guild from 'markedForSave'
-        String rootKey = GuildData.getJedisKey(guildData.getGuildUUID());
-        try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            // Removes all sub-keys for the guild
-            RunicDatabase.getAPI().getRedisAPI().removeAllFromRedis(jedis, rootKey);
-            jedis.del(rootKey);
-            // Guild is no longer marked for save
-            String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-            jedis.srem(database + ":markedForSave:guilds", String.valueOf(guildData.getGuildUUID().getUUID()));
-        }
-        // 2. Delete from Mongo
+        // 1. Delete from Mongo
         Query query = new Query();
         query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField() + ".uuid").is(guildData.getGuildUUID().getUUID()));
         MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
         mongoTemplate.remove(query, GuildData.class);
-        // 3. Delete from memory
+        // 2. Delete from memory
         RunicGuilds.getDataAPI().getGuildInfoMap().remove(guildData.getGuildUUID().getUUID());
-        // 4. Final cleanup
+        // 3. Final cleanup
         for (MemberData memberData : memberDataMap.values()) {
             RunicGuilds.getDataAPI().setGuildForPlayer(memberData.getUuid(), "None");
             Player playerMember = Bukkit.getPlayer(memberData.getUuid());
