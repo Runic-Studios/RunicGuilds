@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.ui;
 
 import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.common.util.GUIUtil;
-import com.runicrealms.plugin.common.util.OfflinePlayerUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.RankCompare;
 import com.runicrealms.runicguilds.model.GuildInfo;
@@ -66,16 +65,14 @@ public class GuildMembersUI implements InventoryHolder {
                     memberDataList.sort(new RankCompare());
 
                     for (MemberData guildMember : memberDataList) {
-                        OfflinePlayerUtil.getName(guildInfo.getOwnerUuid()).thenAcceptAsync(value -> {
-                            // Use player's last known name to async fill inventory
-                            this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
-                                    (
-                                            guildMember.getUuid(),
-                                            ChatColor.GOLD + value, // Last known name
-                                            ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
-                                                    "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
-                                    ));
-                        });
+                        // Use player's last known name to async fill inventory
+                        this.inventory.setItem(this.inventory.firstEmpty(), GuildUtil.guildMemberItem
+                                (
+                                        guildMember.getUuid(),
+                                        ChatColor.GOLD + guildMember.getLastKnownName(), // Last known name
+                                        ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
+                                                "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
+                                ));
                     }
                     return memberDataList;
                 })

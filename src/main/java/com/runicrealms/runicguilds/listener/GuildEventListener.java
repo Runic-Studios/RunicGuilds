@@ -180,11 +180,24 @@ public class GuildEventListener implements Listener {
 
     @EventHandler
     public void onGuildLeave(GuildMemberLeaveEvent event) {
-        Player whoLeft = Bukkit.getPlayer(event.getMember());
-        if (whoLeft != null) {
-            syncDisplays(whoLeft);
-        }
-        syncMemberDisplays(event.getUUID());
+        GuildData guildData = event.getGuildData();
+        guildData.getMemberDataMap().remove(event.getWhoLeft().getUniqueId());
+        RunicGuilds.getGuildWriteOperation().updateGuildData
+                (
+                        guildData.getUUID(),
+                        "memberDataMap",
+                        guildData.getMemberDataMap(),
+                        () -> {
+                            // Remove from in-memory store
+                            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildData.getUUID());
+                            if (guildInfo != null) {
+                                guildInfo.getMembersUuids().remove(event.getWhoLeft().getUniqueId());
+                            }
+                            event.getWhoLeft().sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
+                            syncDisplays(event.getWhoLeft());
+                            syncMemberDisplays(event.getUUID());
+                        }
+                );
     }
 
     /**
@@ -228,6 +241,8 @@ public class GuildEventListener implements Listener {
     public void onGuildTransfer(GuildOwnershipTransferEvent event) {
         Player oldOwner = event.getOldOwner();
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(oldOwner);
+
+        // todo: write operation
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
@@ -262,13 +277,42 @@ public class GuildEventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST) // late
     public void onJoin(CharacterLoadedEvent event) {
         // Ensure player is mapped to their guild in-memory
-        UUID uuid = event.getPlayer().getUniqueId();
-        String guildName = RunicGuilds.getDataAPI().loadGuildForPlayer(uuid);
-        // Update their 'guild' quick lookup tag in core
-        CorePlayerData corePlayerData = (CorePlayerData) event.getCharacterSelectEvent().getSessionDataMongo();
-        corePlayerData.setGuild(guildName);
-        // Sync scoreboard, tab
-        syncDisplays(event.getPlayer());
+        UUID playerUuid = event.getPlayer().getUniqueId();
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> {
+                    String guildName = RunicGuilds.getDataAPI().loadGuildForPlayer(playerUuid);
+                    // Update last known name on login
+                    if (guildName != null) {
+                        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildName);
+                        if (guildInfo != null) {
+                            GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
+                            MemberData memberData = guildData.getMemberDataMap().get(playerUuid);
+                            memberData.setLastKnownName(event.getPlayer().getName());
+                            guildData.getMemberDataMap().put(playerUuid, memberData);
+                            // Update last known name in mongo on a different TaskChain
+                            RunicGuilds.getGuildWriteOperation().updateGuildData
+                                    (
+                                            guildInfo.getUUID(),
+                                            "memberDataMap",
+                                            guildData.getMemberDataMap(),
+                                            () -> {
+                                            }
+                                    );
+                        }
+                    }
+                    return guildName;
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
+                .syncLast(guildName -> {
+                            // Update their 'guild' quick lookup tag in core
+                            CorePlayerData corePlayerData = (CorePlayerData) event.getCharacterSelectEvent().getSessionDataMongo();
+                            corePlayerData.setGuild(guildName);
+                            // Sync scoreboard, tab
+                            syncDisplays(event.getPlayer());
+                        }
+                )
+                .execute();
     }
 
     @EventHandler

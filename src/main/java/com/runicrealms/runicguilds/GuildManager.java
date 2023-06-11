@@ -77,7 +77,7 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @Override
     public GuildCreationResult createGuild(Player owner, String name, String prefix, boolean modCreated) {
-        GuildCreationResult result = createGuild(owner.getUniqueId(), name, prefix);
+        GuildCreationResult result = createGuild(owner, name, prefix);
         if (result == GuildCreationResult.SUCCESSFUL) {
             owner.playSound(owner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
@@ -138,12 +138,12 @@ public class GuildManager implements GuildsAPI, Listener {
     /**
      * Attempts to create a guild
      *
-     * @param ownerUuid of the guild owner
-     * @param name      of the guild
-     * @param prefix    of the guild
+     * @param owner  the guild owner
+     * @param name   of the guild
+     * @param prefix of the guild
      * @return the creation result
      */
-    private GuildCreationResult createGuild(UUID ownerUuid, String name, String prefix) {
+    private GuildCreationResult createGuild(Player owner, String name, String prefix) {
         if (prefix.length() < 3 || prefix.length() > 4 || prefix.equalsIgnoreCase("None")) {
             return GuildCreationResult.BAD_PREFIX;
         }
@@ -175,7 +175,7 @@ public class GuildManager implements GuildsAPI, Listener {
             if (otherName.equalsIgnoreCase(name)) {
                 return GuildCreationResult.NAME_NOT_UNIQUE;
             }
-            if (guildInfo.getMembersUuids().contains(ownerUuid)) {
+            if (guildInfo.getMembersUuids().contains(owner.getUniqueId())) {
                 return GuildCreationResult.CREATOR_IN_GUILD;
             }
             if (otherPrefix.equalsIgnoreCase(prefix)) {
@@ -189,7 +189,7 @@ public class GuildManager implements GuildsAPI, Listener {
                         UUID.randomUUID(),
                         name,
                         prefix,
-                        new MemberData(ownerUuid, GuildRank.OWNER, 0)
+                        new MemberData(owner.getUniqueId(), owner.getName(), GuildRank.OWNER, 0)
                 );
         guildData.addDocumentToMongo();
         // Cache latency-sensitive fields in-memory

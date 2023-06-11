@@ -260,7 +260,7 @@ public class GuildModCMD extends BaseCommand {
                 player.sendMessage(ColorUtil.format(this.prefix + "The specified player was not found!"));
                 return;
             }
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(uuid);
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
             if (guildInfo == null) {
                 player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
                 return;

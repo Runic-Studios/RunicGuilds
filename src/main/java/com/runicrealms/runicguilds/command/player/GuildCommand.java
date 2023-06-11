@@ -128,7 +128,7 @@ public class GuildCommand extends BaseCommand {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
                     }
                     // Let's add a guild member!
-                    guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), GuildRank.RECRUIT, 0));
+                    guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), player.getName(), GuildRank.RECRUIT, 0));
                     // Save to MongoDB with TaskChain
                     RunicGuilds.getGuildWriteOperation().updateGuildData
                             (
@@ -537,14 +537,14 @@ public class GuildCommand extends BaseCommand {
                     return guildDataNoBank;
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
-                .syncLast(guildDataNoBank -> {
-                    // Close the bank
-                    if (GuildBankUtil.isViewingBank(player.getUniqueId())) {
-                        GuildBankUtil.close(player);
-                    }
-                    // Complete operation and call event
-                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
-                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guildDataNoBank.getUUID(), player.getUniqueId()));
+                .syncLast(guildData -> {
+                    // Call event to complete operation
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent
+                            (
+                                    guildData.getUUID(),
+                                    player,
+                                    guildData
+                            ));
                     GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
                     GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
                 })
