@@ -35,11 +35,15 @@ import java.util.regex.Pattern;
 
 public class GuildManager implements GuildsAPI, Listener {
 
+    public GuildManager() {
+        Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
+    }
+
     /**
-     * ?
+     * Updates the player's guild column in tab
      *
-     * @param player
-     * @param tableTabList
+     * @param player       to update
+     * @param tableTabList from some tab update event
      */
     public static void updateGuildTab(Player player, TableTabList tableTabList) {
         tableTabList.set(3, 0, new TextTabItem
@@ -53,6 +57,7 @@ public class GuildManager implements GuildsAPI, Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onTabUpdate(TabUpdateEvent event) {
+        Bukkit.broadcastMessage("guilds is responding");
         updateGuildTab(event.getPlayer(), event.getTableTabList());
     }
 
