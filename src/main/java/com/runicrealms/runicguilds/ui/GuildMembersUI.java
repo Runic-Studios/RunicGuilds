@@ -5,7 +5,6 @@ import com.runicrealms.plugin.common.util.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.guild.RankCompare;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import com.runicrealms.runicguilds.util.TaskChainUtil;
@@ -57,12 +56,12 @@ public class GuildMembersUI implements InventoryHolder {
         this.inventory.setItem(0, GUIUtil.BACK_BUTTON);
         this.inventory.setItem(8, GUIUtil.CLOSE_BUTTON);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-        GuildUUID guildUUID = guildInfo.getGuildUUID();
+        UUID guildUUID = guildInfo.getUUID();
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadMemberDataMap(guildUUID.getUUID());
+                    Map<UUID, MemberData> memberDataMap = RunicGuilds.getDataAPI().loadMemberDataMap(guildUUID);
                     List<MemberData> memberDataList = new ArrayList<>(memberDataMap.values());
                     memberDataList.sort(new RankCompare());
                     for (MemberData guildMember : memberDataList) {

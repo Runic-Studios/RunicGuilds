@@ -27,7 +27,6 @@ import com.runicrealms.runicguilds.guild.banner.GuildBannerUI;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
@@ -114,7 +113,7 @@ public class GuildCommand extends BaseCommand {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
                     if (guildDataNoBank == null) return null;
 
                     RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
@@ -142,7 +141,7 @@ public class GuildCommand extends BaseCommand {
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.GREEN + "You have accepted the guild invitation!"));
                     Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent
                             (
-                                    guildDataNoBank.getGuildUUID(),
+                                    guildDataNoBank.getUUID(),
                                     player.getUniqueId(),
                                     GuildCommandMapManager.getInvites().get(player.getUniqueId())
                             ));
@@ -173,7 +172,7 @@ public class GuildCommand extends BaseCommand {
         // Load member data async then return to main thread
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID().getUUID(), player.getUniqueId()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getUUID(), player.getUniqueId()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "There was an error trying to open guild banner ui!")
                 .syncLast(memberData -> {
                     if (memberData.getRank() != GuildRank.OWNER) {
@@ -186,7 +185,7 @@ public class GuildCommand extends BaseCommand {
                         return;
                     }
 
-                    player.openInventory(new GuildBannerUI(guildInfo.getGuildUUID()).getInventory());
+                    player.openInventory(new GuildBannerUI(guildInfo.getUUID()).getInventory());
                 })
                 .execute();
     }
@@ -234,10 +233,10 @@ public class GuildCommand extends BaseCommand {
 
         if (GuildCommandMapManager.getDisbanding().contains(player.getUniqueId())) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Disbanding guild..."));
-            GuildData.disband(guildInfo.getGuildUUID(), player, false);
+            GuildData.disband(guildInfo.getUUID(), player, false);
         } else if (GuildCommandMapManager.getTransferOwnership().containsKey(player.getUniqueId())) {
             // Transferring ownership
-            this.transferOwnership(player, guildInfo.getGuildUUID());
+            this.transferOwnership(player, guildInfo.getUUID());
         } else {
             // Not confirming
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have nothing to confirm."));
@@ -256,7 +255,7 @@ public class GuildCommand extends BaseCommand {
         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have decline the guild invitation."));
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(GuildCommandMapManager.getInvites().get(player.getUniqueId()));
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(offlinePlayer); // Guild of the inviter
-        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guildInfo.getGuildUUID(), player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
+        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationDeclinedEvent(guildInfo.getUUID(), player.getUniqueId(), GuildCommandMapManager.getInvites().get(player.getUniqueId())));
         GuildCommandMapManager.getInvites().remove(player.getUniqueId());
     }
 
@@ -283,7 +282,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .sync(guildDataNoBank -> {
                     if (!offlinePlayer.hasPlayedBefore() || !guildDataNoBank.isInGuild(offlinePlayer.getUniqueId())) {
@@ -326,7 +325,7 @@ public class GuildCommand extends BaseCommand {
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + offlinePlayer.getName() + " has been demoted to rank " + newRank + "!"));
                     Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent
                             (
-                                    guildDataNoBank.getGuildUUID(),
+                                    guildDataNoBank.getUUID(),
                                     offlinePlayer.getUniqueId(),
                                     player.getUniqueId(),
                                     newRank
@@ -393,7 +392,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.RECRUITER)) {
@@ -421,7 +420,7 @@ public class GuildCommand extends BaseCommand {
                     target.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have been invited to join the guild " + guildInfo.getName() + " by " + player.getName() + ". Type /guild accept to accept the invitation, or /guild decline to deny the invitation."));
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have invited a player to the guild. An invitation has been sent."));
                     GuildCommandMapManager.getInvites().put(target.getUniqueId(), player.getUniqueId());
-                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guildInfo.getGuildUUID(), target.getUniqueId(), player.getUniqueId()));
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberInvitedEvent(guildInfo.getUUID(), target.getUniqueId(), player.getUniqueId()));
                 })
                 .execute();
     }
@@ -455,7 +454,7 @@ public class GuildCommand extends BaseCommand {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to kick other players."));
                         return null;
@@ -488,7 +487,7 @@ public class GuildCommand extends BaseCommand {
                     // Complete operation and call event to remove player
                     Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent
                             (
-                                    guildDataNoBank.getGuildUUID(),
+                                    guildDataNoBank.getUUID(),
                                     otherPlayerUuid,
                                     player.getUniqueId(),
                                     false
@@ -510,7 +509,7 @@ public class GuildCommand extends BaseCommand {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
                     if (guildDataNoBank == null) return null;
                     if (guildDataNoBank.getMemberDataMap().get(player.getUniqueId()).getRank() == GuildRank.OWNER) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot leave the guild because you are the owner! To disband guild or transfer ownership, use those commands."));
@@ -529,7 +528,7 @@ public class GuildCommand extends BaseCommand {
                     }
                     // Complete operation and call event
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have left your guild."));
-                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guildDataNoBank.getGuildUUID(), player.getUniqueId()));
+                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberLeaveEvent(guildDataNoBank.getUUID(), player.getUniqueId()));
                     GuildCommandMapManager.getTransferOwnership().remove(player.getUniqueId());
                     GuildCommandMapManager.getDisbanding().remove(player.getUniqueId());
                 })
@@ -561,7 +560,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .sync(guildDataNoBank -> {
                     if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
@@ -603,7 +602,7 @@ public class GuildCommand extends BaseCommand {
                     player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + target.getName() + " has been promoted to rank " + newRank + "!"));
                     Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent
                             (
-                                    guildDataNoBank.getGuildUUID(),
+                                    guildDataNoBank.getUUID(),
                                     target.getUniqueId(),
                                     player.getUniqueId(),
                                     newRank
@@ -643,7 +642,7 @@ public class GuildCommand extends BaseCommand {
 //        chain
 //                .asyncFirst(() -> {
 //                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-//                        return RunicGuilds.getDataAPI().loadSettingsData(guildInfo.getGuildUUID(), jedis);
+//                        return RunicGuilds.getDataAPI().loadSettingsData(guildInfo.getUUID(), jedis);
 //                    }
 //                })
 //                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
@@ -689,7 +688,7 @@ public class GuildCommand extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
                 .syncLast(guildDataNoBank -> {
                     if (!guildDataNoBank.getOwnerUuid().equals(player.getUniqueId())) {
@@ -737,7 +736,7 @@ public class GuildCommand extends BaseCommand {
      * @param player    who initiated the transfer
      * @param guildUUID of the guild
      */
-    private void transferOwnership(Player player, GuildUUID guildUUID) {
+    private void transferOwnership(Player player, UUID guildUUID) {
         Player newOwner = Bukkit.getPlayer(GuildCommandMapManager.getTransferOwnership().get(player.getUniqueId()));
         if (newOwner == null) {
             player.sendMessage(GuildUtil.PREFIX + "The new owner must be in the guild and online to transfer the guild!");

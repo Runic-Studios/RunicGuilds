@@ -1,16 +1,17 @@
 package com.runicrealms.runicguilds.api.event;
 
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import java.util.UUID;
+
 public class ClickGuildBannerEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
-    private final GuildUUID guildUUID;
+    private final UUID guildUUID;
     private boolean cancelled;
 
-    public ClickGuildBannerEvent(GuildUUID guildUUID) {
+    public ClickGuildBannerEvent(UUID guildUUID) {
         this.guildUUID = guildUUID;
         this.cancelled = false;
     }
@@ -24,7 +25,7 @@ public class ClickGuildBannerEvent extends Event implements Cancellable {
         return this.HANDLERS_LIST;
     }
 
-    public GuildUUID guildUUID() {
+    public UUID guildUUID() {
         return this.guildUUID;
     }
 

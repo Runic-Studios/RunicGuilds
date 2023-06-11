@@ -3,7 +3,6 @@ package com.runicrealms.runicguilds.guild.banner;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -11,6 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.springframework.data.annotation.Transient;
+
+import java.util.UUID;
 
 public class GuildBanner {
     @Transient // Doesn't get persisted
@@ -22,19 +23,19 @@ public class GuildBanner {
         // Default constructor for Spring
     }
 
-    public GuildBanner(GuildUUID guildUUID) {
+    public GuildBanner(UUID guildUUID) {
         this.banner = this.makeDefaultBanner(guildUUID);
     }
 
-    public GuildBanner(GuildUUID guildUUID, ItemStack itemStack) {
-//        this.guildUUID = guildUUID;
-
-//        if (!itemStack.hasItemMeta() || !(itemStack.getItemMeta() instanceof BannerMeta)) {
-//            this.banner = this.makeDefaultBanner(guildUUID);
-//        } else {
-//            this.banner = itemStack;
-//        }
-    }
+//    public GuildBanner(UUID guildUUID, ItemStack itemStack) {
+////        this.guildUUID = guildUUID;
+//
+////        if (!itemStack.hasItemMeta() || !(itemStack.getItemMeta() instanceof BannerMeta)) {
+////            this.banner = this.makeDefaultBanner(guildUUID);
+////        } else {
+////            this.banner = itemStack;
+////        }
+//    }
 
     public ItemStack getBannerItem() {
         return this.banner;
@@ -48,7 +49,7 @@ public class GuildBanner {
         this.serializedBanner = serializedBanner;
     }
 
-    private ItemStack makeDefaultBanner(GuildUUID guildUUID) {
+    private ItemStack makeDefaultBanner(UUID guildUUID) {
         ItemStack item = new ItemStack(Material.WHITE_BANNER, 1);
         ItemMeta meta = item.getItemMeta();
         assert meta != null;
@@ -61,7 +62,7 @@ public class GuildBanner {
         return item;
     }
 
-    public void setBanner(GuildUUID guildUUID, Material material, BannerMeta meta) {
+    public void setBanner(UUID guildUUID, Material material, BannerMeta meta) {
         this.banner.setType(material);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
         if (guildInfo != null) {

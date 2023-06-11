@@ -2,7 +2,6 @@ package com.runicrealms.runicguilds.api;
 
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.model.ScoreContainer;
 import org.bukkit.OfflinePlayer;
@@ -43,7 +42,7 @@ public interface DataAPI {
      * @param guildUUID of the guild to lookup
      * @return some basic info about their guilds, like exp, name, etc.
      */
-    GuildInfo getGuildInfo(GuildUUID guildUUID);
+    GuildInfo getGuildInfo(UUID guildUUID);
 
     /**
      * Returns a container of basic guild info for player (if it exists)

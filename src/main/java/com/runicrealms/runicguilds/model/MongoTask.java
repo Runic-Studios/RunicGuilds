@@ -45,7 +45,7 @@ public class MongoTask implements MongoTaskOperation {
 
     @Override
     public Query getQuery(UUID guildUUID) {
-        return new Query(Criteria.where(GuildDataField.GUILD_UUID.getField() + ".uuid").is(guildUUID));
+        return new Query(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
     }
 
     @Override

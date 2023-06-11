@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 @SuppressWarnings("unused")
 public class GuildInfo {
-    private final GuildUUID guildUUID;
+    private final UUID guildUUID;
     private Set<UUID> membersUuids;
     private String name;
     private String prefix;
@@ -29,7 +29,7 @@ public class GuildInfo {
      * @param guildData an object retrieved from a database call
      */
     public GuildInfo(GuildData guildData) {
-        this.guildUUID = guildData.getGuildUUID();
+        this.guildUUID = guildData.getUUID();
         this.membersUuids = guildData.getMemberDataMap().keySet();
         this.ownerUuid = guildData.getOwnerUuid();
         this.name = guildData.getName();
@@ -63,7 +63,7 @@ public class GuildInfo {
         this.guildBanner = guildBanner;
     }
 
-    public GuildUUID getGuildUUID() {
+    public UUID getUUID() {
         return guildUUID;
     }
 

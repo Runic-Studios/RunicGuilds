@@ -97,7 +97,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildBankUtil.open(player, 1, guildInfo.getGuildUUID());
+        GuildBankUtil.open(player, 1, guildInfo.getUUID());
         player.sendMessage(ColorUtil.format(this.prefix + "You have opened the bank of " + guildInfo.getName()));
     }
 
@@ -124,7 +124,7 @@ public class GuildModCMD extends BaseCommand {
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
-            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guildInfo.getGuildUUID(), uuid, true));
+            Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guildInfo.getUUID(), uuid, true));
         }
     }
 
@@ -148,7 +148,7 @@ public class GuildModCMD extends BaseCommand {
         UUID ownerUuid = guildInfo.getOwnerUuid();
         GuildCommandMapManager.getTransferOwnership().remove(ownerUuid);
         GuildCommandMapManager.getDisbanding().remove(ownerUuid);
-        Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guildInfo.getGuildUUID(), null, true));
+        Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guildInfo.getUUID(), null, true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully disbanded guild."));
     }
 
@@ -192,7 +192,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getGuildUUID(), amount, source);
+        GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getUUID(), amount, source);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
         target.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "&eYou received " + amount + " guild experience!"));
@@ -234,10 +234,10 @@ public class GuildModCMD extends BaseCommand {
 
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID().getUUID(), target.getUniqueId()))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getUUID(), target.getUniqueId()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, target, "There was an error trying to give guild score!")
                 .syncLast(memberData -> {
-                    Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getGuildUUID(), memberData, amount));
+                    Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getUUID(), memberData, amount));
                     sender.sendMessage(ColorUtil.format(this.prefix + "You have given " + target.getName() + " " + amount + " points!"));
                 })
                 .execute();
@@ -275,7 +275,7 @@ public class GuildModCMD extends BaseCommand {
             GuildBankUtil.close((Player) offlinePlayer);
         }
 
-        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getGuildUUID(), offlinePlayer.getUniqueId(), player.getUniqueId(), true));
+        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberKickedEvent(guildInfo.getUUID(), offlinePlayer.getUniqueId(), player.getUniqueId(), true));
         player.sendMessage(ColorUtil.format(this.prefix + "Successfully kicked guild member."));
     }
 
@@ -313,10 +313,10 @@ public class GuildModCMD extends BaseCommand {
         // todo: this doesn't actually reset anything
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID().getUUID(), targetUUID))
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getUUID(), targetUUID))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
                 .syncLast(memberData -> {
-                    Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getGuildUUID(), memberData, memberData.getScore()));
+                    Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent(guildInfo.getUUID(), memberData, memberData.getScore()));
                     player.sendMessage(ColorUtil.format(this.prefix + "Successfully reset guild member score."));
                 })
                 .execute();

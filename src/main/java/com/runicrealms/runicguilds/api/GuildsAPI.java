@@ -2,10 +2,11 @@ package com.runicrealms.runicguilds.api;
 
 import com.runicrealms.runicguilds.guild.GuildCreationResult;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public interface GuildsAPI {
 
@@ -17,7 +18,7 @@ public interface GuildsAPI {
      * @param score      int score to add
      * @return true if successful
      */
-    boolean addGuildScore(GuildUUID guildUUID, MemberData memberData, Integer score);
+    boolean addGuildScore(UUID guildUUID, MemberData memberData, Integer score);
 
     /**
      * Attempts to create a guild
@@ -34,7 +35,7 @@ public interface GuildsAPI {
      * @param guildUUID of the GUILD
      * @return the stage of the guild
      */
-    GuildStage getGuildStage(GuildUUID guildUUID);
+    GuildStage getGuildStage(UUID guildUUID);
 
     /**
      * Gives the specified guild an amount of exp
@@ -42,7 +43,7 @@ public interface GuildsAPI {
      * @param guildUUID of the guild
      * @param exp       an amount of guild experience
      */
-    void giveExperience(GuildUUID guildUUID, int exp);
+    void giveExperience(UUID guildUUID, int exp);
 
     /**
      * @param offlinePlayer to check

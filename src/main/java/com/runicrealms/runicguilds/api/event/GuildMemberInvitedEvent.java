@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.api.event;
 
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -8,11 +7,11 @@ import java.util.UUID;
 
 public class GuildMemberInvitedEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private final GuildUUID guildUUID;
+    private final UUID guildUUID;
     private final UUID invited;
     private final UUID inviter;
 
-    public GuildMemberInvitedEvent(GuildUUID guildUUID, UUID invited, UUID inviter) {
+    public GuildMemberInvitedEvent(UUID guildUUID, UUID invited, UUID inviter) {
         this.guildUUID = guildUUID;
         this.invited = invited;
         this.inviter = inviter;
@@ -34,7 +33,7 @@ public class GuildMemberInvitedEvent extends Event {
         return this.inviter;
     }
 
-    public GuildUUID guildUUID() {
+    public UUID guildUUID() {
         return this.guildUUID;
     }
 

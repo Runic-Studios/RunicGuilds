@@ -24,7 +24,6 @@ import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildDataField;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildBankUtil;
 import com.runicrealms.runicguilds.util.GuildUtil;
@@ -56,19 +55,15 @@ public class GuildEventListener implements Listener {
      * Disbands the guild, removing its data from Redis, Mongo, and local memory
      */
     private void disbandGuild(GuildData guildData, Player player) {
-        if (guildData == null) {
-            Bukkit.broadcastMessage("guild data is null!!!");
-            return;
-        }
         // Store a reference to the guild members
         Map<UUID, MemberData> memberDataMap = guildData.getMemberDataMap();
         // 1. Delete from Mongo
         Query query = new Query();
-        query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField() + ".uuid").is(guildData.getGuildUUID().getUUID()));
+        query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildData.getUUID()));
         MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
         mongoTemplate.remove(query, GuildData.class);
         // 2. Delete from memory
-        RunicGuilds.getDataAPI().getGuildInfoMap().remove(guildData.getGuildUUID().getUUID());
+        RunicGuilds.getDataAPI().getGuildInfoMap().remove(guildData.getUUID());
         // 3. Final cleanup
         for (MemberData memberData : memberDataMap.values()) {
             RunicGuilds.getDataAPI().setGuildForPlayer(memberData.getUuid(), "None");
@@ -110,7 +105,7 @@ public class GuildEventListener implements Listener {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(event.getGuildUUID().getUUID());
+                    GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(event.getUUID());
                     disbandGuild(guildData, player);
                     return guildData;
                 })
@@ -125,12 +120,12 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildExp(GiveGuildEXPEvent event) {
         if (event.isCancelled()) return;
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getGuildUUID());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getUUID());
         GuildStage currentStage = GuildStage.getFromExp(guildInfo.getExp());
         guildInfo.setExp(guildInfo.getExp() + event.getAmount());
         // Get the guild data async and update
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
+            GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
             guildDataNoBank.setExp(guildInfo.getExp());
             try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 guildDataNoBank.writeToJedis(jedis);
@@ -155,7 +150,7 @@ public class GuildEventListener implements Listener {
     public void onGuildInvitationAccept(GuildInvitationAcceptedEvent event) {
         Player whoWasInvited = Bukkit.getPlayer(event.getInvited());
         syncDisplays(whoWasInvited);
-        syncMemberDisplays(event.getGuildUUID());
+        syncMemberDisplays(event.getUUID());
     }
 
     @EventHandler
@@ -167,7 +162,7 @@ public class GuildEventListener implements Listener {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
             syncDisplays(player);
         }
-        syncMemberDisplays(event.getGuildUUID());
+        syncMemberDisplays(event.getUUID());
         Player player = Bukkit.getPlayer(event.getKicker());
         if (player != null) {
             player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
@@ -178,7 +173,7 @@ public class GuildEventListener implements Listener {
     public void onGuildLeave(GuildMemberLeaveEvent event) {
         Player whoLeft = Bukkit.getPlayer(event.getMember());
         syncDisplays(whoLeft);
-        syncMemberDisplays(event.getGuildUUID());
+        syncMemberDisplays(event.getUUID());
     }
 
     /**
@@ -189,15 +184,15 @@ public class GuildEventListener implements Listener {
         MemberData member = event.getMemberData();
         int score = member.getScore();
         member.setScore(score + event.getScore());
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getGuildUUID());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getUUID());
         // Load guild data async then recalculate score
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
                     try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                        event.getMemberData().writeToJedis(event.getGuildUUID(), event.getMemberData().getUuid(), jedis);
+                        event.getMemberData().writeToJedis(event.getUUID(), event.getMemberData().getUuid(), jedis);
                     }
-                    return RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
+                    return RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
                 })
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "GuildScoreChangeEvent failed to load!")
                 .syncLast(guildDataNoBank -> guildInfo.setScore(guildDataNoBank.calculateGuildScore()))
@@ -212,7 +207,7 @@ public class GuildEventListener implements Listener {
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
                 .asyncFirst(() -> {
-                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getGuildUUID().getUUID());
+                    GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
                     if (guildDataNoBank == null) {
                         Bukkit.getLogger().severe("Guild ownership transfer failed!");
                         oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "&cThere was an error processing this command!"));
@@ -235,7 +230,7 @@ public class GuildEventListener implements Listener {
                 .syncLast(guildDataNoBank -> {
                     guildInfo.setOwnerUuid(event.getNewOwner().getUniqueId());
                     syncDisplays(oldOwner);
-                    syncMemberDisplays(event.getGuildUUID());
+                    syncMemberDisplays(event.getUUID());
                     oldOwner.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Successfully transferred guild ownership. You have been demoted to officer."));
                     event.getNewOwner().sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You are now the owner of " + guildDataNoBank.getName() + "!"));
                 })
@@ -258,7 +253,7 @@ public class GuildEventListener implements Listener {
                 && !guildName.equalsIgnoreCase("")) {
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildName);
             if (guildInfo != null) {
-                RunicGuilds.getDataAPI().getPlayerToGuildMap().put(uuid, guildInfo.getGuildUUID().getUUID());
+                RunicGuilds.getDataAPI().getPlayerToGuildMap().put(uuid, guildInfo.getUUID());
             }
         }
         // Update their 'guild' quick lookup tag in core
@@ -312,7 +307,7 @@ public class GuildEventListener implements Listener {
      *
      * @param guildUUID of the guild to sync
      */
-    private void syncMemberDisplays(GuildUUID guildUUID) {
+    private void syncMemberDisplays(UUID guildUUID) {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
         Set<UUID> members = guildInfo.getMembersUuids();
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {

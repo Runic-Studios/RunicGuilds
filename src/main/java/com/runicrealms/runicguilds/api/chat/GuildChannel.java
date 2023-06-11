@@ -3,7 +3,6 @@ package com.runicrealms.runicguilds.api.chat;
 import com.runicrealms.api.chat.ChatChannel;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -14,6 +13,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class GuildChannel extends ChatChannel {
 
@@ -38,8 +38,8 @@ public class GuildChannel extends ChatChannel {
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (target == null) continue;
             if (!RunicGuilds.getGuildsAPI().isInGuild(target)) continue;
-            GuildUUID guildUUID = RunicGuilds.getDataAPI().getGuildInfo(target).getGuildUUID();
-            if (guildInfoSender.getGuildUUID() == guildUUID) {
+            UUID guildUUID = RunicGuilds.getDataAPI().getGuildInfo(target).getUUID();
+            if (guildInfoSender.getUUID() == guildUUID) {
                 recipients.add(target);
             }
         }

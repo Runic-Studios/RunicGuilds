@@ -15,7 +15,6 @@ import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bson.types.ObjectId;
@@ -62,7 +61,7 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public boolean addGuildScore(GuildUUID guildUUID, MemberData memberData, Integer score) {
+    public boolean addGuildScore(UUID guildUUID, MemberData memberData, Integer score) {
         UUID uuid = memberData.getUuid();
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
         if (guildInfo == null) {
@@ -71,7 +70,7 @@ public class GuildManager implements GuildsAPI, Listener {
         }
         Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent
                 (
-                        guildInfo.getGuildUUID(),
+                        guildInfo.getUUID(),
                         memberData,
                         score
                 ));
@@ -86,7 +85,7 @@ public class GuildManager implements GuildsAPI, Listener {
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent
                     (
-                            guildInfo.getGuildUUID(),
+                            guildInfo.getUUID(),
                             owner.getUniqueId(),
                             modCreated
                     ));
@@ -97,7 +96,7 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public GuildStage getGuildStage(GuildUUID guildUUID) {
+    public GuildStage getGuildStage(UUID guildUUID) {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
         if (guildInfo == null) {
             return GuildStage.STAGE_0;
@@ -107,14 +106,14 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public void giveExperience(GuildUUID guildUUID, int exp) {
+    public void giveExperience(UUID guildUUID, int exp) {
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                 // Update in-memory
                 GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
                 guildInfo.setExp(guildInfo.getExp() + exp);
                 // Update in Redis
-                GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildUUID.getUUID());
+                GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildUUID);
                 guildData.setExp(guildInfo.getExp());
                 guildData.writeToJedis(jedis);
             }
@@ -194,7 +193,7 @@ public class GuildManager implements GuildsAPI, Listener {
             GuildData guildData = new GuildData
                     (
                             new ObjectId(),
-                            new GuildUUID(UUID.randomUUID()),
+                            UUID.randomUUID(),
                             name,
                             prefix,
                             new MemberData(ownerUuid, GuildRank.OWNER, 0)
@@ -205,9 +204,9 @@ public class GuildManager implements GuildsAPI, Listener {
             // Cache latency-sensitive fields in-memory
             GuildInfo guildInfo = new GuildInfo(guildData);
             RunicGuilds.getDataAPI().addGuildInfoToMemory(guildInfo);
-            RunicGuilds.getDataAPI().getPlayerToGuildMap().put(ownerUuid, guildInfo.getGuildUUID().getUUID());
+            RunicGuilds.getDataAPI().getPlayerToGuildMap().put(ownerUuid, guildInfo.getUUID());
 //            Bukkit.broadcastMessage("adding guild info to memory");
-//            Bukkit.broadcastMessage("guildUUID is " + guildInfo.getGuildUUID().getUUID());
+//            Bukkit.broadcastMessage("guildUUID is " + guildInfo.getUUID().getUUID());
         }
         return GuildCreationResult.SUCCESSFUL;
     }

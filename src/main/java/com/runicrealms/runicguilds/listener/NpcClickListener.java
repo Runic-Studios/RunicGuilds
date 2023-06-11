@@ -50,7 +50,7 @@ public class NpcClickListener implements Listener {
 //            // Call redis async
 //            TaskChain<?> chain = RunicGuilds.newChain();
 //            chain
-//                    .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getGuildUUID(), uuid))
+//                    .asyncFirst(() -> RunicGuilds.getDataAPI().loadMemberData(guildInfo.getUUID(), uuid))
 //                    .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load member data!")
 //                    .syncLast(memberData -> {
 //                        // If this is NOT the owner

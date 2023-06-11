@@ -45,7 +45,7 @@ public class DataManager implements DataAPI, Listener {
             Set<GuildData> guildDataSet = getGuildDataFromMongo();
             if (guildDataSet.isEmpty()) return; // No guilds created
             guildDataSet.forEach(guildData -> {
-                guildInfoMap.put(guildData.getGuildUUID().getUUID(), new GuildInfo(guildData));
+                guildInfoMap.put(guildData.getUUID(), new GuildInfo(guildData));
             });
         }, 10 * 20L);
         Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
@@ -53,7 +53,7 @@ public class DataManager implements DataAPI, Listener {
 
     @Override
     public void addGuildInfoToMemory(GuildInfo guildInfo) {
-        this.guildInfoMap.put(guildInfo.getGuildUUID().getUUID(), guildInfo);
+        this.guildInfoMap.put(guildInfo.getUUID(), guildInfo);
     }
 
     @Override
@@ -78,8 +78,8 @@ public class DataManager implements DataAPI, Listener {
     }
 
     @Override
-    public GuildInfo getGuildInfo(GuildUUID guildUUID) {
-        return this.guildInfoMap.get(guildUUID.getUUID());
+    public GuildInfo getGuildInfo(UUID guildUUID) {
+        return this.guildInfoMap.get(guildUUID);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class DataManager implements DataAPI, Listener {
     public List<ScoreContainer> loadAllGuildScores() {
         List<ScoreContainer> scoreContainers = new ArrayList<>();
         for (UUID guildUUID : this.guildInfoMap.keySet()) {
-            scoreContainers.add(new ScoreContainer(guildInfoMap.get(guildUUID).getGuildUUID(), guildInfoMap.get(guildUUID).getScore()));
+            scoreContainers.add(new ScoreContainer(guildInfoMap.get(guildUUID).getUUID(), guildInfoMap.get(guildUUID).getScore()));
         }
         return scoreContainers;
     }
@@ -152,7 +152,7 @@ public class DataManager implements DataAPI, Listener {
         if (!name.equalsIgnoreCase("none")) {
             GuildInfo guildInfo = this.getGuildInfo(name);
             if (guildInfo != null) {
-                this.playerToGuildMap.put(uuid, guildInfo.getGuildUUID().getUUID());
+                this.playerToGuildMap.put(uuid, guildInfo.getUUID());
             }
         } else {
             this.playerToGuildMap.remove(uuid);

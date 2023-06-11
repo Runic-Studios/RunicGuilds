@@ -33,7 +33,7 @@ public class GuildData implements SessionDataMongo {
     }};
     @Id
     private ObjectId id;
-    private GuildUUID guildUUID;
+    private UUID guildUUID;
     private String name = "";
     private String prefix = "";
     private int exp = 0;
@@ -54,7 +54,7 @@ public class GuildData implements SessionDataMongo {
      * @param prefix     of the guild's name
      * @param memberData player owner of the guild
      */
-    public GuildData(ObjectId id, GuildUUID guildUUID, String name, String prefix, MemberData memberData) {
+    public GuildData(ObjectId id, UUID guildUUID, String name, String prefix, MemberData memberData) {
         this.id = id;
         this.guildUUID = guildUUID;
         this.name = name;
@@ -69,9 +69,9 @@ public class GuildData implements SessionDataMongo {
      * @param guildUUID of the GUILD
      * @return the root key path
      */
-    public static String getJedisKey(GuildUUID guildUUID) {
+    public static String getJedisKey(UUID guildUUID) {
         String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-        return database + ":guilds:" + guildUUID.getUUID().toString();
+        return database + ":guilds:" + guildUUID.toString();
     }
 
     /**
@@ -80,7 +80,7 @@ public class GuildData implements SessionDataMongo {
      * @param guildUUID uuid of the data object wrapper
      * @param player    who disbanded the guild
      */
-    public static void disband(GuildUUID guildUUID, Player player, boolean mod) {
+    public static void disband(UUID guildUUID, Player player, boolean mod) {
         Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guildUUID, player, mod));
     }
 
@@ -121,11 +121,11 @@ public class GuildData implements SessionDataMongo {
         this.guildBanner = guildBanner;
     }
 
-    public GuildUUID getGuildUUID() {
+    public UUID getUUID() {
         return guildUUID;
     }
 
-    public void setGuildUUID(GuildUUID guildUUID) {
+    public void setUUID(UUID guildUUID) {
         this.guildUUID = guildUUID;
     }
 

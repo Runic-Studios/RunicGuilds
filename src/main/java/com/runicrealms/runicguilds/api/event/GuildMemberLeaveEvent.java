@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.api.event;
 
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -8,10 +7,10 @@ import java.util.UUID;
 
 public class GuildMemberLeaveEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private final GuildUUID guildUUID;
+    private final UUID guildUUID;
     private final UUID member;
 
-    public GuildMemberLeaveEvent(GuildUUID guildUUID, UUID member) {
+    public GuildMemberLeaveEvent(UUID guildUUID, UUID member) {
         this.guildUUID = guildUUID;
         this.member = member;
     }
@@ -20,7 +19,7 @@ public class GuildMemberLeaveEvent extends Event {
         return handlers;
     }
 
-    public GuildUUID getGuildUUID() {
+    public UUID getUUID() {
         return this.guildUUID;
     }
 

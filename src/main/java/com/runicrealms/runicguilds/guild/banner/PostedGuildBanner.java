@@ -5,7 +5,6 @@ import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,6 +17,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 /**
  * Class that represents the spawned guild banners in hub cities for display
  */
@@ -26,11 +27,11 @@ public class PostedGuildBanner {
     // constants to adjust the location based on the yaw
     final double OFFSET_X_YAW_90 = 0.78;
     final double OFFSET_Z_YAW_90 = 0.5;
-    private final GuildUUID guildUUID;
+    private final UUID guildUUID;
     private final ArmorStand[] banner;
     private final Hologram hologram;
 
-    public PostedGuildBanner(GuildUUID guildUUID, Location location) {
+    public PostedGuildBanner(UUID guildUUID, Location location) {
         this.guildUUID = guildUUID;
         this.banner = this.createShowcase(location);
         this.hologram = this.makeHologram(location);
@@ -49,7 +50,7 @@ public class PostedGuildBanner {
         armorStand.addEquipmentLock(EquipmentSlot.HEAD, ArmorStand.LockType.REMOVING_OR_CHANGING);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
         if (guildInfo != null) {
-            armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, guildInfo.getGuildUUID().toString());
+            armorStand.getPersistentDataContainer().set(KEY, PersistentDataType.STRING, guildInfo.getUUID().toString());
         }
     }
 
@@ -96,7 +97,7 @@ public class PostedGuildBanner {
         return this.hologram;
     }
 
-    public GuildUUID guildUUID() {
+    public UUID guildUUID() {
         return this.guildUUID;
     }
 

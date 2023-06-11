@@ -72,7 +72,7 @@ public class GuildBannerUIListener implements Listener {
 
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo != null) {
-            bannerUI.getBanner().setBanner(bannerUI.getGuildUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
+            bannerUI.getBanner().setBanner(bannerUI.getUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
             guildInfo.setGuildBanner(bannerUI.getBanner());
             humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
         } else {

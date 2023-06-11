@@ -59,7 +59,7 @@ public class MemberData {
      * @param playerUUID of this member
      * @param jedis      a jedis resource/thread
      */
-    public void writeToJedis(GuildUUID guildUUID, UUID playerUUID, Jedis jedis) {
+    public void writeToJedis(UUID guildUUID, UUID playerUUID, Jedis jedis) {
         // todo: add a write operation method
 //        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
 //        // Inform the server that this guild member should be saved to mongo on next task (jedis data is refreshed)

@@ -1,6 +1,5 @@
 package com.runicrealms.runicguilds.util;
 
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -37,7 +36,7 @@ public class GuildBankUtil implements Listener {
      * @param page
      * @param guildUUID
      */
-    public static void open(Player player, Integer page, GuildUUID guildUUID) {
+    public static void open(Player player, Integer page, UUID guildUUID) {
 //        Guild guild = RunicGuilds.getGuildsAPI().getGuild(prefix).getGuild();
 //        Inventory inventory = Bukkit.createInventory(null, 54, ChatColor.translateAlternateColorCodes('&', "Guild Bank"));
 //        if (guild.getBankSize() > 45 && page != guild.getBankSize() / 45) {
@@ -74,7 +73,7 @@ public class GuildBankUtil implements Listener {
         viewers.remove(player.getUniqueId());
     }
 
-    public static String getJedisKey(GuildUUID guildUUID, Jedis jedis) {
+    public static String getJedisKey(UUID guildUUID, Jedis jedis) {
         return jedis.get(guildUUID + ":bankViewers");
     }
 

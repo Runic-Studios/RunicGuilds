@@ -1,19 +1,20 @@
 package com.runicrealms.runicguilds.api.event;
 
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import java.util.UUID;
+
 public class GiveGuildEXPEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
-    private final GuildUUID guildUUID;
+    private final UUID guildUUID;
     private final int amount;
     private final GuildEXPSource source;
     private boolean cancelled;
 
-    public GiveGuildEXPEvent(GuildUUID guildUUID, int amount, GuildEXPSource source) {
+    public GiveGuildEXPEvent(UUID guildUUID, int amount, GuildEXPSource source) {
         this.guildUUID = guildUUID;
         this.amount = amount;
         this.source = source;
@@ -28,7 +29,7 @@ public class GiveGuildEXPEvent extends Event implements Cancellable {
         return this.amount;
     }
 
-    public GuildUUID getGuildUUID() {
+    public UUID getUUID() {
         return this.guildUUID;
     }
 

@@ -4,7 +4,6 @@ import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.common.util.GUIUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
-import com.runicrealms.runicguilds.model.GuildUUID;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -21,6 +20,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Manages the UI that lets players customize their guild banner
@@ -44,7 +44,7 @@ public class GuildBannerUI implements InventoryHolder {
     }
 
     private final Inventory inventory;
-    private final GuildUUID guildUUID;
+    private final UUID guildUUID;
     private final GuildBanner banner;
     private final ItemStack dummyBanner;
     private final NamespacedKey key = new NamespacedKey(RunicGuilds.getInstance(), "itemKey");
@@ -54,7 +54,7 @@ public class GuildBannerUI implements InventoryHolder {
     private PatternType chosenPattern;
     private int page;
 
-    public GuildBannerUI(GuildUUID guildUUID) {
+    public GuildBannerUI(UUID guildUUID) {
         this.inventory = Bukkit.createInventory(this, 54, ColorUtil.format("&r&6Banner Editor"));
         this.guildUUID = guildUUID;
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
@@ -108,7 +108,7 @@ public class GuildBannerUI implements InventoryHolder {
         return this.dummyBanner;
     }
 
-    public GuildUUID getGuildUUID() {
+    public UUID getUUID() {
         return guildUUID;
     }
 
