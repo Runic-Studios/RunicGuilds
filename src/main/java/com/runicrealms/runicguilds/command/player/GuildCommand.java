@@ -115,42 +115,42 @@ public class GuildCommand extends BaseCommand {
         }
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(inviter);
 
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID()))
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "There was an error trying to accept guild invitation!")
+                .syncLast(guildData -> {
+                    RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
 
-        GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
-        if (guildData == null) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "A guild was not found!"));
-            return;
-        }
-
-        RunicGuilds.getPlayersCreatingGuild().remove(player.getUniqueId());
-
-        // Ensure there is room for new member
-        GuildStage stage = GuildStage.getFromExp(guildInfo.getExp());
-        if (guildData.getMemberDataMap().size() >= stage.getMaxMembers()) {
-            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
-        }
-        // Let's add a guild member!
-        guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), GuildRank.RECRUIT, 0));
-        // Save to MongoDB with TaskChain
-        RunicGuilds.getGuildWriteOperation().updateGuildData
-                (
-                        guildInfo.getUUID(),
-                        "memberDataMap",
-                        guildData.getMemberDataMap(),
-                        () -> {
-                            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
-                            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.GREEN + "You have accepted the guild invitation!"));
-                            Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent
-                                    (
-                                            guildData.getUUID(),
-                                            player.getUniqueId(),
-                                            GuildCommandMapManager.getInvites().get(player.getUniqueId())
-                                    ));
-                            // Add to in-memory cache
-                            guildInfo.getMembersUuids().add(player.getUniqueId());
-                            GuildCommandMapManager.getInvites().remove(player.getUniqueId());
-                        }
-                );
+                    // Ensure there is room for new member
+                    GuildStage stage = GuildStage.getFromExp(guildInfo.getExp());
+                    if (guildData.getMemberDataMap().size() >= stage.getMaxMembers()) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
+                    }
+                    // Let's add a guild member!
+                    guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), GuildRank.RECRUIT, 0));
+                    // Save to MongoDB with TaskChain
+                    RunicGuilds.getGuildWriteOperation().updateGuildData
+                            (
+                                    guildInfo.getUUID(),
+                                    "memberDataMap",
+                                    guildData.getMemberDataMap(),
+                                    () -> {
+                                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.0f);
+                                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.GREEN + "You have accepted the guild invitation!"));
+                                        Bukkit.getServer().getPluginManager().callEvent(new GuildInvitationAcceptedEvent
+                                                (
+                                                        guildData.getUUID(),
+                                                        player.getUniqueId(),
+                                                        GuildCommandMapManager.getInvites().get(player.getUniqueId())
+                                                ));
+                                        // Add to in-memory cache
+                                        guildInfo.getMembersUuids().add(player.getUniqueId());
+                                        GuildCommandMapManager.getInvites().remove(player.getUniqueId());
+                                    }
+                            );
+                })
+                .execute();
     }
 
     @Subcommand("bank")
@@ -322,17 +322,25 @@ public class GuildCommand extends BaseCommand {
                         guildDataNoBank.getMemberDataMap().get(uuid).setRank(GuildRank.getByNumber(targetRank.getRankNumber() + 1));
                         return guildDataNoBank;
                     })
-                    .syncLast(guildDataNoBank -> {
+                    .syncLast(guildData -> {
                         // Demote success!
-                        GuildRank newRank = guildDataNoBank.getMemberDataMap().get(uuid).getRank();
-                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + name + " has been demoted to rank " + newRank + "!"));
-                        Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent
+                        RunicGuilds.getGuildWriteOperation().updateGuildData
                                 (
-                                        guildDataNoBank.getUUID(),
-                                        uuid,
-                                        player.getUniqueId(),
-                                        newRank
-                                ));
+                                        guildInfo.getUUID(),
+                                        "memberDataMap",
+                                        guildData.getMemberDataMap(),
+                                        () -> {
+                                            GuildRank newRank = guildData.getMemberDataMap().get(uuid).getRank();
+                                            player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + name + " has been demoted to rank " + newRank + "!"));
+                                            Bukkit.getServer().getPluginManager().callEvent(new GuildMemberDemotedEvent
+                                                    (
+                                                            guildData.getUUID(),
+                                                            uuid,
+                                                            player.getUniqueId(),
+                                                            newRank
+                                                    ));
+                                        }
+                                );
                     })
                     .execute();
         });
@@ -570,19 +578,19 @@ public class GuildCommand extends BaseCommand {
         chain
                 .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, player, "RunicGuilds failed to load data no bank!")
-                .sync(guildDataNoBank -> {
-                    if (!guildDataNoBank.isAtLeastRank(player, GuildRank.OFFICER)) {
+                .sync(guildData -> {
+                    if (!guildData.isAtLeastRank(player, GuildRank.OFFICER)) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to promote other players."));
                         return null;
                     }
 
-                    if (!guildDataNoBank.isInGuild(target.getUniqueId())) {
+                    if (!guildData.isInGuild(target.getUniqueId())) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
                         return null;
                     }
 
-                    GuildRank commandSenderRank = guildDataNoBank.getMemberDataMap().get(player.getUniqueId()).getRank();
-                    GuildRank targetRank = guildDataNoBank.getMemberDataMap().get(target.getUniqueId()).getRank();
+                    GuildRank commandSenderRank = guildData.getMemberDataMap().get(player.getUniqueId()).getRank();
+                    GuildRank targetRank = guildData.getMemberDataMap().get(target.getUniqueId()).getRank();
 
                     if (targetRank == GuildRank.OFFICER) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot promote another player to owner. To transfer guild ownership, use /guild transfer."));
@@ -594,25 +602,31 @@ public class GuildCommand extends BaseCommand {
                         return null;
                     }
 
-                    return guildDataNoBank;
+                    return guildData;
                 })
                 .abortIfNull()
-                .async(guildDataNoBank -> {
-                    GuildRank targetRank = guildDataNoBank.getMemberDataMap().get(target.getUniqueId()).getRank();
-                    guildDataNoBank.getMemberDataMap().get(target.getUniqueId()).setRank(GuildRank.getByNumber(targetRank.getRankNumber() - 1));
-                    return guildDataNoBank;
+                .async(guildData -> {
+                    GuildRank targetRank = guildData.getMemberDataMap().get(target.getUniqueId()).getRank();
+                    guildData.getMemberDataMap().get(target.getUniqueId()).setRank(GuildRank.getByNumber(targetRank.getRankNumber() - 1));
+                    return guildData;
                 })
-                .syncLast(guildDataNoBank -> {
-                    GuildRank newRank = guildDataNoBank.getMemberDataMap().get(target.getUniqueId()).getRank();
-                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + target.getName() + " has been promoted to rank " + newRank + "!"));
-                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent
-                            (
-                                    guildDataNoBank.getUUID(),
-                                    target.getUniqueId(),
-                                    player.getUniqueId(),
-                                    newRank
-                            ));
-                })
+                .syncLast(guildData -> RunicGuilds.getGuildWriteOperation().updateGuildData
+                        (
+                                guildInfo.getUUID(),
+                                "memberDataMap",
+                                guildData.getMemberDataMap(),
+                                () -> {
+                                    GuildRank newRank = guildData.getMemberDataMap().get(target.getUniqueId()).getRank();
+                                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + target.getName() + " has been promoted to rank " + newRank + "!"));
+                                    Bukkit.getServer().getPluginManager().callEvent(new GuildMemberPromotedEvent
+                                            (
+                                                    guildData.getUUID(),
+                                                    target.getUniqueId(),
+                                                    player.getUniqueId(),
+                                                    newRank
+                                            ));
+                                }
+                        ))
                 .execute();
     }
 
