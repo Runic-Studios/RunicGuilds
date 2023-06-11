@@ -75,6 +75,10 @@ public class GuildBossManager implements Listener {
     public void handleBossDeath(UUID bossID, int guildScore) {
         Pair<Map<UUID, Integer>, Double> pair = bossDamage.get(bossID);
         if (pair == null) return;
+//        Bukkit.broadcastMessage(pair.first.entrySet()
+//                .stream()
+//                .map(entry -> entry.getKey() + " = " + entry.getValue())
+//                .collect(Collectors.joining(", ", "{", "}")));
         Map<UUID, Integer> damageValues = pair.first;
         Double maxHealth = pair.second;
         // 75% of guild score is distributed according to how much damage each player did, 25% is split evenly for participation
@@ -84,19 +88,21 @@ public class GuildBossManager implements Listener {
         double participationScoreForEach = participationScoreTotal / ((double) damageValues.size());
 
         for (UUID damager : damageValues.keySet()) {
+            if (Bukkit.getPlayer(damager) == null) continue;
             double percentDamage = damageValues.get(damager) / maxHealth;
             damageScores.put(damager, (int) Math.round(damageScoreTotal * percentDamage + participationScoreForEach));
         }
         // Distribute guild score
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             for (UUID damager : damageScores.keySet()) {
-                GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(damager);
+                Player damagerPlayer = Bukkit.getPlayer(damager);
+                if (damagerPlayer == null) continue;
+                GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(damagerPlayer);
                 if (info == null) continue;
                 MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getUUID(), damager);
+                Bukkit.broadcastMessage(damagerPlayer.getName() + " gained " + damageScores.get(damager));
                 Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
                     RunicGuilds.getGuildsAPI().addGuildScore(info.getUUID(), data, damageScores.get(damager));
-                    Player damagerPlayer = Bukkit.getPlayer(damager);
-                    if (damagerPlayer == null) return;
                     info.getMembersUuids().forEach(memberUUID -> {
                         Player online = Bukkit.getPlayer(memberUUID);
                         if (online != null) {
