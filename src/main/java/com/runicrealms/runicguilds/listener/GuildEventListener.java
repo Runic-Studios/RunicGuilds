@@ -39,7 +39,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import redis.clients.jedis.Jedis;
 
 import java.util.Map;
 import java.util.Set;
@@ -178,21 +177,35 @@ public class GuildEventListener implements Listener {
      */
     @EventHandler
     public void onGuildScoreChange(GuildScoreChangeEvent event) {
-        MemberData member = event.getMemberData();
-        int score = member.getScore();
-        member.setScore(score + event.getScore());
+        MemberData memberData = event.getMemberData();
+        int score = memberData.getScore();
+        memberData.setScore(score + event.getScore());
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getUUID());
         // Load guild data async then recalculate score
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
-                .asyncFirst(() -> {
-                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                        event.getMemberData().writeToJedis(event.getUUID(), event.getMemberData().getUuid(), jedis);
-                    }
-                    return RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
-                })
+                .asyncFirst(() -> RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID()))
                 .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "GuildScoreChangeEvent failed to load!")
-                .syncLast(guildDataNoBank -> guildInfo.setScore(guildDataNoBank.calculateGuildScore()))
+                .syncLast(guildData -> {
+                    // Update MongoDB
+                    guildData.getMemberDataMap().put(event.getMemberData().getUuid(), memberData);
+                    RunicGuilds.getGuildWriteOperation().updateGuildData
+                            (
+                                    guildInfo.getUUID(),
+                                    "memberDataMap",
+                                    guildData.getMemberDataMap(),
+                                    () -> {
+                                        // Update in-memory cache
+                                        guildInfo.setScore(guildData.calculateGuildScore());
+                                        Player player = Bukkit.getPlayer(event.getMemberData().getUuid());
+                                        if (player != null) {
+                                            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                                                    GuildUtil.PREFIX + ChatColor.GREEN + "You received " +
+                                                            ChatColor.GOLD + ChatColor.BOLD + event.getScore() + ChatColor.GREEN + " guild score!"));
+                                        }
+                                    }
+                            );
+                })
                 .execute();
     }
 

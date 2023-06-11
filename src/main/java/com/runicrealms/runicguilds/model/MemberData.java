@@ -1,7 +1,6 @@
 package com.runicrealms.runicguilds.model;
 
 import com.runicrealms.runicguilds.guild.GuildRank;
-import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
 
@@ -50,23 +49,6 @@ public class MemberData {
 
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
-    }
-
-    /**
-     * Writes all member data for the guild
-     *
-     * @param guildUUID  of the guild
-     * @param playerUUID of this member
-     * @param jedis      a jedis resource/thread
-     */
-    public void writeToJedis(UUID guildUUID, UUID playerUUID, Jedis jedis) {
-        // todo: add a write operation method
-//        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-//        // Inform the server that this guild member should be saved to mongo on next task (jedis data is refreshed)
-//        jedis.sadd(database + ":markedForSave:guilds", guildUUID.getUUID().toString());
-//        String key = getJedisKey(guildUUID, playerUUID);
-//        jedis.hmset(database + ":" + key, this.toMap(playerUUID));
-//        jedis.expire(database + ":" + key, RunicDatabase.getAPI().getRedisAPI().getExpireTime());
     }
 
 }
