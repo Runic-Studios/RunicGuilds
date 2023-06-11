@@ -147,7 +147,7 @@ public class GuildUtil {
             if (j > 19) break;
             Player playerMember = Bukkit.getPlayer(guildMember);
             if (playerMember == null) continue; // Insurance
-            tableTabList.set(1, j + 1, new TextTabItem
+            tableTabList.set(3, j + 1, new TextTabItem
                     (
                             playerMember.getName(),
                             playerMember.getPing(),
