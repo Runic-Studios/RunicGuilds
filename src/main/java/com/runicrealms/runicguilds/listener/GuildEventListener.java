@@ -286,7 +286,7 @@ public class GuildEventListener implements Listener {
      * @param player to sync
      */
     private void syncDisplays(Player player) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) {
             RunicGuilds.getDataAPI().setGuildForPlayer(player.getUniqueId(), "None");
             Bukkit.getLogger().severe("Guild info was null, setting guild for player to null");

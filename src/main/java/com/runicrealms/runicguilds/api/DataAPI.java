@@ -4,6 +4,7 @@ import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.model.ScoreContainer;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,15 +32,15 @@ public interface DataAPI {
      * Returns a container of basic guild info for guild (if it exists)
      *
      * @param name of the guild to lookup
-     * @return some basic info about their guilds, like exp, name, etc.
+     * @return some basic info about the guild, like exp, name, etc.
      */
     GuildInfo getGuildInfo(String name);
 
     /**
-     * Returns a container of basic guild info for player (if it exists)
+     * Returns a container of basic guild info for the GUILD UUID (breaks if you pass in player uuid)
      *
-     * @param guildUUID of the guild to lookup
-     * @return some basic info about their guilds, like exp, name, etc.
+     * @param guildUUID of the GUILD to lookup
+     * @return some basic info about the guild, like exp, name, etc.
      */
     GuildInfo getGuildInfo(UUID guildUUID);
 
@@ -47,9 +48,9 @@ public interface DataAPI {
      * Returns a container of basic guild info for player (if it exists)
      *
      * @param player to lookup
-     * @return some basic info about their guilds, like exp, name, etc.
+     * @return some basic info about the PLAYER'S guild, like exp, name, etc.
      */
-    GuildInfo getGuildInfo(UUID player);
+    GuildInfo getGuildInfo(Player player);
 
     /**
      * @return all in-memory guilds. Used for guild creation to ensure names are unique

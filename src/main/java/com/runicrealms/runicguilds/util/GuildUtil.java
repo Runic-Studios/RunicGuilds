@@ -104,7 +104,7 @@ public class GuildUtil {
      * @param tableTabList the tab list (probably from a tab list update event)
      */
     public static void updateGuildTabColumn(Player player, TableTabList tableTabList) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         // Reset guild column
         for (int i = 0; i < 19; i++) {
             tableTabList.remove(1, i);

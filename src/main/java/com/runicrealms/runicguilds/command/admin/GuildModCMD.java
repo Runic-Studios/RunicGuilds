@@ -124,7 +124,7 @@ public class GuildModCMD extends BaseCommand {
         GuildCreationResult result = RunicGuilds.getGuildsAPI().createGuild(owner, args[1], args[2], true);
         player.sendMessage(ColorUtil.format(this.prefix + "&e" + result.getMessage()));
         if (result == GuildCreationResult.SUCCESSFUL) {
-            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner.getUniqueId());
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(owner);
             Bukkit.getServer().getPluginManager().callEvent(new GuildCreationEvent(guildInfo.getUUID(), uuid, true));
         }
     }
@@ -170,7 +170,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
         if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -219,7 +219,7 @@ public class GuildModCMD extends BaseCommand {
             return;
         }
 
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
         if (guildInfo == null) {
             sender.sendMessage(ColorUtil.format(this.prefix + "&cThe targeted player must be in a guild to execute this command!"));
             return;
@@ -305,7 +305,7 @@ public class GuildModCMD extends BaseCommand {
         }
 
         UUID targetUUID = target.getUniqueId();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(target);
         if (guildInfo == null) {
             player.sendMessage(ColorUtil.format(this.prefix + "The specified player must be in a guild to execute this command!"));
             return;

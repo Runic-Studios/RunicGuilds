@@ -18,6 +18,7 @@ import com.runicrealms.runicguilds.guild.banner.GuildBannerUIListener;
 import com.runicrealms.runicguilds.guild.banner.PostedGuildBanner;
 import com.runicrealms.runicguilds.listener.GuildEventListener;
 import com.runicrealms.runicguilds.listener.GuildExpBonusListener;
+import com.runicrealms.runicguilds.listener.GuildScoreboardListener;
 import com.runicrealms.runicguilds.listener.NpcClickListener;
 import com.runicrealms.runicguilds.listener.RewardDamageListener;
 import com.runicrealms.runicguilds.listener.RewardMountListener;
@@ -118,6 +119,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
                         new GuildBannerUIListener(),
                         new GuildExpBonusListener(),
                         new RewardDamageListener(),
+                        new GuildScoreboardListener(),
                         new RewardMountListener(),
                         new GuildInfoUIListener(),
                         new GuildMembersUIListener(),

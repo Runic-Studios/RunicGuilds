@@ -27,8 +27,8 @@ public class GuildExpBonusListener implements Listener {
         GuildStage guildStage = GuildStage.getFromReward(expStageReward);
         if (guildStage == null) return;
 
-        // Ensure there is a guild
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        // Ensure there is a guild for this player
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo == null) return;
 
         // Ensure guild has perk unlocked

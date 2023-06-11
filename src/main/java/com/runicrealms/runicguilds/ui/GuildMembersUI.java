@@ -32,7 +32,7 @@ public class GuildMembersUI implements InventoryHolder {
      */
     public GuildMembersUI(Player player) {
         this.player = player;
-        String name = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId()).getName();
+        String name = RunicGuilds.getDataAPI().getGuildInfo(player).getName();
         this.inventory = Bukkit.createInventory(this, 54, ChatColor.GOLD + name);
         openMenu();
     }
@@ -55,7 +55,7 @@ public class GuildMembersUI implements InventoryHolder {
         GUIUtil.fillInventoryBorders(this.inventory);
         this.inventory.setItem(0, GUIUtil.BACK_BUTTON);
         this.inventory.setItem(8, GUIUtil.CLOSE_BUTTON);
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         UUID guildUUID = guildInfo.getUUID();
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
