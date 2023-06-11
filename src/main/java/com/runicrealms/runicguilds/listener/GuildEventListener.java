@@ -125,9 +125,6 @@ public class GuildEventListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
             GuildData guildDataNoBank = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
             guildDataNoBank.setExp(guildInfo.getExp());
-            try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                guildDataNoBank.writeToJedis(jedis);
-            }
             GuildStage newStage = GuildStage.getFromExp(guildInfo.getExp());
             if (currentStage == null || newStage == null) return;
             if (currentStage != newStage) { // Stage upgrade!
@@ -147,7 +144,9 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildInvitationAccept(GuildInvitationAcceptedEvent event) {
         Player whoWasInvited = Bukkit.getPlayer(event.getInvited());
-        syncDisplays(whoWasInvited);
+        if (whoWasInvited != null) {
+            syncDisplays(whoWasInvited);
+        }
         syncMemberDisplays(event.getUUID());
     }
 
@@ -168,7 +167,9 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildLeave(GuildMemberLeaveEvent event) {
         Player whoLeft = Bukkit.getPlayer(event.getMember());
-        syncDisplays(whoLeft);
+        if (whoLeft != null) {
+            syncDisplays(whoLeft);
+        }
         syncMemberDisplays(event.getUUID());
     }
 
@@ -198,7 +199,7 @@ public class GuildEventListener implements Listener {
     @EventHandler
     public void onGuildTransfer(GuildOwnershipTransferEvent event) {
         Player oldOwner = event.getOldOwner();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(oldOwner.getUniqueId());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(oldOwner);
         // Load members async, populate inventory async, then open inv sync
         TaskChain<?> chain = RunicGuilds.newChain();
         chain
@@ -217,9 +218,6 @@ public class GuildEventListener implements Listener {
                     }
                     oldOwnerData.setRank(GuildRank.OFFICER);
                     newOwnerData.setRank(GuildRank.OWNER);
-                    try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                        guildDataNoBank.writeToJedis(jedis);
-                    }
                     return guildDataNoBank;
                 })
                 .abortIfNull()

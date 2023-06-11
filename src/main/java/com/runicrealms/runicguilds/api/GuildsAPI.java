@@ -48,6 +48,6 @@ public interface GuildsAPI {
      * @param player to check
      * @return true if player in guild
      */
-    boolean isInGuild(UUID player);
+    boolean isInGuild(Player player);
 
 }

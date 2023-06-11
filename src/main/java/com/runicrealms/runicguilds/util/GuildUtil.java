@@ -107,7 +107,7 @@ public class GuildUtil {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         // Reset guild column
         for (int i = 0; i < 19; i++) {
-            tableTabList.remove(1, i);
+            tableTabList.remove(3, i);
         }
         tableTabList.set(3, 0, new TextTabItem
                 (ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
@@ -125,7 +125,7 @@ public class GuildUtil {
                 (ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
         // Reset guild column
         for (int i = 1; i < 19; i++) {
-            tableTabList.remove(1, i);
+            tableTabList.remove(3, i);
         }
         int j = 0;
         for (UUID guildMember : onlineMembers) {

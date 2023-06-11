@@ -7,6 +7,7 @@ import co.aikar.taskchain.TaskChain;
 import co.aikar.taskchain.TaskChainFactory;
 import com.runicrealms.RunicChat;
 import com.runicrealms.runicguilds.api.DataAPI;
+import com.runicrealms.runicguilds.api.GuildWriteOperation;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
@@ -57,6 +58,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     private static TaskChainFactory taskChainFactory;
     private static MongoTask mongoTask;
     private static GuildBossManager bossManager;
+    private static GuildWriteOperation guildWriteOperation;
 
     public static <T> TaskChain<T> newChain() {
         return taskChainFactory.newChain();
@@ -94,11 +96,17 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         return bossManager;
     }
 
+    public static GuildWriteOperation getGuildWriteOperation() {
+        return guildWriteOperation;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
         this.saveDefaultConfig();
-        dataAPI = new DataManager();
+        DataManager dataManager = new DataManager();
+        dataAPI = dataManager;
+        guildWriteOperation = dataManager;
         guildsAPI = new GuildManager();
         taskChainFactory = BukkitTaskChainFactory.create(this);
         bossManager = new GuildBossManager();
@@ -166,6 +174,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         commandManager = null;
         mongoTask = null;
         bossManager = null;
+        guildWriteOperation = null;
     }
 
     private void registerEvents(Listener... listeners) {

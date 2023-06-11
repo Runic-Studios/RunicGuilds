@@ -1,9 +1,13 @@
 package com.runicrealms.runicguilds.model;
 
+import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.rdb.RunicDatabase;
+import com.runicrealms.plugin.rdb.api.WriteCallback;
 import com.runicrealms.plugin.rdb.event.MongoSaveEvent;
+import com.runicrealms.plugin.taskchain.TaskChainUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.DataAPI;
+import com.runicrealms.runicguilds.api.GuildWriteOperation;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +32,7 @@ import java.util.UUID;
  *
  * @author Skyfallin
  */
-public class DataManager implements DataAPI, Listener {
+public class DataManager implements DataAPI, GuildWriteOperation, Listener {
     // Contains some latency-sensitive data for fastest lookup.
     private final HashMap<UUID, GuildInfo> guildInfoMap;
 
@@ -169,4 +174,25 @@ public class DataManager implements DataAPI, Listener {
         RunicGuilds.getMongoTask().saveAllToMongo(() -> event.markPluginSaved("guilds"));
     }
 
+    @Override
+    public <T> void updateGuildData(UUID guildUUID, String fieldName, T newValue, WriteCallback callback) {
+        MongoTemplate mongoTemplate = RunicDatabase.getAPI().getDataAPI().getMongoTemplate();
+        TaskChain<?> chain = RunicGuilds.newChain();
+        chain
+                .asyncFirst(() -> {
+                    // Define a query to find the GuildData for this player
+                    Query query = new Query();
+                    query.addCriteria(Criteria.where(GuildDataField.GUILD_UUID.getField()).is(guildUUID));
+
+                    // Define an update to set the specific field
+                    Update update = new Update();
+                    update.set(fieldName, newValue);
+
+                    // Execute the update operation
+                    return mongoTemplate.updateFirst(query, update, GuildData.class);
+                })
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to write to " + fieldName + "!")
+                .syncLast(updateResult -> callback.onWriteComplete())
+                .execute();
+    }
 }

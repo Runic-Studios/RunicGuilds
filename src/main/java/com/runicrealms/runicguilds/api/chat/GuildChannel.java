@@ -37,7 +37,7 @@ public class GuildChannel extends ChatChannel {
         }
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (target == null) continue;
-            if (!RunicGuilds.getGuildsAPI().isInGuild(target.getUniqueId())) continue;
+            if (!RunicGuilds.getGuildsAPI().isInGuild(target)) continue;
             UUID guildUUID = RunicGuilds.getDataAPI().getGuildInfo(target).getUUID();
             if (guildInfoSender.getUUID() == guildUUID) {
                 recipients.add(target);

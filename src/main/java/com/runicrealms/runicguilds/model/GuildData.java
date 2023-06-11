@@ -211,34 +211,4 @@ public class GuildData implements SessionDataMongo {
         }
     }
 
-    /**
-     * A jedis write method that writes the underlying data structures
-     *
-     * @param jedis some new jedis resource
-     */
-    public void writeToJedis(Jedis jedis) {
-//        String root = getJedisKey(this.guildUUID);
-//        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-//        // Inform the server that this guild should be saved to mongo on next task (jedis data is refreshed)
-//        jedis.sadd(database + ":" + "markedForSave:guilds", this.guildUUID.getUUID().toString());
-//        // Write base fields as map
-//        jedis.hmset(root, this.toMap());
-//        // Write member data (includes owner)
-//        if (memberDataMap != null) { // Exclude projection
-//            RunicDatabase.getAPI().getRedisAPI().removeAllFromRedis(jedis, root + ":members"); // Reset section
-//            for (UUID uuid : this.memberDataMap.keySet()) {
-//                MemberData memberData = this.memberDataMap.get(uuid);
-//                memberData.writeToJedis(this.guildUUID, uuid, jedis);
-//            }
-//        }
-//        // Write bank data
-//        if (bankData != null) { // Exclude projection
-//            this.bankData.writeToJedis(this.guildUUID.getUUID(), jedis);
-//        }
-//        // Write settings data
-//        if (settingsData != null) { // Exclude projection
-//            this.settingsData.writeToJedis(this.guildUUID.getUUID(), jedis);
-//        }
-    }
-
 }
