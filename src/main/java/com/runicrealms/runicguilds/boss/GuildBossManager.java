@@ -100,12 +100,11 @@ public class GuildBossManager implements Listener {
                 GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(damagerPlayer);
                 if (info == null) continue;
                 MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getUUID(), damager);
-                Bukkit.broadcastMessage(damagerPlayer.getName() + " gained " + damageScores.get(damager));
                 Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
                     RunicGuilds.getGuildsAPI().addGuildScore(info.getUUID(), data, damageScores.get(damager));
                     info.getMembersUuids().forEach(memberUUID -> {
                         Player online = Bukkit.getPlayer(memberUUID);
-                        if (online != null) {
+                        if (online != null && !memberUUID.equals(damager)) {
                             online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + damagerPlayer.getName() + " has earned your guild &6" + damageScores.get(damager) + " &eguild points!"));
                         }
                     });
