@@ -183,7 +183,7 @@ public class GuildEventListener implements Listener {
                                 whoWasKicked.sendMessage(ColorUtil.format(GuildUtil.PREFIX + ChatColor.RED + "You have been kicked from your guild!"));
                                 syncDisplays(whoWasKicked);
                             }
-                            syncMemberDisplays(guildData.getOwnerUuid());
+                            syncMemberDisplays(guildData.getUUID());
                             Player player = Bukkit.getPlayer(event.getKicker());
                             if (player != null) {
                                 player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Removed player from the guild!"));
