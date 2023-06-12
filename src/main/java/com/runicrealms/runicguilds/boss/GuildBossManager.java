@@ -73,24 +73,28 @@ public class GuildBossManager implements Listener {
     }
 
     public void handleBossDeath(UUID bossID, int guildScore) {
-        Pair<Map<UUID, Integer>, Double> pair = bossDamage.get(bossID);
-        if (pair == null) return;
+        Map<UUID, Integer> damageScores = new HashMap<>();
+        if (bossDamage.size() == 1) {
+            damageScores.put(bossDamage.keySet().stream().findFirst().get(), guildScore);
+        } else {
+            Pair<Map<UUID, Integer>, Double> pair = bossDamage.get(bossID);
+            if (pair == null) return;
 //        Bukkit.broadcastMessage(pair.first.entrySet()
 //                .stream()
 //                .map(entry -> entry.getKey() + " = " + entry.getValue())
 //                .collect(Collectors.joining(", ", "{", "}")));
-        Map<UUID, Integer> damageValues = pair.first;
-        Double maxHealth = pair.second;
-        // 75% of guild score is distributed according to how much damage each player did, 25% is split evenly for participation
-        int damageScoreTotal = (int) Math.round(guildScore * 0.75);
-        Map<UUID, Integer> damageScores = new HashMap<>();
-        double participationScoreTotal = guildScore * 0.25;
-        double participationScoreForEach = participationScoreTotal / ((double) damageValues.size());
+            Map<UUID, Integer> damageValues = pair.first;
+            Double maxHealth = pair.second;
+            // 75% of guild score is distributed according to how much damage each player did, 25% is split evenly for participation
+            int damageScoreTotal = (int) Math.round(guildScore * 0.75);
+            double participationScoreTotal = guildScore * 0.25;
+            double participationScoreForEach = participationScoreTotal / ((double) damageValues.size());
 
-        for (UUID damager : damageValues.keySet()) {
-            if (Bukkit.getPlayer(damager) == null) continue;
-            double percentDamage = damageValues.get(damager) / maxHealth;
-            damageScores.put(damager, (int) Math.round(damageScoreTotal * percentDamage + participationScoreForEach));
+            for (UUID damager : damageValues.keySet()) {
+                if (Bukkit.getPlayer(damager) == null) continue;
+                double percentDamage = damageValues.get(damager) / maxHealth;
+                damageScores.put(damager, (int) Math.round(damageScoreTotal * percentDamage + participationScoreForEach));
+            }
         }
         // Distribute guild score
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
