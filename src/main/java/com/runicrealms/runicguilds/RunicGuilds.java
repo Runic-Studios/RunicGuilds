@@ -11,6 +11,7 @@ import com.runicrealms.runicguilds.api.GuildWriteOperation;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.chat.GuildChannel;
 import com.runicrealms.runicguilds.boss.GuildBossManager;
+import com.runicrealms.runicguilds.command.GuildChannelCommand;
 import com.runicrealms.runicguilds.command.admin.GuildBossCommand;
 import com.runicrealms.runicguilds.command.admin.GuildModCMD;
 import com.runicrealms.runicguilds.command.player.GuildCommand;
@@ -154,7 +155,9 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new PlaceholderAPI().register();
         }
-        RunicChat.getRunicChatAPI().registerChatChannel(new GuildChannel()); // register channels after place holders
+        GuildChannel guildChannel = new GuildChannel();
+        RunicChat.getRunicChatAPI().registerChatChannel(guildChannel); // register channels after place holders
+        commandManager.registerCommand(new GuildChannelCommand(guildChannel));
         new GuildBannerLoader().runTaskTimer(this, 5 * 20L, 60 * 20L); // 10s delay, 1 min
 		/*
 		Shops
