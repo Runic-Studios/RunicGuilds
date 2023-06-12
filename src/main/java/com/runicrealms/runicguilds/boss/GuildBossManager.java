@@ -74,8 +74,8 @@ public class GuildBossManager implements Listener {
 
     public void handleBossDeath(UUID bossID, int guildScore) {
         Map<UUID, Integer> damageScores = new HashMap<>();
-        if (bossDamage.size() == 1) {
-            damageScores.put(bossDamage.keySet().stream().findFirst().get(), guildScore);
+        if (bossDamage.get(bossID).first.size() == 1) {
+            damageScores.put(bossDamage.get(bossID).first.keySet().stream().findFirst().orElseThrow(), guildScore);
         } else {
             Pair<Map<UUID, Integer>, Double> pair = bossDamage.get(bossID);
             if (pair == null) return;
