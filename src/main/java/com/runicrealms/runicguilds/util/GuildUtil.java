@@ -5,6 +5,7 @@ import com.keenant.tabbed.tablist.TableTabList;
 import com.keenant.tabbed.util.Skins;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.common.util.ColorUtil;
+import com.runicrealms.plugin.common.util.Pair;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.Bukkit;
@@ -24,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -121,8 +123,9 @@ public class GuildUtil {
 
     private static void getMembersAndPopulate(TableTabList tableTabList, GuildInfo guildInfo) {
         Set<UUID> members = guildInfo.getMembersUuids();
-        Set<UUID> onlineMembers = members.stream()
-                .filter(member -> Bukkit.getPlayer(member) != null)
+        Set<Player> onlineMembers = members.stream()
+                .map(Bukkit::getPlayer)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         tableTabList.set(3, 0, new TextTabItem
                 (ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
@@ -131,15 +134,13 @@ public class GuildUtil {
             tableTabList.remove(3, i);
         }
         int j = 0;
-        for (UUID guildMember : onlineMembers) {
+        for (Pair<? extends Player, String> guildMember : RunicCore.getTabAPI().sortPlayersByRank(onlineMembers)) {
             if (j > 19) break;
-            Player playerMember = Bukkit.getPlayer(guildMember);
-            if (playerMember == null) continue; // Insurance
             tableTabList.set(3, j + 1, new TextTabItem
                     (
-                            RunicCore.getTabAPI().getTablistNameColor(playerMember) + playerMember.getName(),
-                            playerMember.getPing(),
-                            Skins.getPlayer(playerMember)
+                            guildMember.second,
+                            guildMember.first.getPing(),
+                            Skins.getPlayer(guildMember.first)
                     ));
             j++;
         }
