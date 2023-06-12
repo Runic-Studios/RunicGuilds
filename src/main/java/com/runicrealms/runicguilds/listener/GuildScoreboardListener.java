@@ -14,9 +14,11 @@ public class GuildScoreboardListener implements Listener {
     public void onScoreboardUpdate(ScoreboardUpdateEvent event) {
         try {
             GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getPlayer());
-            event.setGuild(guildInfo.getName().equals("") ? "None" : guildInfo.getName());
+            String guild = "None";
+            if (guildInfo != null && !guildInfo.getName().equals("")) guild = guildInfo.getName();
+            event.setGuild(guild);
         } catch (Exception ex) {
-            Bukkit.getLogger().warning("RunicProfessions failed to update scoreboard for " + event.getPlayer().getUniqueId());
+            Bukkit.getLogger().warning("RunicGuilds failed to update scoreboard for " + event.getPlayer().getUniqueId());
         }
     }
 

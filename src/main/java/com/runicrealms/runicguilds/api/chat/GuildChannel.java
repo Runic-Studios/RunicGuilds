@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.api.chat;
 
 import com.runicrealms.api.chat.ChatChannel;
+import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -54,13 +55,15 @@ public class GuildChannel extends ChatChannel {
     @Override
     public TextComponent getTextComponent(Player player, String finalMessage) {
         TextComponent textComponent = new TextComponent(finalMessage);
+        String title = PlaceholderAPI.setPlaceholders(player, "%core_prefix%");
+        if (title.isEmpty()) title = "None";
+        String titleColor = ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "%core_name_color%"));
         textComponent.setHoverEvent(new HoverEvent
                 (
                         HoverEvent.Action.SHOW_TEXT,
-                        new Text(PlaceholderAPI.setPlaceholders(player,
-                                ChatColor.DARK_AQUA + "Title: " + ChatColor.AQUA + "%core_prefix%"
-
-                        )) // ChatColor.GOLD + "\nGuild Score: %guild_score%"
+                        new Text(
+                                ChatColor.DARK_AQUA + "Title: " + titleColor + title
+                        ) // ChatColor.GOLD + "\nGuild Score: %guild_score%"
                 )
         );
         return textComponent;
