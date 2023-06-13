@@ -20,6 +20,7 @@ import org.bukkit.event.Listener;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -97,25 +98,60 @@ public class GuildBossManager implements Listener {
             }
         }
         // Distribute guild score
-        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            for (UUID damager : damageScores.keySet()) {
-                Player damagerPlayer = Bukkit.getPlayer(damager);
-                if (damagerPlayer == null) continue;
-                GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(damagerPlayer);
-                if (info == null) continue;
-                MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getUUID(), damager);
-                Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
-                    RunicGuilds.getGuildsAPI().addGuildScore(info.getUUID(), data, damageScores.get(damager));
-                    info.getMembersUuids().forEach(memberUUID -> {
-                        Player online = Bukkit.getPlayer(memberUUID);
-                        if (online != null && !memberUUID.equals(damager)) {
-                            online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + damagerPlayer.getName() + " has earned your guild &6" + damageScores.get(damager) + " &eguild points!"));
-                        }
-                    });
-                });
-            }
-        });
+//        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
+//            for (UUID damager : damageScores.keySet()) {
+//                Player damagerPlayer = Bukkit.getPlayer(damager);
+//                if (damagerPlayer == null) continue;
+//                GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(damagerPlayer);
+//                if (info == null) continue;
+//                MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getUUID(), damager);
+//                Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
+//                    RunicGuilds.getGuildsAPI().addGuildScore(info.getUUID(), data, damageScores.get(damager));
+//                    info.getMembersUuids().forEach(memberUUID -> {
+//                        Player online = Bukkit.getPlayer(memberUUID);
+//                        if (online != null && !memberUUID.equals(damager)) {
+//                            online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + damagerPlayer.getName() + " has earned your guild &6" + damageScores.get(damager) + " &eguild points!"));
+//                        }
+//                    });
+//                });
+//            }
+//        });
+        LinkedList<UUID> playerQueue = new LinkedList<>(damageScores.keySet());
+        Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> processPlayerQueue(damageScores, playerQueue));
         bossDamage.remove(bossID);
+    }
+
+    private void processPlayerQueue(Map<UUID, Integer> damageScores, LinkedList<UUID> playerQueue) {
+        if (playerQueue.isEmpty()) {
+            return;
+        }
+
+        UUID damager = playerQueue.pop();
+        Player damagerPlayer = Bukkit.getPlayer(damager);
+        if (damagerPlayer == null) {
+            processPlayerQueue(damageScores, playerQueue); // Skip this player and go to the next one
+            return;
+        }
+
+        GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(damagerPlayer);
+        if (info == null) {
+            processPlayerQueue(damageScores, playerQueue); // Skip this player and go to the next one
+            return;
+        }
+
+        MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getUUID(), damager);
+
+        Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
+            RunicGuilds.getGuildsAPI().addGuildScore(info.getUUID(), data, damageScores.get(damager));
+            info.getMembersUuids().forEach(memberUUID -> {
+                Player online = Bukkit.getPlayer(memberUUID);
+                if (online != null && !memberUUID.equals(damager)) {
+                    online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + damagerPlayer.getName() + " has earned your guild &6" + damageScores.get(damager) + " &eguild points!"));
+                }
+            });
+
+            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> processPlayerQueue(damageScores, playerQueue));
+        });
     }
 
 }

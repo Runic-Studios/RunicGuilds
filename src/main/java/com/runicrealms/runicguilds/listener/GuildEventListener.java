@@ -217,7 +217,7 @@ public class GuildEventListener implements Listener {
     /**
      * Updates player score on change, recalculates guild's entire score
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onGuildScoreChange(GuildScoreChangeEvent event) {
         MemberData memberData = event.getMemberData();
         int score = memberData.getScore();
