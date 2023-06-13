@@ -44,7 +44,7 @@ public class GuildChannel extends ChatChannel {
 
     @Override
     public TextComponent createMessage(Player player, String message) {
-        TextComponent textComponent = new TextComponent(ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "&6[Guild] %luckperms_meta_name_color%%player_name%: ")) + message);
+        TextComponent textComponent = new TextComponent(ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "&6[Guild] %luckperms_meta_name_color%%player_name%: &f")) + message);
         String title = PlaceholderAPI.setPlaceholders(player, "%core_prefix%");
         if (title.isEmpty()) title = "None";
         String titleColor = ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "%core_name_color%"));
@@ -64,7 +64,29 @@ public class GuildChannel extends ChatChannel {
         GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player);
         String guildName = "Unknown";
         if (guild != null) guildName = guild.getPrefix();
-        TextComponent textComponent = new TextComponent(ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "&6[" + guildName + " Guild] %luckperms_meta_name_color%%player_name%: ")) + message);
+        TextComponent textComponent = new TextComponent(ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "&6[" + guildName + " Guild] %luckperms_meta_name_color%%player_name%: &f")) + message);
+        String title = PlaceholderAPI.setPlaceholders(player, "%core_prefix%");
+        if (title.isEmpty()) title = "None";
+        String titleColor = ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "%core_name_color%"));
+        textComponent.setHoverEvent(new HoverEvent
+                (
+                        HoverEvent.Action.SHOW_TEXT,
+                        new Text(
+                                ChatColor.DARK_AQUA + "Title: " + titleColor + title
+                        ) // ChatColor.GOLD + "\nGuild Score: %guild_score%"
+                )
+        );
+        return textComponent;
+    }
+
+    private TextComponent createMessage(Player player, String message, boolean spy) {
+        String guildName = "";
+        if (spy) {
+            GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(player);
+            guildName = "Unknown";
+            if (guild != null) guildName = guild.getPrefix();
+        }
+        TextComponent textComponent = new TextComponent(ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "&6[" + (spy ? guildName + " " : "") + "Guild] %luckperms_meta_name_color%%player_name%: &f")) + message);
         String title = PlaceholderAPI.setPlaceholders(player, "%core_prefix%");
         if (title.isEmpty()) title = "None";
         String titleColor = ColorUtil.format(PlaceholderAPI.setPlaceholders(player, "%core_name_color%"));
