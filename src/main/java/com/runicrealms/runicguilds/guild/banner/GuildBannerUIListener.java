@@ -23,8 +23,8 @@ import org.bukkit.persistence.PersistentDataType;
 public class GuildBannerUIListener implements Listener {
 
     /**
-     * @param ui
-     * @param meta
+     * @param ui   that is open
+     * @param meta of the current banner item
      */
     private void confirm(GuildBannerUI ui, BannerMeta meta) {
         if (ui.getPage() == 1 && ui.getSelectedColor() != null && ui.getChosenColor() == null && ui.getChosenPattern() == null) {
@@ -59,7 +59,7 @@ public class GuildBannerUIListener implements Listener {
             dummy.setItemMeta(meta);
         }
         if (bannerUI.getSelectedColor() != null && bannerUI.getChosenColor() == null && bannerUI.getChosenPattern() == null) {
-            dummy.setType(Material.WHITE_BANNER);
+            dummy.setType(Material.BROWN_BANNER);
         }
         if (bannerUI.getSelectedColor() != null && bannerUI.getChosenColor() == null && bannerUI.getChosenPattern() != null) {
             Pattern pattern = meta.getPattern(meta.getPatterns().size() - 1);
@@ -72,9 +72,17 @@ public class GuildBannerUIListener implements Listener {
 
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         if (guildInfo != null) {
-            bannerUI.getBanner().setBanner(bannerUI.getUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
-            guildInfo.setGuildBanner(bannerUI.getBanner());
-            humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
+            ItemStack newBanner = BannerUtil.createUpdatedBanner(bannerUI.getUUID(), dummy.getType(), (BannerMeta) dummy.getItemMeta());
+            guildInfo.setSerializedBanner(BannerUtil.serializeItemStack(newBanner));
+            RunicGuilds.getGuildWriteOperation().updateGuildData
+                    (
+                            guildInfo.getUUID(),
+                            "serializedBanner",
+                            guildInfo.getSerializedBanner(),
+                            () -> {
+                                humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &aYour guild's banner has been updated!"));
+                            }
+                    );
         } else {
             humanEntity.sendMessage(ColorUtil.format("&r&6&lGuilds »&r &cAn internal error has occurred, please try again..."));
         }
@@ -182,9 +190,11 @@ public class GuildBannerUIListener implements Listener {
     }
 
     /**
-     * @param ui
-     * @param meta
-     * @param itemMeta
+     * Sets the banner meta color
+     *
+     * @param ui       the menu that is open
+     * @param meta     the current meta of the banner
+     * @param itemMeta for the dye color
      */
     private void selectColor(GuildBannerUI ui, BannerMeta meta, ItemMeta itemMeta) {
         DyeColor color = DyeColor.valueOf(itemMeta.getPersistentDataContainer().get(ui.getKey(), PersistentDataType.STRING));
@@ -200,9 +210,11 @@ public class GuildBannerUIListener implements Listener {
     }
 
     /**
-     * @param ui
-     * @param item
-     * @param meta
+     * Sets the banner meta pattern
+     *
+     * @param ui   the menu that is open
+     * @param item the item stack
+     * @param meta the current meta of the banner
      */
     private void selectPattern(GuildBannerUI ui, ItemStack item, BannerMeta meta) {
         String name = item.getItemMeta().getDisplayName();

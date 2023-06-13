@@ -74,12 +74,14 @@ public class PostedGuildBanner {
                 ), EntityType.ARMOR_STAND);
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(this.guildUUID);
         if (guildInfo != null) {
-            GuildBanner guildBanner = guildInfo.getGuildBanner();
-            if (guildBanner != null) {
-                this.armorStandSetup(bannerBody, guildInfo.getGuildBanner().getBannerItem());
+            String serializedBanner = guildInfo.getSerializedBanner();
+            if (serializedBanner != null && !serializedBanner.equalsIgnoreCase("")) {
+                this.armorStandSetup(bannerBody, BannerUtil.deserializeItemStack(serializedBanner));
             } else {
-                // Banner wasn't loaded for some reason, use default banner
-                this.armorStandSetup(bannerBody, new GuildBanner(guildUUID).getBannerItem());
+                // Banner wasn't loaded for some reason, use default banner and update
+                ItemStack banner = BannerUtil.makeDefaultBanner(guildUUID);
+                guildInfo.setSerializedBanner(BannerUtil.serializeItemStack(banner));
+                this.armorStandSetup(bannerBody, BannerUtil.deserializeItemStack(guildInfo.getSerializedBanner()));
             }
         }
 

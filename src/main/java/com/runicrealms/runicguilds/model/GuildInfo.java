@@ -1,7 +1,5 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.runicguilds.guild.banner.GuildBanner;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +19,7 @@ public class GuildInfo {
     private String prefix;
     private int exp;
     private int score;
-    private GuildBanner guildBanner;
+    private String serializedBanner;
     private UUID ownerUuid;
 
     /**
@@ -37,7 +35,7 @@ public class GuildInfo {
         this.prefix = guildData.getPrefix();
         this.exp = guildData.getExp();
         this.score = guildData.calculateGuildScore();
-        this.guildBanner = guildData.getGuildBanner();
+        this.serializedBanner = guildData.getSerializedBanner();
     }
 
     public Set<UUID> getMembersUuids() {
@@ -56,12 +54,12 @@ public class GuildInfo {
         this.exp = exp;
     }
 
-    public GuildBanner getGuildBanner() {
-        return guildBanner;
+    public String getSerializedBanner() {
+        return serializedBanner;
     }
 
-    public void setGuildBanner(GuildBanner guildBanner) {
-        this.guildBanner = guildBanner;
+    public void setSerializedBanner(String serializedBanner) {
+        this.serializedBanner = serializedBanner;
     }
 
     public UUID getUUID() {

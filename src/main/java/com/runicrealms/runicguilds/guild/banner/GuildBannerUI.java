@@ -45,7 +45,7 @@ public class GuildBannerUI implements InventoryHolder {
 
     private final Inventory inventory;
     private final UUID guildUUID;
-    private final GuildBanner banner;
+    private final ItemStack banner;
     private final ItemStack dummyBanner;
     private final NamespacedKey key = new NamespacedKey(RunicGuilds.getInstance(), "itemKey");
     private DyeColor selectedColor;
@@ -59,15 +59,15 @@ public class GuildBannerUI implements InventoryHolder {
         this.guildUUID = guildUUID;
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
         if (guildInfo != null) {
-            this.banner = guildInfo.getGuildBanner();
+            this.banner = BannerUtil.deserializeItemStack(guildInfo.getSerializedBanner());
         } else {
-            this.banner = new GuildBanner(guildUUID);
+            this.banner = BannerUtil.makeDefaultBanner(guildUUID);
         }
         this.dummyBanner = this.setupDummyBanner();
         setupColorMenu();
     }
 
-    public GuildBanner getBanner() {
+    public ItemStack getBanner() {
         return this.banner;
     }
 
@@ -217,7 +217,7 @@ public class GuildBannerUI implements InventoryHolder {
      * @return a clone of the banner ItemStack
      */
     private ItemStack setupDummyBanner() {
-        ItemStack item = this.banner.getBannerItem();
+        ItemStack item = this.banner.clone();
         BannerMeta meta = (BannerMeta) item.getItemMeta();
         assert meta != null;
         meta.setDisplayName(ColorUtil.format("&6&lClick &7to finish the banner"));
