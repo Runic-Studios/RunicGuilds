@@ -23,6 +23,14 @@ public class WorkOrder {
         return name;
     }
 
+    public Map<String, Integer> getItemRequirements() {
+        return itemRequirements;
+    }
+
+    public int getTotalExp() {
+        return totalExp;
+    }
+
     /**
      * Offers an ADDITIONAL 25% bonus for the last checkpoint
      *

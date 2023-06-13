@@ -1,9 +1,14 @@
 package com.runicrealms.runicguilds.order;
 
+import com.runicrealms.plugin.api.NpcClickEvent;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.order.config.OrderConfigLoader;
+import com.runicrealms.runicguilds.order.ui.WorkOrderUI;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import redis.clients.jedis.Jedis;
 
@@ -14,23 +19,45 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Resets the work order every week
  */
-public class WorkOrderManager {
+public class WorkOrderManager implements Listener {
     private static final int RESET_CHECK_TIME = 180; // Seconds
-    private static final String CURRENT_WORK_ORDER_KEY = "currentWorkOrderName";
-    private static final String RESET_TIMESTAMP_KEY = "nextResetTimestamp";
-    private final WorkOrder currentWorkOrder;
+    private static final Set<Integer> GUILD_FOREMAN_IDS = new HashSet<>();
+    private static final String CURRENT_WORK_ORDER_KEY = "order:currentWorkOrderName";
+    private static final String RESET_TIMESTAMP_KEY = "order:nextResetTimestamp";
     File configFile;
     OrderConfigLoader loader;
+    private WorkOrder currentWorkOrder;
 
     public WorkOrderManager() throws IOException, InvalidConfigurationException {
+        GUILD_FOREMAN_IDS.add(785);
         configFile = new File(RunicGuilds.getInstance().getDataFolder(), "orders.yml");
         loader = new OrderConfigLoader(configFile);
-        currentWorkOrder = initializeWorkOrder();
-        scheduleResetTask();
+        Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
+        // Delayed task to initialize work orders
+        Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
+            currentWorkOrder = initializeWorkOrder();
+            scheduleResetTask();
+        }, 10 * 20L);
+    }
+
+    public WorkOrder getCurrentWorkOrder() {
+        return currentWorkOrder;
+    }
+
+    @EventHandler
+    public void onNPCInteract(NpcClickEvent event) {
+        if (!GUILD_FOREMAN_IDS.contains(event.getNpc().getId())) return;
+        if (currentWorkOrder == null) {
+            Bukkit.getLogger().warning("A player tried to access the guild foreman, but the current order is null.");
+            return; // Wait for it to load
+        }
+        event.getPlayer().openInventory(new WorkOrderUI(event.getPlayer()).getInventory());
     }
 
     /**
@@ -39,6 +66,7 @@ public class WorkOrderManager {
      * @return the work order object that is live
      */
     private WorkOrder initializeWorkOrder() {
+        Bukkit.getLogger().info("Initializing guild work orders!");
         String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
         String currentWorkOrderName;
         String nextResetTimestamp;
@@ -73,6 +101,9 @@ public class WorkOrderManager {
                     if (now.compareTo(nextReset) >= 0) {
                         resetGlobalWorkOrder();
                     }
+                } catch (Exception ex) {
+                    Bukkit.getLogger().warning("WorkOrderManager schedule reset task had a problem!");
+                    ex.printStackTrace();
                 }
             }
         };
@@ -90,12 +121,16 @@ public class WorkOrderManager {
      * @return the new global work order
      */
     private WorkOrder resetGlobalWorkOrder() {
+        Bukkit.getLogger().severe("RESETTING OR APPLY NEW GLOBAL WORK ORDER");
+        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
+        WorkOrder workOrder = loader.chooseRandomOrder();
+        Bukkit.getLogger().severe("WORK ORDER NAME IS " + workOrder.getName());
         // After resetting work order, update the values in Jedis
         try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            jedis.set(CURRENT_WORK_ORDER_KEY, currentWorkOrder.getName());
-            jedis.set(RESET_TIMESTAMP_KEY, String.valueOf(calculateNextReset().toInstant().toEpochMilli()));
-            jedis.expire(CURRENT_WORK_ORDER_KEY, 1_209_600);
-            jedis.expire(RESET_TIMESTAMP_KEY, 1_209_600);
+            jedis.set(database + ":" + CURRENT_WORK_ORDER_KEY, workOrder.getName());
+            jedis.set(database + ":" + RESET_TIMESTAMP_KEY, String.valueOf(calculateNextReset().toInstant().toEpochMilli()));
+            jedis.expire(database + ":" + CURRENT_WORK_ORDER_KEY, 1_209_600);
+            jedis.expire(database + ":" + RESET_TIMESTAMP_KEY, 1_209_600);
         }
         // Reset the progress of each guild
         RunicGuilds.getDataAPI().getGuildInfoMap().forEach((guildUUID, guildInfo) -> {
@@ -109,8 +144,7 @@ public class WorkOrderManager {
                             }
                     );
         });
-        // Choose a new random order
-        return loader.chooseRandomOrder();
+        return workOrder;
     }
 
     /**
