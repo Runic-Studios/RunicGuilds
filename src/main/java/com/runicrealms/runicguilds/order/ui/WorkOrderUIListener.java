@@ -1,6 +1,7 @@
 package com.runicrealms.runicguilds.order.ui;
 
 import com.runicrealms.plugin.common.util.GUIUtil;
+import com.runicrealms.runicguilds.RunicGuilds;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -36,7 +37,9 @@ public class WorkOrderUIListener implements Listener {
         event.setCancelled(true);
         if (material == GUIUtil.CLOSE_BUTTON.getType())
             event.getWhoClicked().closeInventory();
-//        if (GatheringSkill.getGatheringSkillMenuSlots().contains(event.getRawSlot()))
-//            RunicProfessions.getAPI().openGatheringSkillGUI(player, GatheringSkill.getFromMenuSlot(event.getSlot()));
+        else if (material == RunicGuilds.getWorkOrderManager().getCurrentWorkOrder().getIcon().getType()) {
+            player.closeInventory();
+            RunicGuilds.getWorkOrderManager().supplyOrderMaterials(player);
+        }
     }
 }

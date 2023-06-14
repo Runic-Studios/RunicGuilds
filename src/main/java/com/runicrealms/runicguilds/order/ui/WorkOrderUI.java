@@ -5,6 +5,7 @@ import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.common.util.GUIUtil;
 import com.runicrealms.plugin.utilities.NumRounder;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.order.WorkOrder;
 import com.runicrealms.runicitems.RunicItemsAPI;
 import org.bukkit.Bukkit;
@@ -21,16 +22,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WorkOrderUI implements InventoryHolder {
+    private final GuildInfo guildInfo;
     private final Inventory inventory;
     private final Player player;
 
-    public WorkOrderUI(Player player) {
+    public WorkOrderUI(GuildInfo guildInfo, Player player) {
+        this.guildInfo = guildInfo;
         this.inventory = Bukkit.createInventory(this, 54, ColorUtil.format("&eWeekly Work Order"));
         this.player = player;
         openMenu();
     }
 
-    private static String buildProgressBar(double total) { // todo: take in a guild
+    private static String buildProgressBar(double total) {
         String bar = "❚❚❚❚❚❚❚❚❚❚"; // 10 bars
         try {
             double current = 2500;
@@ -41,10 +44,13 @@ public class WorkOrderUI implements InventoryHolder {
                     " [0/10]" +
                     " " + ChatColor.GREEN + ChatColor.BOLD + progressRounded + "% ";
         } catch (Exception ex) {
-//            Bukkit.getLogger().warning("There was a problem creating the gathering progress bar for " + gatheringSkill.getIdentifier());
             ex.printStackTrace();
         }
         return ChatColor.WHITE + bar;
+    }
+
+    public GuildInfo getGuildInfo() {
+        return guildInfo;
     }
 
     /**
@@ -73,7 +79,8 @@ public class WorkOrderUI implements InventoryHolder {
         try {
             workOrder.getItemRequirements().forEach((s, integer) -> {
                 String name = RunicItemsAPI.generateItemFromTemplate(s).getDisplayableItem().getDisplayName();
-                lore.add(ChatColor.GRAY + "- " + ChatColor.BLUE + name + ": " + ChatColor.GRAY + "[0/" + integer + "]");
+                lore.add(ChatColor.GRAY + "- " + ChatColor.BLUE + name + ": " + ChatColor.GRAY + "[" +
+                        ChatColor.WHITE + guildInfo.getWorkOrderMap().get(s) + "/" + integer + "]");
             });
         } catch (Exception ex) {
             ex.printStackTrace();

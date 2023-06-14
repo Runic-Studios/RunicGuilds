@@ -114,17 +114,17 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
         this.saveDefaultConfig();
+        try {
+            workOrderManager = new WorkOrderManager();
+        } catch (IOException | InvalidConfigurationException e) {
+            throw new RuntimeException(e);
+        }
         DataManager dataManager = new DataManager();
         dataAPI = dataManager;
         guildWriteOperation = dataManager;
         guildsAPI = new GuildManager();
         taskChainFactory = BukkitTaskChainFactory.create(this);
         bossManager = new GuildBossManager();
-        try {
-            workOrderManager = new WorkOrderManager();
-        } catch (IOException | InvalidConfigurationException e) {
-            throw new RuntimeException(e);
-        }
         GUILD_BANKERS = this.getConfig().getIntegerList("guild-bankers");
         GUILD_HERALDS = this.getConfig().getIntegerList("guild-heralds");
         GUILD_VENDORS = this.getConfig().getIntegerList("guild-vendors");

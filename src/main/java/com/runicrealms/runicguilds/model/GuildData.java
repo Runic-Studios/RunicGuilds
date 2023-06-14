@@ -18,6 +18,7 @@ import redis.clients.jedis.Jedis;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -38,7 +39,8 @@ public class GuildData implements SessionDataMongo {
     private String name = "";
     private String prefix = "";
     private int exp = 0;
-    private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
+    private Map<UUID, MemberData> memberDataMap = new HashMap<>();
+    private Map<String, Integer> workOrderMap = new HashMap<>();
     private String serializedBanner;
 
     @SuppressWarnings("unused")
@@ -73,6 +75,14 @@ public class GuildData implements SessionDataMongo {
      */
     public static void disband(UUID guildUUID, Player player, boolean mod) {
         Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guildUUID, player, mod));
+    }
+
+    public Map<String, Integer> getWorkOrderMap() {
+        return workOrderMap;
+    }
+
+    public void setWorkOrderMap(Map<String, Integer> workOrderMap) {
+        this.workOrderMap = workOrderMap;
     }
 
     @SuppressWarnings("unchecked")
@@ -128,7 +138,7 @@ public class GuildData implements SessionDataMongo {
         this.id = id;
     }
 
-    public HashMap<UUID, MemberData> getMemberDataMap() {
+    public Map<UUID, MemberData> getMemberDataMap() {
         return memberDataMap;
     }
 

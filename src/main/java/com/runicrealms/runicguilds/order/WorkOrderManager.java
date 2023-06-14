@@ -3,12 +3,20 @@ package com.runicrealms.runicguilds.order;
 import com.runicrealms.plugin.api.NpcClickEvent;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.order.config.OrderConfigLoader;
 import com.runicrealms.runicguilds.order.ui.WorkOrderUI;
+import com.runicrealms.runicguilds.util.GuildUtil;
+import com.runicrealms.runicitems.RunicItemsAPI;
+import com.runicrealms.runicitems.item.RunicItem;
+import com.runicrealms.runicitems.util.ItemUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import redis.clients.jedis.Jedis;
 
@@ -20,7 +28,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Resets the work order every week
@@ -39,10 +49,11 @@ public class WorkOrderManager implements Listener {
         configFile = new File(RunicGuilds.getInstance().getDataFolder(), "orders.yml");
         loader = new OrderConfigLoader(configFile);
         Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
-        // Delayed task to initialize work orders
+        // Delayed task to initialize global work order
         Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
             currentWorkOrder = initializeWorkOrder();
             scheduleResetTask();
+            Bukkit.getLogger().severe("WORK ORDER IS NOW INITIALIZED");
         }, 10 * 20L);
     }
 
@@ -57,7 +68,63 @@ public class WorkOrderManager implements Listener {
             Bukkit.getLogger().warning("A player tried to access the guild foreman, but the current order is null.");
             return; // Wait for it to load
         }
-        event.getPlayer().openInventory(new WorkOrderUI(event.getPlayer()).getInventory());
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getPlayer());
+        if (guildInfo == null) {
+            event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+            event.getPlayer().sendMessage(GuildUtil.PREFIX + "You must be in a guild to access the foreman!");
+            return;
+        }
+        // Populate in-memory guild maps with the current values
+        for (String templateId : currentWorkOrder.getItemRequirements().keySet()) {
+            guildInfo.getWorkOrderMap().putIfAbsent(templateId, 0); // Ensure there are no null values
+        }
+        event.getPlayer().openInventory(new WorkOrderUI(guildInfo, event.getPlayer()).getInventory());
+    }
+
+    /**
+     * Attempts to provide materials from the player's inventory toward the weekly order requirement
+     *
+     * @param player is supplying materials
+     */
+    public void supplyOrderMaterials(Player player) {
+        player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 0.5f, 1.0f);
+        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 0.5f, 0.5f);
+        player.sendMessage(GuildUtil.PREFIX + "Supplying materials...");
+        if (RunicGuilds.getDataAPI().getGuildInfo(player) == null) {
+            player.sendMessage(GuildUtil.PREFIX + "You must be in a guild to do that!");
+            return;
+        }
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
+        Map<String, Integer> guildOrderMap = guildInfo.getWorkOrderMap();
+        // give the materials (queue)
+        for (String templateId : currentWorkOrder.getItemRequirements().keySet()) {
+            RunicItem runicItem = RunicItemsAPI.generateItemFromTemplate(templateId);
+            // Ensure there are no null values
+            guildOrderMap.putIfAbsent(templateId, 0);
+            if (guildOrderMap.get(templateId) >= currentWorkOrder.getItemRequirements().get(templateId)) {
+                player.sendMessage(GuildUtil.PREFIX + "Your guild has completed your order for " + runicItem.getDisplayableItem().getDisplayName());
+                continue;
+            }
+            ItemStack itemStack = RunicItemsAPI.generateItemFromTemplate(templateId).generateItem();
+            ItemUtils.takeItem(player, itemStack, guildOrderMap.get(templateId));
+            // todo: keep track of how many were taken
+        }
+        // todo: if a checkpoint was reached, call event
+    }
+
+    /**
+     * ?
+     *
+     * @param guildUUID
+     */
+    public void updateGuildOrderMap(UUID guildUUID) {
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+        if (guildInfo == null) return;
+        Map<String, Integer> guildOrderMap = guildInfo.getWorkOrderMap();
+        // Ensure there are no null values
+        for (String templateId : currentWorkOrder.getItemRequirements().keySet()) {
+            guildOrderMap.putIfAbsent(templateId, 0);
+        }
     }
 
     /**
@@ -139,7 +206,13 @@ public class WorkOrderManager implements Listener {
                         "orderMap",
                         new HashMap<>(),
                         () -> {
-                            // todo: send a message to the players here
+                            // Inform all online players of the reset
+                            guildInfo.getMembersUuids().forEach(uuid -> {
+                                Player player = Bukkit.getPlayer(uuid);
+                                if (player != null && player.isOnline()) {
+                                    player.sendMessage(GuildUtil.PREFIX + "Guild orders have reset!");
+                                }
+                            });
                         }
                 ));
         return workOrder;
