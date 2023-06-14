@@ -1,26 +1,42 @@
 package com.runicrealms.runicguilds.order;
 
+import com.runicrealms.runicitems.RunicItemsAPI;
+import org.bukkit.inventory.ItemStack;
+
 import java.util.Map;
 
 public class WorkOrder {
     private static final int MAX_CHECKPOINT_NUMBER = 10;
-    private final String name;
+    private final ItemStack icon;
+    private final String displayName;
+    private final String orderId;
     private final Map<String, Integer> itemRequirements;
     private final int totalExp;
 
     /**
-     * @param name             of the work order
+     * @param displayName      for the order in the ui
+     * @param orderId          of the work order
      * @param itemRequirements a map of runic item id to amount
      * @param totalExp         granted by this work order
      */
-    public WorkOrder(String name, Map<String, Integer> itemRequirements, int totalExp) {
-        this.name = name;
+    public WorkOrder(String orderId, String displayName, String icon, Map<String, Integer> itemRequirements, int totalExp) {
+        this.icon = RunicItemsAPI.generateItemFromTemplate(icon).generateGUIItem();
+        this.displayName = displayName;
+        this.orderId = orderId;
         this.itemRequirements = itemRequirements;
         this.totalExp = totalExp;
     }
 
-    public String getName() {
-        return name;
+    public ItemStack getIcon() {
+        return icon;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getOrderId() {
+        return orderId;
     }
 
     public Map<String, Integer> getItemRequirements() {

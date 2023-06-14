@@ -54,13 +54,11 @@ public class WorkOrderUI implements InventoryHolder {
      * @return an ItemStack that can be used for a UI menu
      */
     private ItemStack workOrderItem(WorkOrder workOrder) {
-        String displayName = workOrder.getName();
-        ItemStack menuItem = new ItemStack(Material.PAPER);  // This could be a custom item specific to the work order
+        String displayName = workOrder.getDisplayName();
+        ItemStack menuItem = workOrder.getIcon();  // This could be a custom item specific to the work order
         ItemMeta meta = menuItem.getItemMeta();
         if (meta == null) return menuItem;
-
         meta.setDisplayName(ChatColor.YELLOW + displayName);
-        // todo: add a custom 'display name' field to yml
         // List out the description of the work order, including the required items and amounts
         List<String> lore = new ArrayList<>();
         lore.add("");
@@ -77,7 +75,6 @@ public class WorkOrderUI implements InventoryHolder {
                 String name = RunicItemsAPI.generateItemFromTemplate(s).getDisplayableItem().getDisplayName();
                 lore.add(ChatColor.GRAY + "- " + ChatColor.BLUE + name + ": " + ChatColor.GRAY + "[0/" + integer + "]");
             });
-            // todo: change the config format to include a template-id icon (generateGUIItem)
         } catch (Exception ex) {
             ex.printStackTrace();
         }

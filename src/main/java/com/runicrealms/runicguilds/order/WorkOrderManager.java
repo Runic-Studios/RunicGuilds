@@ -127,7 +127,7 @@ public class WorkOrderManager implements Listener {
         WorkOrder workOrder = loader.chooseRandomOrder();
         // After resetting work order, update the values in Jedis
         try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            jedis.set(database + ":" + CURRENT_WORK_ORDER_KEY, workOrder.getName());
+            jedis.set(database + ":" + CURRENT_WORK_ORDER_KEY, workOrder.getOrderId());
             jedis.set(database + ":" + RESET_TIMESTAMP_KEY, String.valueOf(calculateNextReset().toInstant().toEpochMilli()));
             jedis.expire(database + ":" + CURRENT_WORK_ORDER_KEY, 1_209_600); // 2 weeks to be safe
             jedis.expire(database + ":" + RESET_TIMESTAMP_KEY, 1_209_600);

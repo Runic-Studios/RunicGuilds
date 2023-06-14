@@ -19,18 +19,24 @@ public class OrderConfigLoader {
         config.load(configFile);
     }
 
-    public WorkOrder loadOrder(String orderName) {
-        if (!config.contains("orders." + orderName)) {
-            throw new IllegalArgumentException("Order '" + orderName + "' does not exist in config");
+    public WorkOrder loadOrder(String orderId) {
+        if (!config.contains("orders." + orderId)) {
+            throw new IllegalArgumentException("Order '" + orderId + "' does not exist in config");
         }
 
+        // Load display name
+        String displayName = config.getString("orders." + orderId + ".display-name");
+        // Load exp
+        String icon = config.getString("orders." + orderId + ".icon");
+        // Load exp
+        int exp = config.getInt("orders." + orderId + ".exp");
+        // Load required Items
         Map<String, Integer> items = new HashMap<>();
-        for (String key : config.getConfigurationSection("orders." + orderName + ".ids").getKeys(false)) {
-            items.put(key, config.getInt("orders." + orderName + ".ids." + key));
+        for (String key : config.getConfigurationSection("orders." + orderId + ".ids").getKeys(false)) {
+            items.put(key, config.getInt("orders." + orderId + ".ids." + key));
         }
-        int exp = config.getInt("orders." + orderName + ".exp");
 
-        return new WorkOrder(orderName, items, exp);
+        return new WorkOrder(orderId, displayName, icon, items, exp);
     }
 
     public WorkOrder chooseRandomOrder() {
