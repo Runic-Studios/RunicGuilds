@@ -68,19 +68,21 @@ public class WorkOrderManager implements Listener {
     private WorkOrder initializeWorkOrder() {
         Bukkit.getLogger().info("Initializing guild work orders!");
         String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
+        Bukkit.getLogger().severe("DATABASE IS " + database);
         String currentWorkOrderName;
         String nextResetTimestamp;
         // Check Redis for the work order key
         try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-            currentWorkOrderName = jedis.get(database + ":" + CURRENT_WORK_ORDER_KEY);
-            nextResetTimestamp = jedis.get(database + ":" + RESET_TIMESTAMP_KEY);
-        }
-        ZonedDateTime now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-        if (currentWorkOrderName != null && nextResetTimestamp != null) {
-            ZonedDateTime nextReset = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(nextResetTimestamp)), ZoneId.systemDefault());
-            if (now.compareTo(nextReset) < 0) {
-                // Load current work order from name if current date time is still before next reset
-                return loader.loadOrder(CURRENT_WORK_ORDER_KEY);
+            ZonedDateTime now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+            if (jedis.exists(database + ":" + CURRENT_WORK_ORDER_KEY) && jedis.exists(database + ":" + RESET_TIMESTAMP_KEY)) {
+                currentWorkOrderName = jedis.get(database + ":" + CURRENT_WORK_ORDER_KEY);
+                nextResetTimestamp = jedis.get(database + ":" + RESET_TIMESTAMP_KEY);
+                ZonedDateTime nextReset = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(nextResetTimestamp)), ZoneId.systemDefault());
+                if (now.compareTo(nextReset) < 0) {
+                    // Load current work order from name if current date time is still before next reset
+                    Bukkit.getLogger().info("Loading currently existing work order.");
+                    return loader.loadOrder(currentWorkOrderName);
+                }
             }
         }
 
@@ -96,8 +98,9 @@ public class WorkOrderManager implements Listener {
             @Override
             public void run() {
                 ZonedDateTime now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+                String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
                 try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                    ZonedDateTime nextReset = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(jedis.get(RESET_TIMESTAMP_KEY))), ZoneId.systemDefault());
+                    ZonedDateTime nextReset = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(jedis.get(database + ":" + RESET_TIMESTAMP_KEY))), ZoneId.systemDefault());
                     if (now.compareTo(nextReset) >= 0) {
                         resetGlobalWorkOrder();
                     }
@@ -153,10 +156,20 @@ public class WorkOrderManager implements Listener {
     private ZonedDateTime calculateNextReset() {
         ZonedDateTime now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         ZonedDateTime nextMidnightWednesday = now.with(DayOfWeek.WEDNESDAY).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+        // Debug logging
+        Bukkit.getLogger().info("Now: " + now);
+        Bukkit.getLogger().info("Next Midnight Wednesday (Before adjustment): " + nextMidnightWednesday);
+
         if (now.compareTo(nextMidnightWednesday) > 0) {
             nextMidnightWednesday = nextMidnightWednesday.plusWeeks(1);
         }
+
+        // Debug logging
+        Bukkit.getLogger().info("Next Midnight Wednesday (After adjustment): " + nextMidnightWednesday);
+
         return nextMidnightWednesday;
     }
+
 
 }

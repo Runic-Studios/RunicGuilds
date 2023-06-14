@@ -43,9 +43,11 @@ public class WorkOrderUI implements InventoryHolder {
 
         meta.setDisplayName(ChatColor.YELLOW + displayName);
         // List out the description of the work order, including the required items and amounts
-        List<String> lore = new ArrayList<>(ChatUtils.formattedText("&6&lCLICK &7the item below to turn in all resources in your inventory. " +
-                "The work order item will show your guild's total progress this week. Upon reaching a &d&lCHECKPOINT&7, " +
-                "you will earn a chunk of experience! Complete each checkpoint to earn a hefty chunk of &a&lBONUS EXP&7!"));
+        List<String> lore = new ArrayList<>();
+        lore.add("");
+        lore.addAll(ChatUtils.formattedText("&6&lCLICK &7the item below to turn in all resources in your inventory. " +
+                "Upon reaching a &d&lCHECKPOINT&7, you will earn a chunk of experience! " +
+                "Complete each checkpoint to earn a hefty chunk of &a&lBONUS EXP&7!"));
         lore.add("");
         lore.add(ChatColor.GRAY + "Required Items:");
         try {
