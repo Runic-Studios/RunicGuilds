@@ -34,20 +34,45 @@ public class WorkOrderUI implements InventoryHolder {
     }
 
     private static String buildProgressBar(double checkPoint) {
-        String bar = "❚❚❚❚❚❚❚❚❚" + ChatColor.GOLD + "❚"; // 10 bars
-        try {
-            double progress = checkPoint / WorkOrder.MAX_CHECKPOINT_NUMBER;
-            int progressRounded = (int) NumRounder.round(progress * 100);
-            int percent = Math.min(progressRounded / 10, 10); // limit percent to a maximum of 10
-            return ChatColor.GREEN + bar.substring(0, percent) +
-                    ChatColor.WHITE + bar.substring(percent) +
-                    ChatColor.GRAY + " [" + ChatColor.WHITE + (int) checkPoint +
-                    ChatColor.GRAY + "/10]";
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        StringBuilder progressBar = new StringBuilder();
+        int greenBars = (int) checkPoint; // Number of green bars
+
+        // Add the green bars
+        for (int i = 0; i < greenBars; i++) {
+            progressBar.append(ChatColor.GREEN).append("❚");
         }
-        return ChatColor.WHITE + bar;
+
+        // Add the white bars
+        for (int i = greenBars; i < 9; i++) { // We limit to 9 because the last bar is always gold
+            progressBar.append(ChatColor.WHITE).append("❚");
+        }
+
+        // Add the final gold bar
+        progressBar.append(ChatColor.GOLD).append("❚");
+
+        // Add the checkpoint information
+        progressBar.append(ChatColor.GRAY).append(" [").append(ChatColor.WHITE)
+                .append((int) checkPoint).append(ChatColor.GRAY).append("/10]");
+
+        return progressBar.toString();
     }
+
+
+//    private static String buildProgressBar(double checkPoint) {
+//        String bar = "❚❚❚❚❚❚❚❚❚" + ChatColor.GOLD + "❚"; // 10 bars
+//        try {
+//            double progress = checkPoint / WorkOrder.MAX_CHECKPOINT_NUMBER;
+//            int progressRounded = (int) NumRounder.round(progress * 100);
+//            int percent = Math.min(progressRounded / 10, 10); // limit percent to a maximum of 10
+//            return ChatColor.GREEN + bar.substring(0, percent) +
+//                    ChatColor.WHITE + bar.substring(percent) +
+//                    ChatColor.GRAY + " [" + ChatColor.WHITE + (int) checkPoint +
+//                    ChatColor.GRAY + "/10]";
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        return ChatColor.WHITE + bar;
+//    }
 
     public GuildInfo getGuildInfo() {
         return guildInfo;
