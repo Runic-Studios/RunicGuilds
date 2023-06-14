@@ -65,4 +65,31 @@ public class WorkOrder {
         return itemRequirements.values().stream().mapToInt(Integer::intValue).sum();
     }
 
+    /**
+     * ?
+     *
+     * @param currentItems
+     * @return
+     */
+    public int determineCurrentCheckpoint(Map<String, Integer> currentItems) {
+        int minCheckpoint = MAX_CHECKPOINT_NUMBER; // Start with max value and look for minimum
+
+        for (Map.Entry<String, Integer> entry : this.itemRequirements.entrySet()) { // Loop through master map
+            String itemId = entry.getKey();
+            int requiredAmount = entry.getValue();
+
+            Integer currentItemAmount = currentItems.get(itemId);
+
+            // If current item amount is null, it means we have 0 of that item, so checkpoint is 0
+            int checkpoint = (currentItemAmount != null)
+                    ? (currentItemAmount * MAX_CHECKPOINT_NUMBER) / requiredAmount
+                    : 0;
+
+            minCheckpoint = Math.min(minCheckpoint, checkpoint);
+        }
+
+        return minCheckpoint;
+    }
+
+
 }

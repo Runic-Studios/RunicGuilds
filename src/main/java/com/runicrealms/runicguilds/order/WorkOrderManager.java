@@ -11,6 +11,7 @@ import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicitems.item.RunicItem;
 import com.runicrealms.runicitems.util.ItemUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
@@ -89,27 +90,52 @@ public class WorkOrderManager implements Listener {
     public void supplyOrderMaterials(Player player) {
         player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 0.5f, 1.0f);
         player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 0.5f, 0.5f);
-        player.sendMessage(GuildUtil.PREFIX + "Supplying materials...");
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                GuildUtil.PREFIX + "Supplying materials..."));
         if (RunicGuilds.getDataAPI().getGuildInfo(player) == null) {
-            player.sendMessage(GuildUtil.PREFIX + "You must be in a guild to do that!");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    GuildUtil.PREFIX + "You must be in a guild to do that!"));
             return;
         }
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         Map<String, Integer> guildOrderMap = guildInfo.getWorkOrderMap();
+        int currentCheckpoint = currentWorkOrder.determineCurrentCheckpoint(guildOrderMap);
+        Bukkit.broadcastMessage("lowest checkpoint is " + currentCheckpoint);
         // give the materials (queue)
         for (String templateId : currentWorkOrder.getItemRequirements().keySet()) {
             RunicItem runicItem = RunicItemsAPI.generateItemFromTemplate(templateId);
             // Ensure there are no null values
             guildOrderMap.putIfAbsent(templateId, 0);
             if (guildOrderMap.get(templateId) >= currentWorkOrder.getItemRequirements().get(templateId)) {
-                player.sendMessage(GuildUtil.PREFIX + "Your guild has completed your order for " + runicItem.getDisplayableItem().getDisplayName());
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        GuildUtil.PREFIX + "Your guild has completed your order for " + runicItem.getDisplayableItem().getDisplayName()));
                 continue;
             }
             ItemStack itemStack = RunicItemsAPI.generateItemFromTemplate(templateId).generateItem();
-            ItemUtils.takeItem(player, itemStack, guildOrderMap.get(templateId));
-            // todo: keep track of how many were taken
+            // Always try to take remaining balance
+            int remainingBalance = currentWorkOrder.getItemRequirements().get(templateId) - guildOrderMap.get(templateId);
+            Bukkit.broadcastMessage("remaining balance for " + templateId + " is " + remainingBalance);
+            int totalTaken = ItemUtils.takeItem(player, itemStack, remainingBalance);
+            Bukkit.broadcastMessage("total taken for " + templateId + " was " + totalTaken);
+            guildInfo.getWorkOrderMap().put(templateId, totalTaken + guildInfo.getWorkOrderMap().get(templateId));
+            // todo: may need to be a queue?
         }
-        // todo: if a checkpoint was reached, call event
+        RunicGuilds.getGuildWriteOperation().updateGuildData
+                (
+                        guildInfo.getUUID(),
+                        "workOrderMap",
+                        guildInfo.getWorkOrderMap(),
+                        () -> {
+                            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.0f);
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', GuildUtil.PREFIX + "&aComplete!"));
+                        }
+                );
+        int newCheckpoint = currentWorkOrder.determineCurrentCheckpoint(guildOrderMap);
+        // New checkpoint reached!
+        if (currentCheckpoint != newCheckpoint) {
+            // todo: if a checkpoint was reached, call event
+            Bukkit.broadcastMessage("checkpoint reached");
+        }
     }
 
     /**
@@ -203,7 +229,7 @@ public class WorkOrderManager implements Listener {
         RunicGuilds.getDataAPI().getGuildInfoMap().forEach((guildUUID, guildInfo) -> RunicGuilds.getGuildWriteOperation().updateGuildData
                 (
                         guildUUID,
-                        "orderMap",
+                        "workOrderMap",
                         new HashMap<>(),
                         () -> {
                             // Inform all online players of the reset

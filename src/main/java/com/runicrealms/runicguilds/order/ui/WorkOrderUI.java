@@ -33,16 +33,16 @@ public class WorkOrderUI implements InventoryHolder {
         openMenu();
     }
 
-    private static String buildProgressBar(double total) {
+    private static String buildProgressBar(int checkPoint, double total) {
         String bar = "❚❚❚❚❚❚❚❚❚❚"; // 10 bars
         try {
-            double current = 2500;
-            double progress = current / total;
+            double progress = checkPoint / total;
             int progressRounded = (int) NumRounder.round(progress * 100);
             int percent = Math.min(progressRounded / 10, 10); // limit percent to a maximum of 10
-            return ChatColor.GREEN + bar.substring(0, percent) + ChatColor.WHITE + bar.substring(percent) +
-                    " [0/10]" +
-                    " " + ChatColor.GREEN + ChatColor.BOLD + progressRounded + "% ";
+            return ChatColor.GREEN + bar.substring(0, percent) +
+                    ChatColor.WHITE + bar.substring(percent) +
+                    ChatColor.GRAY + " [" + ChatColor.WHITE + checkPoint +
+                    ChatColor.GRAY + "/10]";
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -69,18 +69,23 @@ public class WorkOrderUI implements InventoryHolder {
         List<String> lore = new ArrayList<>();
         lore.add("");
         lore.addAll(ChatUtils.formattedText("&6&lCLICK &7the item below to turn in all resources in your inventory. " +
-                "Each checkpoint awards guild exp. " +
+                "Each checkpoint (10% payload across all items) awards guild exp. " +
                 "Complete ALL checkpoints to earn a hefty chunk of &a&l25% bonus &a&lexp&7!"));
         lore.add("");
-        lore.add(ChatColor.DARK_GREEN + String.valueOf(ChatColor.BOLD) + "EXP CHECKPOINTS:");
-        lore.add(buildProgressBar(workOrder.getItemRequirements().values().stream().mapToDouble(Integer::doubleValue).sum()));
+        lore.add(ChatColor.DARK_GREEN + String.valueOf(ChatColor.BOLD) + "CHECKPOINT:");
+        int checkpoint = workOrder.determineCurrentCheckpoint(guildInfo.getWorkOrderMap());
+        lore.add(buildProgressBar(checkpoint, workOrder.getItemRequirements().values().stream().mapToDouble(Integer::doubleValue).sum()));
         lore.add("");
         lore.add(ChatColor.GRAY + "Required Items:");
         try {
             workOrder.getItemRequirements().forEach((s, integer) -> {
                 String name = RunicItemsAPI.generateItemFromTemplate(s).getDisplayableItem().getDisplayName();
+                double current = guildInfo.getWorkOrderMap().get(s);
+                double progress = current / integer;
+                int progressRounded = (int) NumRounder.round(progress * 100);
                 lore.add(ChatColor.GRAY + "- " + ChatColor.BLUE + name + ": " + ChatColor.GRAY + "[" +
-                        ChatColor.WHITE + guildInfo.getWorkOrderMap().get(s) + "/" + integer + "]");
+                        ChatColor.WHITE + guildInfo.getWorkOrderMap().get(s) + ChatColor.GRAY + "/" + integer + "] " +
+                        ChatColor.GREEN + ChatColor.BOLD + progressRounded + "% ");
             });
         } catch (Exception ex) {
             ex.printStackTrace();
