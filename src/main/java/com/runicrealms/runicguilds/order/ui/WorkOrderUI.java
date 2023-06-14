@@ -34,7 +34,7 @@ public class WorkOrderUI implements InventoryHolder {
     }
 
     private static String buildProgressBar(double checkPoint) {
-        String bar = "❚❚❚❚❚❚❚❚❚❚"; // 10 bars
+        String bar = "❚❚❚❚❚❚❚❚❚" + ChatColor.GOLD + "❚"; // 10 bars
         try {
             double progress = checkPoint / WorkOrder.MAX_CHECKPOINT_NUMBER;
             int progressRounded = (int) NumRounder.round(progress * 100);
@@ -68,13 +68,13 @@ public class WorkOrderUI implements InventoryHolder {
         // List out the description of the work order, including the required items and amounts
         List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.addAll(ChatUtils.formattedText("&6&lCLICK &7the item below to turn in all resources in your inventory. " +
+        lore.addAll(ChatUtils.formattedText("&6&lCLICK &7to turn in all resources in your inventory. " +
                 "Each checkpoint (10% payload across all items) awards guild exp. " +
                 "Complete ALL checkpoints to earn a hefty chunk of &a&l25% &a&lbonus &a&lexp&7!"));
         lore.add("");
         lore.add(ChatColor.DARK_GREEN + String.valueOf(ChatColor.BOLD) + "CHECKPOINT:");
         int checkpoint = workOrder.determineCurrentCheckpoint(guildInfo.getWorkOrderMap());
-        lore.add(buildProgressBar(checkpoint)); // workOrder.getItemRequirements().values().stream().mapToDouble(Integer::doubleValue).sum())
+        lore.add(buildProgressBar(checkpoint));
         lore.add("");
         lore.add(ChatColor.GRAY + "Required Items:");
         try {

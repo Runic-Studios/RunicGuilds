@@ -3,6 +3,8 @@ package com.runicrealms.runicguilds.order;
 import com.runicrealms.plugin.api.NpcClickEvent;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
+import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.order.config.OrderConfigLoader;
 import com.runicrealms.runicguilds.order.ui.WorkOrderUI;
@@ -72,7 +74,8 @@ public class WorkOrderManager implements Listener {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(event.getPlayer());
         if (guildInfo == null) {
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
-            event.getPlayer().sendMessage(GuildUtil.PREFIX + "You must be in a guild to access the foreman!");
+            event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    GuildUtil.PREFIX + "You must be in a guild to access the foreman!"));
             return;
         }
         // Populate in-memory guild maps with the current values
@@ -115,7 +118,6 @@ public class WorkOrderManager implements Listener {
             int remainingBalance = currentWorkOrder.getItemRequirements().get(templateId) - guildOrderMap.get(templateId);
             int totalTaken = ItemUtils.takeItem(player, itemStack, remainingBalance);
             guildInfo.getWorkOrderMap().put(templateId, totalTaken + guildInfo.getWorkOrderMap().get(templateId));
-            // todo: may need to be a queue?
         }
         RunicGuilds.getGuildWriteOperation().updateGuildData
                 (
@@ -130,15 +132,17 @@ public class WorkOrderManager implements Listener {
         int newCheckpoint = currentWorkOrder.determineCurrentCheckpoint(guildOrderMap);
         // New checkpoint reached!
         if (currentCheckpoint != newCheckpoint) {
-            // todo: if a checkpoint was reached, call event
-            Bukkit.broadcastMessage("checkpoint reached");
+            double difference = newCheckpoint - currentCheckpoint;
+            double amount = (double) currentWorkOrder.getTotalExp() / WorkOrder.MAX_CHECKPOINT_NUMBER;
+            GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getUUID(), (int) (difference * amount), GuildEXPSource.ORDER);
+            Bukkit.getPluginManager().callEvent(event);
         }
     }
 
     /**
-     * ?
+     * Ensures there are no null values in the guild order map for the current global order
      *
-     * @param guildUUID
+     * @param guildUUID of the guild to mutate
      */
     public void updateGuildOrderMap(UUID guildUUID) {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
