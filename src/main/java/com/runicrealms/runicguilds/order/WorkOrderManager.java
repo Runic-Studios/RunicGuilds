@@ -100,7 +100,6 @@ public class WorkOrderManager implements Listener {
         GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
         Map<String, Integer> guildOrderMap = guildInfo.getWorkOrderMap();
         int currentCheckpoint = currentWorkOrder.determineCurrentCheckpoint(guildOrderMap);
-        Bukkit.broadcastMessage("lowest checkpoint is " + currentCheckpoint);
         // give the materials (queue)
         for (String templateId : currentWorkOrder.getItemRequirements().keySet()) {
             RunicItem runicItem = RunicItemsAPI.generateItemFromTemplate(templateId);
@@ -114,9 +113,7 @@ public class WorkOrderManager implements Listener {
             ItemStack itemStack = RunicItemsAPI.generateItemFromTemplate(templateId).generateItem();
             // Always try to take remaining balance
             int remainingBalance = currentWorkOrder.getItemRequirements().get(templateId) - guildOrderMap.get(templateId);
-            Bukkit.broadcastMessage("remaining balance for " + templateId + " is " + remainingBalance);
             int totalTaken = ItemUtils.takeItem(player, itemStack, remainingBalance);
-            Bukkit.broadcastMessage("total taken for " + templateId + " was " + totalTaken);
             guildInfo.getWorkOrderMap().put(templateId, totalTaken + guildInfo.getWorkOrderMap().get(templateId));
             // todo: may need to be a queue?
         }

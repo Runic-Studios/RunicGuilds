@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Map;
 
 public class WorkOrder {
-    private static final int MAX_CHECKPOINT_NUMBER = 10;
+    public static final int MAX_CHECKPOINT_NUMBER = 10;
     private final ItemStack icon;
     private final String displayName;
     private final String orderId;

@@ -33,15 +33,15 @@ public class WorkOrderUI implements InventoryHolder {
         openMenu();
     }
 
-    private static String buildProgressBar(int checkPoint, double total) {
+    private static String buildProgressBar(double checkPoint) {
         String bar = "❚❚❚❚❚❚❚❚❚❚"; // 10 bars
         try {
-            double progress = checkPoint / total;
+            double progress = checkPoint / WorkOrder.MAX_CHECKPOINT_NUMBER;
             int progressRounded = (int) NumRounder.round(progress * 100);
             int percent = Math.min(progressRounded / 10, 10); // limit percent to a maximum of 10
             return ChatColor.GREEN + bar.substring(0, percent) +
                     ChatColor.WHITE + bar.substring(percent) +
-                    ChatColor.GRAY + " [" + ChatColor.WHITE + checkPoint +
+                    ChatColor.GRAY + " [" + ChatColor.WHITE + (int) checkPoint +
                     ChatColor.GRAY + "/10]";
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -70,11 +70,11 @@ public class WorkOrderUI implements InventoryHolder {
         lore.add("");
         lore.addAll(ChatUtils.formattedText("&6&lCLICK &7the item below to turn in all resources in your inventory. " +
                 "Each checkpoint (10% payload across all items) awards guild exp. " +
-                "Complete ALL checkpoints to earn a hefty chunk of &a&l25% bonus &a&lexp&7!"));
+                "Complete ALL checkpoints to earn a hefty chunk of &a&l25% &a&lbonus &a&lexp&7!"));
         lore.add("");
         lore.add(ChatColor.DARK_GREEN + String.valueOf(ChatColor.BOLD) + "CHECKPOINT:");
         int checkpoint = workOrder.determineCurrentCheckpoint(guildInfo.getWorkOrderMap());
-        lore.add(buildProgressBar(checkpoint, workOrder.getItemRequirements().values().stream().mapToDouble(Integer::doubleValue).sum()));
+        lore.add(buildProgressBar(checkpoint)); // workOrder.getItemRequirements().values().stream().mapToDouble(Integer::doubleValue).sum())
         lore.add("");
         lore.add(ChatColor.GRAY + "Required Items:");
         try {
@@ -91,8 +91,9 @@ public class WorkOrderUI implements InventoryHolder {
             ex.printStackTrace();
         }
         lore.add("");
+        double expPerCheckpoint = (double) workOrder.getTotalExp() / WorkOrder.MAX_CHECKPOINT_NUMBER;
         lore.add(ChatColor.translateAlternateColorCodes('&',
-                "&9&oEarned &f&o0 &9&oof " + workOrder.getTotalExp() + " exp"));
+                "&9&oEarned &f&o" + (int) (checkpoint * expPerCheckpoint) + " &9&oof " + workOrder.getTotalExp() + " exp"));
         meta.setLore(lore);
         menuItem.setItemMeta(meta);
         return menuItem;
