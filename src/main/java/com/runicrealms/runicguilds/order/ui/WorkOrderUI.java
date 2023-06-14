@@ -3,6 +3,7 @@ package com.runicrealms.runicguilds.order.ui;
 import com.runicrealms.plugin.common.util.ChatUtils;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.common.util.GUIUtil;
+import com.runicrealms.plugin.utilities.NumRounder;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.order.WorkOrder;
 import com.runicrealms.runicitems.RunicItemsAPI;
@@ -29,6 +30,23 @@ public class WorkOrderUI implements InventoryHolder {
         openMenu();
     }
 
+    private static String buildProgressBar(double total) { // todo: take in a guild
+        String bar = "❚❚❚❚❚❚❚❚❚❚"; // 10 bars
+        try {
+            double current = 2500;
+            double progress = current / total;
+            int progressRounded = (int) NumRounder.round(progress * 100);
+            int percent = Math.min(progressRounded / 10, 10); // limit percent to a maximum of 10
+            return ChatColor.GREEN + bar.substring(0, percent) + ChatColor.WHITE + bar.substring(percent) +
+                    " [0/10]" +
+                    " " + ChatColor.GREEN + ChatColor.BOLD + progressRounded + "% ";
+        } catch (Exception ex) {
+//            Bukkit.getLogger().warning("There was a problem creating the gathering progress bar for " + gatheringSkill.getIdentifier());
+            ex.printStackTrace();
+        }
+        return ChatColor.WHITE + bar;
+    }
+
     /**
      * Helper method to create the visual menu item for the given work order
      *
@@ -42,23 +60,30 @@ public class WorkOrderUI implements InventoryHolder {
         if (meta == null) return menuItem;
 
         meta.setDisplayName(ChatColor.YELLOW + displayName);
+        // todo: add a custom 'display name' field to yml
         // List out the description of the work order, including the required items and amounts
         List<String> lore = new ArrayList<>();
         lore.add("");
         lore.addAll(ChatUtils.formattedText("&6&lCLICK &7the item below to turn in all resources in your inventory. " +
-                "Upon reaching a &d&lCHECKPOINT&7, you will earn a chunk of experience! " +
-                "Complete each checkpoint to earn a hefty chunk of &a&lBONUS EXP&7!"));
+                "Each checkpoint awards guild exp. " +
+                "Complete ALL checkpoints to earn a hefty chunk of &a&l25% bonus &a&lexp&7!"));
+        lore.add("");
+        lore.add(ChatColor.DARK_GREEN + String.valueOf(ChatColor.BOLD) + "EXP CHECKPOINTS:");
+        lore.add(buildProgressBar(workOrder.getItemRequirements().values().stream().mapToDouble(Integer::doubleValue).sum()));
         lore.add("");
         lore.add(ChatColor.GRAY + "Required Items:");
         try {
             workOrder.getItemRequirements().forEach((s, integer) -> {
                 String name = RunicItemsAPI.generateItemFromTemplate(s).getDisplayableItem().getDisplayName();
-                lore.add(ChatColor.GRAY + "-" + name + ": [0/" + integer + "]");
+                lore.add(ChatColor.GRAY + "- " + ChatColor.BLUE + name + ": " + ChatColor.GRAY + "[0/" + integer + "]");
             });
+            // todo: change the config format to include a template-id icon (generateGUIItem)
         } catch (Exception ex) {
-
+            ex.printStackTrace();
         }
         lore.add("");
+        lore.add(ChatColor.translateAlternateColorCodes('&',
+                "&9&oEarned &f&o0 &9&oof " + workOrder.getTotalExp() + " exp"));
         meta.setLore(lore);
         menuItem.setItemMeta(meta);
         return menuItem;

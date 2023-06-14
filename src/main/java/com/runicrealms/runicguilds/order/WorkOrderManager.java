@@ -68,7 +68,6 @@ public class WorkOrderManager implements Listener {
     private WorkOrder initializeWorkOrder() {
         Bukkit.getLogger().info("Initializing guild work orders!");
         String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-        Bukkit.getLogger().severe("DATABASE IS " + database);
         String currentWorkOrderName;
         String nextResetTimestamp;
         // Check Redis for the work order key
@@ -124,29 +123,25 @@ public class WorkOrderManager implements Listener {
      * @return the new global work order
      */
     private WorkOrder resetGlobalWorkOrder() {
-        Bukkit.getLogger().severe("RESETTING OR APPLY NEW GLOBAL WORK ORDER");
         String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
         WorkOrder workOrder = loader.chooseRandomOrder();
-        Bukkit.getLogger().severe("WORK ORDER NAME IS " + workOrder.getName());
         // After resetting work order, update the values in Jedis
         try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
             jedis.set(database + ":" + CURRENT_WORK_ORDER_KEY, workOrder.getName());
             jedis.set(database + ":" + RESET_TIMESTAMP_KEY, String.valueOf(calculateNextReset().toInstant().toEpochMilli()));
-            jedis.expire(database + ":" + CURRENT_WORK_ORDER_KEY, 1_209_600);
+            jedis.expire(database + ":" + CURRENT_WORK_ORDER_KEY, 1_209_600); // 2 weeks to be safe
             jedis.expire(database + ":" + RESET_TIMESTAMP_KEY, 1_209_600);
         }
         // Reset the progress of each guild
-        RunicGuilds.getDataAPI().getGuildInfoMap().forEach((guildUUID, guildInfo) -> {
-            RunicGuilds.getGuildWriteOperation().updateGuildData
-                    (
-                            guildUUID,
-                            "orderMap",
-                            new HashMap<>(),
-                            () -> {
-
-                            }
-                    );
-        });
+        RunicGuilds.getDataAPI().getGuildInfoMap().forEach((guildUUID, guildInfo) -> RunicGuilds.getGuildWriteOperation().updateGuildData
+                (
+                        guildUUID,
+                        "orderMap",
+                        new HashMap<>(),
+                        () -> {
+                            // todo: send a message to the players here
+                        }
+                ));
         return workOrder;
     }
 
