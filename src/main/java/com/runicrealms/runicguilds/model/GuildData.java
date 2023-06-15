@@ -5,10 +5,11 @@ import com.runicrealms.plugin.rdb.model.SessionDataMongo;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.guild.banner.GuildBanner;
+import com.runicrealms.runicguilds.guild.banner.BannerUtil;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,6 +18,7 @@ import redis.clients.jedis.Jedis;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -37,8 +39,9 @@ public class GuildData implements SessionDataMongo {
     private String name = "";
     private String prefix = "";
     private int exp = 0;
-    private HashMap<UUID, MemberData> memberDataMap = new HashMap<>();
-    private GuildBanner guildBanner;
+    private Map<UUID, MemberData> memberDataMap = new HashMap<>();
+    private Map<String, Integer> workOrderMap = new HashMap<>();
+    private String serializedBanner;
 
     @SuppressWarnings("unused")
     public GuildData() {
@@ -59,19 +62,9 @@ public class GuildData implements SessionDataMongo {
         this.guildUUID = guildUUID;
         this.name = name;
         this.prefix = prefix;
-        this.guildBanner = new GuildBanner(guildUUID);
+        ItemStack banner = BannerUtil.makeDefaultBanner(guildUUID);
+        this.serializedBanner = BannerUtil.serializeItemStack(banner);
         this.memberDataMap.put(memberData.getUuid(), memberData);
-    }
-
-    /**
-     * Grabs the root jedis key for this guild to determine if there is data stored in Redis
-     *
-     * @param guildUUID of the GUILD
-     * @return the root key path
-     */
-    public static String getJedisKey(UUID guildUUID) {
-        String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
-        return database + ":guilds:" + guildUUID.toString();
     }
 
     /**
@@ -82,6 +75,14 @@ public class GuildData implements SessionDataMongo {
      */
     public static void disband(UUID guildUUID, Player player, boolean mod) {
         Bukkit.getServer().getPluginManager().callEvent(new GuildDisbandEvent(guildUUID, player, mod));
+    }
+
+    public Map<String, Integer> getWorkOrderMap() {
+        return workOrderMap;
+    }
+
+    public void setWorkOrderMap(Map<String, Integer> workOrderMap) {
+        this.workOrderMap = workOrderMap;
     }
 
     @SuppressWarnings("unchecked")
@@ -113,12 +114,12 @@ public class GuildData implements SessionDataMongo {
         this.exp = exp;
     }
 
-    public GuildBanner getGuildBanner() {
-        return guildBanner;
+    public String getSerializedBanner() {
+        return serializedBanner;
     }
 
-    public void setGuildBanner(GuildBanner guildBanner) {
-        this.guildBanner = guildBanner;
+    public void setSerializedBanner(String serializedBanner) {
+        this.serializedBanner = serializedBanner;
     }
 
     public UUID getUUID() {
@@ -137,7 +138,7 @@ public class GuildData implements SessionDataMongo {
         this.id = id;
     }
 
-    public HashMap<UUID, MemberData> getMemberDataMap() {
+    public Map<UUID, MemberData> getMemberDataMap() {
         return memberDataMap;
     }
 

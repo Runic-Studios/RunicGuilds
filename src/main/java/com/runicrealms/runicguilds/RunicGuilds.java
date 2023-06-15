@@ -26,6 +26,8 @@ import com.runicrealms.runicguilds.listener.RewardDamageListener;
 import com.runicrealms.runicguilds.listener.RewardMountListener;
 import com.runicrealms.runicguilds.model.DataManager;
 import com.runicrealms.runicguilds.model.MongoTask;
+import com.runicrealms.runicguilds.order.WorkOrderManager;
+import com.runicrealms.runicguilds.order.ui.WorkOrderUIListener;
 import com.runicrealms.runicguilds.shop.GuildShopManager;
 import com.runicrealms.runicguilds.ui.GuildInfoUIListener;
 import com.runicrealms.runicguilds.ui.GuildMembersUIListener;
@@ -34,11 +36,13 @@ import com.runicrealms.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.runicitems.RunicItemsAPI;
 import com.runicrealms.runicrestart.event.ServerShutdownEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +64,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     private static MongoTask mongoTask;
     private static GuildBossManager bossManager;
     private static GuildWriteOperation guildWriteOperation;
+    private static WorkOrderManager workOrderManager;
 
     public static <T> TaskChain<T> newChain() {
         return taskChainFactory.newChain();
@@ -101,10 +106,19 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         return guildWriteOperation;
     }
 
+    public static WorkOrderManager getWorkOrderManager() {
+        return workOrderManager;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
         this.saveDefaultConfig();
+        try {
+            workOrderManager = new WorkOrderManager();
+        } catch (IOException | InvalidConfigurationException e) {
+            throw new RuntimeException(e);
+        }
         DataManager dataManager = new DataManager();
         dataAPI = dataManager;
         guildWriteOperation = dataManager;
@@ -132,7 +146,8 @@ public class RunicGuilds extends JavaPlugin implements Listener {
                         new RewardMountListener(),
                         new GuildInfoUIListener(),
                         new GuildMembersUIListener(),
-                        new GuildEventListener()
+                        new GuildEventListener(),
+                        new WorkOrderUIListener()
                 );
 
 		/*
@@ -178,6 +193,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
         mongoTask = null;
         bossManager = null;
         guildWriteOperation = null;
+        workOrderManager = null;
     }
 
     private void registerEvents(Listener... listeners) {

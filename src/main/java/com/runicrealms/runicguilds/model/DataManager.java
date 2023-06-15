@@ -46,7 +46,11 @@ public class DataManager implements DataAPI, GuildWriteOperation, Listener {
         Bukkit.getScheduler().runTaskLater(RunicGuilds.getInstance(), () -> {
             Set<GuildData> guildDataSet = getGuildDataFromMongo();
             if (guildDataSet.isEmpty()) return; // No guilds created
-            guildDataSet.forEach(guildData -> guildInfoMap.put(guildData.getUUID(), new GuildInfo(guildData)));
+            guildDataSet.forEach(guildData -> {
+                guildInfoMap.put(guildData.getUUID(), new GuildInfo(guildData));
+                // Ensure the in-memory work order is does not have null values for the current global work order
+                RunicGuilds.getWorkOrderManager().updateGuildOrderMap(guildData.getUUID());
+            });
         }, 10 * 20L);
         Bukkit.getLogger().info("[RunicGuilds] All guilds have been loaded!");
     }

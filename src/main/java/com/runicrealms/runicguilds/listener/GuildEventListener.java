@@ -148,7 +148,12 @@ public class GuildEventListener implements Listener {
                                     "exp",
                                     guildData.getExp(),
                                     () -> {
-
+                                        for (UUID memberUuid : guildData.getMemberDataMap().keySet()) {
+                                            Player online = Bukkit.getPlayer(memberUuid);
+                                            if (online == null) continue; // Player offline
+                                            online.playSound(online.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 2.0f);
+                                            online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Your guild has received " + event.getAmount() + " experience!"));
+                                        }
                                     }
                             );
                 })

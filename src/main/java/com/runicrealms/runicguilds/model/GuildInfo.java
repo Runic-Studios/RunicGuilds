@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.runicguilds.guild.banner.GuildBanner;
-
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,8 +21,9 @@ public class GuildInfo {
     private String prefix;
     private int exp;
     private int score;
-    private GuildBanner guildBanner;
+    private String serializedBanner;
     private UUID ownerUuid;
+    private Map<String, Integer> workOrderMap = new HashMap<>();
 
     /**
      * Updates our in-memory guild info cache from some retrieved GuildData object from Redis/Mongo
@@ -37,7 +38,19 @@ public class GuildInfo {
         this.prefix = guildData.getPrefix();
         this.exp = guildData.getExp();
         this.score = guildData.calculateGuildScore();
-        this.guildBanner = guildData.getGuildBanner();
+        this.serializedBanner = guildData.getSerializedBanner();
+        // Update order map with persistent data (if it exists)
+        if (guildData.getWorkOrderMap() != null) {
+            this.workOrderMap = guildData.getWorkOrderMap();
+        }
+    }
+
+    public Map<String, Integer> getWorkOrderMap() {
+        return workOrderMap;
+    }
+
+    public void setWorkOrderMap(Map<String, Integer> workOrderMap) {
+        this.workOrderMap = workOrderMap;
     }
 
     public Set<UUID> getMembersUuids() {
@@ -56,12 +69,12 @@ public class GuildInfo {
         this.exp = exp;
     }
 
-    public GuildBanner getGuildBanner() {
-        return guildBanner;
+    public String getSerializedBanner() {
+        return serializedBanner;
     }
 
-    public void setGuildBanner(GuildBanner guildBanner) {
-        this.guildBanner = guildBanner;
+    public void setSerializedBanner(String serializedBanner) {
+        this.serializedBanner = serializedBanner;
     }
 
     public UUID getUUID() {
