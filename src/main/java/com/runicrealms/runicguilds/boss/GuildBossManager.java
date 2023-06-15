@@ -9,8 +9,8 @@ import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.MemberData;
 import com.runicrealms.runicguilds.util.GuildUtil;
-import io.lumine.xikage.mythicmobs.MythicMobs;
-import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
+import io.lumine.mythic.bukkit.MythicBukkit;
+import io.lumine.mythic.core.mobs.ActiveMob;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -61,7 +61,7 @@ public class GuildBossManager implements Listener {
             }
             damage.put(damager.getUniqueId(), damage.get(damager.getUniqueId()) + damageAmount);
         } else {
-            Optional<ActiveMob> optMob = MythicMobs.inst().getMobManager().getActiveMob(bossID);
+            Optional<ActiveMob> optMob = MythicBukkit.inst().getMobManager().getActiveMob(bossID);
             if (optMob.isPresent()) {
                 ActiveMob activeMob = optMob.get();
                 if (!bosses.contains(activeMob.getMobType())) return;
