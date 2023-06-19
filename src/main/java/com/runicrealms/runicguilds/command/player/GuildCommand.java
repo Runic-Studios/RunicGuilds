@@ -578,21 +578,25 @@ public class GuildCommand extends BaseCommand {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You must be of rank officer or higher to promote other players."));
                         return null;
                     }
+                    GuildRank targetRank = guildData.getMemberDataMap().get(target.getUniqueId()).getRank();
+                    GuildRank promoterRank = guildData.getMemberDataMap().get(player.getUniqueId()).getRank();
 
                     if (!guildData.isInGuild(target.getUniqueId())) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "That player is not in your guild."));
                         return null;
                     }
 
-                    GuildRank commandSenderRank = guildData.getMemberDataMap().get(player.getUniqueId()).getRank();
-                    GuildRank targetRank = guildData.getMemberDataMap().get(target.getUniqueId()).getRank();
-
                     if (targetRank == GuildRank.OFFICER) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot promote another player to owner. To transfer guild ownership, use /guild transfer."));
                         return null;
                     }
 
-                    if (targetRank.getRankNumber() <= commandSenderRank.getRankNumber()) {
+                    if (targetRank == GuildRank.OWNER) {
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You cannot promote the guild owner."));
+                        return null;
+                    }
+
+                    if (targetRank.getRankNumber() - 1 <= promoterRank.getRankNumber()) {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You can only promote players that are below your rank!"));
                         return null;
                     }

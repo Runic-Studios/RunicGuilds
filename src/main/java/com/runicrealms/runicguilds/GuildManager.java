@@ -6,7 +6,6 @@ import com.keenant.tabbed.util.Skins;
 import com.runicrealms.RunicChat;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.api.event.TabUpdateEvent;
-import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
@@ -25,7 +24,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -106,15 +104,13 @@ public class GuildManager implements GuildsAPI, Listener {
     @Override
     public void giveExperience(UUID guildUUID, int exp) {
         Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> {
-            try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                // Update in-memory
-                GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
-                guildInfo.setExp(guildInfo.getExp() + exp);
-                // Update in Redis
-                GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildUUID);
-                guildData.setExp(guildInfo.getExp());
-                // todo: write to mongo
-            }
+            // Update in-memory
+            GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
+            guildInfo.setExp(guildInfo.getExp() + exp);
+            // Update in Redis
+            GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildUUID);
+            guildData.setExp(guildInfo.getExp());
+            // todo: write to mongo
         });
     }
 
