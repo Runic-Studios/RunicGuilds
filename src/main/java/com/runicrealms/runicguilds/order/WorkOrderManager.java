@@ -26,6 +26,7 @@ import redis.clients.jedis.Jedis;
 import java.io.File;
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -134,6 +135,10 @@ public class WorkOrderManager implements Listener {
         if (currentCheckpoint != newCheckpoint) {
             double difference = newCheckpoint - currentCheckpoint;
             double amount = (double) currentWorkOrder.getTotalExp() / WorkOrder.MAX_CHECKPOINT_NUMBER;
+            // Give exp bonus for max checkpoint!
+            if (newCheckpoint == WorkOrder.MAX_CHECKPOINT_NUMBER) {
+                amount += (double) currentWorkOrder.getTotalExp() / 4;
+            }
             GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getUUID(), (int) (difference * amount), GuildEXPSource.ORDER);
             Bukkit.getPluginManager().callEvent(event);
         }
@@ -194,6 +199,16 @@ public class WorkOrderManager implements Listener {
                 String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
                 try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
                     ZonedDateTime nextReset = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(jedis.get(database + ":" + RESET_TIMESTAMP_KEY))), ZoneId.systemDefault());
+                    Duration duration = Duration.between(now, nextReset);
+                    long days = duration.toDays();
+                    duration = duration.minusDays(days);
+                    long hours = duration.toHours();
+                    duration = duration.minusHours(hours);
+                    long minutes = duration.toMinutes();
+                    duration = duration.minusMinutes(minutes);
+                    long seconds = duration.getSeconds();
+                    Bukkit.getLogger().info("Next work order reset: " + days + "d" + hours + "h" + minutes + "m" + seconds + "s");
+                    Bukkit.getLogger().severe(now.compareTo(nextReset) + " is value");
                     if (now.compareTo(nextReset) >= 0) {
                         resetGlobalWorkOrder();
                     }
@@ -227,6 +242,7 @@ public class WorkOrderManager implements Listener {
             jedis.expire(database + ":" + RESET_TIMESTAMP_KEY, 1_209_600);
         }
         // Reset the progress of each guild
+        // todo: does this work? put in chatGPT and ask it to verify or give me a method to test
         RunicGuilds.getDataAPI().getGuildInfoMap().forEach((guildUUID, guildInfo) -> RunicGuilds.getGuildWriteOperation().updateGuildData
                 (
                         guildUUID,

@@ -48,28 +48,10 @@ public class WorkOrder {
     }
 
     /**
-     * Offers an ADDITIONAL 25% bonus for the last checkpoint
+     * Based on the current progress across all payloads, determines the highest unlocked checkpoint
      *
-     * @param checkpointNumber the current checkpoint towards this order
-     * @return the total experience to reward
-     */
-    public int getCheckpointReward(int checkpointNumber) {
-        if (checkpointNumber == MAX_CHECKPOINT_NUMBER) {
-            return (totalExp / 10) + (totalExp / 4); // Extra 25% for the last checkpoint
-        } else {
-            return totalExp / 10;
-        }
-    }
-
-    public int getTotalItemCount() {
-        return itemRequirements.values().stream().mapToInt(Integer::intValue).sum();
-    }
-
-    /**
-     * ?
-     *
-     * @param currentItems
-     * @return
+     * @param currentItems a map of all payloads and the current progress
+     * @return the current checkpoint
      */
     public int determineCurrentCheckpoint(Map<String, Integer> currentItems) {
         int minCheckpoint = MAX_CHECKPOINT_NUMBER; // Start with max value and look for minimum
