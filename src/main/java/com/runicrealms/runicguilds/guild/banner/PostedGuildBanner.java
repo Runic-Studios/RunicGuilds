@@ -4,6 +4,7 @@ import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
+import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -109,9 +110,12 @@ public class PostedGuildBanner {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
-        Hologram hologram = HologramsAPI.createHologram(RunicGuilds.getInstance(), new Location(world, x - .5, y + 2.85, z + .5));
+        Hologram hologram = HologramsAPI.createHologram(RunicGuilds.getInstance(), new Location(world, x - .5, y + 3.10, z + .5)); // 2.85
         if (guildInfo != null) {
+            GuildStage guildStage = GuildStage.getFromExp(guildInfo.getExp());
             hologram.appendTextLine(ColorUtil.format("&r&6&l" + ChatColor.stripColor(guildInfo.getName())));
+            String color = guildStage.getRank() == GuildStage.getMaxStage().getRank() ? "&a&l" : "&f&l";
+            hologram.appendTextLine(ColorUtil.format("&r&6&lStage: [" + color + guildStage.getRank() + "&6&l/5]"));
             hologram.appendTextLine(ColorUtil.format("&r&6&lScore: " + guildInfo.getScore()));
         }
         return hologram;
