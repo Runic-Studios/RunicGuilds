@@ -2,6 +2,7 @@ package com.runicrealms.runicguilds.order;
 
 import com.runicrealms.plugin.api.NpcClickEvent;
 import com.runicrealms.plugin.rdb.RunicDatabase;
+import com.runicrealms.plugin.rdb.event.CharacterLoadedEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
@@ -26,8 +27,10 @@ import redis.clients.jedis.Jedis;
 import java.io.File;
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,6 +65,13 @@ public class WorkOrderManager implements Listener {
 
     public WorkOrder getCurrentWorkOrder() {
         return currentWorkOrder;
+    }
+
+    @EventHandler
+    public void onJoin(CharacterLoadedEvent event) {
+        if (!RunicGuilds.getGuildsAPI().isInGuild(event.getPlayer())) return;
+        event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                GuildUtil.PREFIX + "Guild work orders will reset in " + formatTimeDifference(calculateNextReset())) + "!");
     }
 
     @EventHandler
@@ -133,8 +143,14 @@ public class WorkOrderManager implements Listener {
         // New checkpoint reached!
         if (currentCheckpoint != newCheckpoint) {
             double difference = newCheckpoint - currentCheckpoint;
+            // Calculate exp for a single checkpoint
             double amount = (double) currentWorkOrder.getTotalExp() / WorkOrder.MAX_CHECKPOINT_NUMBER;
-            GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getUUID(), (int) (difference * amount), GuildEXPSource.ORDER);
+            int bonus = 0;
+            // Give exp bonus for max checkpoint!
+            if (newCheckpoint == WorkOrder.MAX_CHECKPOINT_NUMBER) {
+                bonus = currentWorkOrder.getTotalExp() / 4;
+            }
+            GiveGuildEXPEvent event = new GiveGuildEXPEvent(guildInfo.getUUID(), (int) (difference * amount) + bonus, GuildEXPSource.ORDER);
             Bukkit.getPluginManager().callEvent(event);
         }
     }
@@ -190,11 +206,16 @@ public class WorkOrderManager implements Listener {
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                ZonedDateTime now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
                 String database = RunicDatabase.getAPI().getDataAPI().getMongoDatabase().getName();
                 try (Jedis jedis = RunicDatabase.getAPI().getRedisAPI().getNewJedisResource()) {
-                    ZonedDateTime nextReset = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(jedis.get(database + ":" + RESET_TIMESTAMP_KEY))), ZoneId.systemDefault());
+                    ZonedDateTime nextReset = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(jedis.get(database + ":" + RESET_TIMESTAMP_KEY))), ZoneOffset.UTC);
+
+                    String timeDifference = formatTimeDifference(nextReset);
+                    Bukkit.getLogger().info("Next work order reset: " + timeDifference);
+
+                    ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
                     if (now.compareTo(nextReset) >= 0) {
+                        Bukkit.getLogger().info("Resetting work orders now!");
                         resetGlobalWorkOrder();
                     }
                 } catch (Exception ex) {
@@ -203,9 +224,7 @@ public class WorkOrderManager implements Listener {
                 }
             }
         };
-
-        // Run the task every minute to check if it's time for a reset
-        task.runTaskTimer(RunicGuilds.getInstance(), 0, RESET_CHECK_TIME * 20L);
+        task.runTaskTimerAsynchronously(RunicGuilds.getInstance(), 0, RESET_CHECK_TIME * 20L);
     }
 
     /**
@@ -249,7 +268,7 @@ public class WorkOrderManager implements Listener {
      * @return time remaining before the next order reset
      */
     private ZonedDateTime calculateNextReset() {
-        ZonedDateTime now = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         ZonedDateTime nextMidnightWednesday = now.with(DayOfWeek.WEDNESDAY).withHour(0).withMinute(0).withSecond(0).withNano(0);
 
         // Debug logging
@@ -266,5 +285,22 @@ public class WorkOrderManager implements Listener {
         return nextMidnightWednesday;
     }
 
+    private String formatTimeDifference(ZonedDateTime futureTime) {
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        Duration duration = Duration.between(now, futureTime);
+
+        long days = duration.toDays();
+        duration = duration.minusDays(days);
+
+        long hours = duration.toHours();
+        duration = duration.minusHours(hours);
+
+        long minutes = duration.toMinutes();
+        duration = duration.minusMinutes(minutes);
+
+        long seconds = duration.getSeconds();
+
+        return days + "d" + hours + "h" + minutes + "m" + seconds + "s";
+    }
 
 }
