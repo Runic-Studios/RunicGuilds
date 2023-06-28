@@ -1,6 +1,10 @@
 package com.runicrealms.runicguilds.command;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Some guild commands map to multiple functions (e.g. accept, confirm)
