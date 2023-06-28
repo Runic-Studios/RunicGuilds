@@ -24,7 +24,6 @@ dependencies {
     compileOnly(project(":Projects:Restart"))
     compileOnly(project(":Projects:Common"))
     compileOnly(project(":Projects:Database"))
-    compileOnly(commonLibs.tabbed)
     compileOnly(commonLibs.acf)
     compileOnly(commonLibs.taskchain)
     compileOnly(commonLibs.holographicdisplays)
