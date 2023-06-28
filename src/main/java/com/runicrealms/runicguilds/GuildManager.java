@@ -1,11 +1,6 @@
 package com.runicrealms.runicguilds;
 
-import com.keenant.tabbed.item.TextTabItem;
-import com.keenant.tabbed.tablist.TableTabList;
-import com.keenant.tabbed.util.Skins;
 import com.runicrealms.RunicChat;
-import com.runicrealms.plugin.RunicCore;
-import com.runicrealms.plugin.api.event.TabUpdateEvent;
 import com.runicrealms.runicguilds.api.GuildsAPI;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
@@ -15,14 +10,10 @@ import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.MemberData;
-import com.runicrealms.runicguilds.util.GuildUtil;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import java.util.UUID;
@@ -33,27 +24,6 @@ public class GuildManager implements GuildsAPI, Listener {
 
     public GuildManager() {
         Bukkit.getPluginManager().registerEvents(this, RunicGuilds.getInstance());
-    }
-
-    /**
-     * Updates the player's guild column in tab
-     *
-     * @param player       to update
-     * @param tableTabList from some tab update event
-     */
-    public static void updateGuildTab(Player player, TableTabList tableTabList) {
-        tableTabList.set(3, 0, new TextTabItem
-                (ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
-        GuildUtil.updateGuildTabColumn(player, tableTabList);
-    }
-
-    public static void updateGuildTab(Player player) {
-        updateGuildTab(player, RunicCore.getTabAPI().getPlayerTabList(player));
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onTabUpdate(TabUpdateEvent event) {
-        updateGuildTab(event.getPlayer(), event.getTableTabList());
     }
 
     @Override

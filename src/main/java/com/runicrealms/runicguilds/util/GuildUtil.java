@@ -1,15 +1,7 @@
 package com.runicrealms.runicguilds.util;
 
-import com.keenant.tabbed.item.TextTabItem;
-import com.keenant.tabbed.tablist.TableTabList;
-import com.keenant.tabbed.util.Skins;
-import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.common.util.ColorUtil;
-import com.runicrealms.plugin.common.util.Pair;
-import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.model.GuildInfo;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -25,10 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class GuildUtil {
     public static final String PREFIX = "&r&6&lGuilds »&r &e";
@@ -101,50 +90,4 @@ public class GuildUtil {
         }
         return null;
     }
-
-    /**
-     * Updates the guild section of the player tab list
-     *
-     * @param player       to update
-     * @param tableTabList the tab list (probably from a tab list update event)
-     */
-    public static void updateGuildTabColumn(Player player, TableTabList tableTabList) {
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-        // Reset guild column
-        for (int i = 0; i < 19; i++) {
-            tableTabList.remove(3, i);
-        }
-        tableTabList.set(3, 0, new TextTabItem
-                (ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "  Guild [0]", 0, Skins.getDot(ChatColor.GOLD)));
-        if (guildInfo == null) return;
-        // Load all the members and owner
-        getMembersAndPopulate(tableTabList, guildInfo);
-    }
-
-    private static void getMembersAndPopulate(TableTabList tableTabList, GuildInfo guildInfo) {
-        Set<UUID> members = guildInfo.getMembersUuids();
-        Set<Player> onlineMembers = members.stream()
-                .map(Bukkit::getPlayer)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        tableTabList.set(3, 0, new TextTabItem
-                (ChatColor.GOLD + String.valueOf(ChatColor.BOLD) + "  Guild [" + onlineMembers.size() + "]", 0, Skins.getDot(ChatColor.GOLD)));
-        // Reset guild column
-        for (int i = 1; i < 19; i++) {
-            tableTabList.remove(3, i);
-        }
-        int j = 0;
-        for (Pair<? extends Player, String> guildMember : RunicCore.getTabAPI().sortPlayersByRank(onlineMembers)) {
-            if (j > 19) break;
-            tableTabList.set(3, j + 1, new TextTabItem
-                    (
-                            guildMember.second,
-                            guildMember.first.getPing(),
-                            Skins.getPlayer(guildMember.first)
-                    ));
-            j++;
-        }
-    }
-
-
 }
