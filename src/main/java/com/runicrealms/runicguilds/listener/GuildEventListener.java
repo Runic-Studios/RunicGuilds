@@ -8,7 +8,6 @@ import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.model.CorePlayerData;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.rdb.event.CharacterLoadedEvent;
-import com.runicrealms.runicguilds.GuildManager;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
@@ -371,7 +370,6 @@ public class GuildEventListener implements Listener {
      */
     private void syncDisplays(Player player) {
         if (player != null) {
-            GuildManager.updateGuildTab(player);
             RunicCore.getScoreboardAPI().updatePlayerScoreboard(player);
         }
     }
