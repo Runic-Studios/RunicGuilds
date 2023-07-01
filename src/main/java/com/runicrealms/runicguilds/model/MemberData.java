@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.model;
 
-import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.plugin.common.api.guilds.GuildRank;
 
 import java.util.UUID;
 

@@ -6,12 +6,13 @@ import com.keenant.tabbed.util.Skins;
 import com.runicrealms.RunicChat;
 import com.runicrealms.plugin.RunicCore;
 import com.runicrealms.plugin.api.event.TabUpdateEvent;
-import com.runicrealms.runicguilds.api.GuildsAPI;
+import com.runicrealms.plugin.common.api.GuildsAPI;
+import com.runicrealms.plugin.common.api.guilds.GuildCreationResult;
+import com.runicrealms.plugin.common.api.guilds.GuildRank;
+import com.runicrealms.plugin.common.api.guilds.GuildStage;
+import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
-import com.runicrealms.runicguilds.guild.GuildCreationResult;
-import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.model.MemberData;
@@ -25,6 +26,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,20 +60,48 @@ public class GuildManager implements GuildsAPI, Listener {
     }
 
     @Override
-    public boolean addGuildScore(UUID guildUUID, MemberData memberData, Integer score) {
-        UUID uuid = memberData.getUuid();
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(guildUUID);
-        if (guildInfo == null) {
-            Bukkit.getLogger().info("A guild was not found to add guild score for " + uuid);
-            return false;
-        }
+    public boolean addGuildScore(UUID player, Integer score, boolean sendMessage) {
+        GuildInfo info = RunicGuilds.getDataAPI().getGuildInfo(player);
+        if (info == null) return false;
+        MemberData data = RunicGuilds.getDataAPI().loadMemberData(info.getUUID(), player);
+        if (data == null) return false;
+        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(info.getUUID());
+        if (guildInfo == null) return false;
         Bukkit.getPluginManager().callEvent(new GuildScoreChangeEvent
                 (
                         guildInfo.getUUID(),
-                        memberData,
+                        data,
                         score
                 ));
+        Player target = Bukkit.getPlayer(player);
+        if (sendMessage && target != null) {
+            info.getMembersUuids().forEach(memberUUID -> {
+                Player online = Bukkit.getPlayer(memberUUID);
+                if (online != null && !memberUUID.equals(player)) {
+                    online.sendMessage(ColorUtil.format(GuildUtil.PREFIX + target.getName() + " has earned your guild &6&l" + score + "&r&e guild points!"));
+                }
+            });
+        }
         return true;
+    }
+
+    @Override
+    public void addBulkGuildScore(Map<UUID, Integer> scores, boolean sendMessage) {
+        processPlayerQueue(scores, new LinkedList<>(scores.keySet()), sendMessage);
+    }
+
+    private void processPlayerQueue(Map<UUID, Integer> damageScores, LinkedList<UUID> playerQueue, boolean sendMessage) {
+        if (playerQueue.isEmpty()) {
+            return;
+        }
+        UUID player = playerQueue.pop();
+        Bukkit.getScheduler().runTask(RunicGuilds.getInstance(), () -> {
+            if (!RunicGuilds.getGuildsAPI().addGuildScore(player, damageScores.get(player), sendMessage)) {
+                processPlayerQueue(damageScores, playerQueue, sendMessage);
+                return;
+            }
+            Bukkit.getScheduler().runTaskAsynchronously(RunicGuilds.getInstance(), () -> processPlayerQueue(damageScores, playerQueue, sendMessage));
+        });
     }
 
     @Override

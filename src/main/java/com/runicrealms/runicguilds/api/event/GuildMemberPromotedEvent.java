@@ -1,6 +1,6 @@
 package com.runicrealms.runicguilds.api.event;
 
-import com.runicrealms.runicguilds.guild.GuildRank;
+import com.runicrealms.plugin.common.api.guilds.GuildRank;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 

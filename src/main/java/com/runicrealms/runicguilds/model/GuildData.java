@@ -1,10 +1,10 @@
 package com.runicrealms.runicguilds.model;
 
+import com.runicrealms.plugin.common.api.guilds.GuildRank;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.rdb.model.SessionDataMongo;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GuildDisbandEvent;
-import com.runicrealms.runicguilds.guild.GuildRank;
 import com.runicrealms.runicguilds.guild.banner.BannerUtil;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;

@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.guild.banner;
 
+import com.runicrealms.plugin.common.api.guilds.GuildStage;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
 import me.filoghost.holographicdisplays.api.hologram.Hologram;

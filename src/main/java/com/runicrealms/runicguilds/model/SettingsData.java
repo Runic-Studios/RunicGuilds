@@ -1,7 +1,7 @@
 package com.runicrealms.runicguilds.model;
 
+import com.runicrealms.plugin.common.api.guilds.GuildRank;
 import com.runicrealms.plugin.rdb.model.SessionDataRedis;
-import com.runicrealms.runicguilds.guild.GuildRank;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;

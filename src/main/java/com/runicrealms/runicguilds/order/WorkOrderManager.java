@@ -1,11 +1,11 @@
 package com.runicrealms.runicguilds.order;
 
 import com.runicrealms.plugin.api.NpcClickEvent;
+import com.runicrealms.plugin.common.api.guilds.GuildEXPSource;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.rdb.event.CharacterLoadedEvent;
 import com.runicrealms.runicguilds.RunicGuilds;
 import com.runicrealms.runicguilds.api.event.GiveGuildEXPEvent;
-import com.runicrealms.runicguilds.guild.stage.GuildEXPSource;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicguilds.order.config.OrderConfigLoader;
 import com.runicrealms.runicguilds.order.ui.WorkOrderUI;

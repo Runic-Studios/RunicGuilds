@@ -2,6 +2,8 @@ package com.runicrealms.runicguilds.listener;
 
 import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.RunicCore;
+import com.runicrealms.plugin.common.api.guilds.GuildRank;
+import com.runicrealms.plugin.common.api.guilds.GuildStage;
 import com.runicrealms.plugin.common.util.ColorUtil;
 import com.runicrealms.plugin.model.CorePlayerData;
 import com.runicrealms.plugin.rdb.RunicDatabase;
@@ -19,8 +21,6 @@ import com.runicrealms.runicguilds.api.event.GuildMemberPromotedEvent;
 import com.runicrealms.runicguilds.api.event.GuildOwnershipTransferEvent;
 import com.runicrealms.runicguilds.api.event.GuildScoreChangeEvent;
 import com.runicrealms.runicguilds.command.GuildCommandMapManager;
-import com.runicrealms.runicguilds.guild.GuildRank;
-import com.runicrealms.runicguilds.guild.stage.GuildStage;
 import com.runicrealms.runicguilds.model.GuildData;
 import com.runicrealms.runicguilds.model.GuildDataField;
 import com.runicrealms.runicguilds.model.GuildInfo;

@@ -1,8 +1,8 @@
 package com.runicrealms.runicguilds.listener;
 
+import com.runicrealms.plugin.common.api.guilds.GuildStage;
+import com.runicrealms.plugin.common.api.guilds.StageReward;
 import com.runicrealms.runicguilds.RunicGuilds;
-import com.runicrealms.runicguilds.guild.stage.GuildStage;
-import com.runicrealms.runicguilds.guild.stage.StageReward;
 import com.runicrealms.runicguilds.model.GuildInfo;
 import com.runicrealms.runicmounts.api.event.MountedEvent;
 import org.bukkit.attribute.Attribute;
