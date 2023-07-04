@@ -76,6 +76,7 @@ public class WorkOrderManager implements Listener {
 
     @EventHandler
     public void onNPCInteract(NpcClickEvent event) {
+        if(event.isCancelled()) return;
         if (!GUILD_FOREMAN_IDS.contains(event.getNpc().getId())) return;
         if (currentWorkOrder == null) {
             Bukkit.getLogger().warning("A player tried to access the guild foreman, but the current order is null.");

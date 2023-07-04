@@ -21,6 +21,7 @@ public class NpcClickListener implements Listener {
 
     @EventHandler
     public void onRightClick(NpcClickEvent event) {
+        if(event.isCancelled()) return;
         if (!cooldowns.containsKey(event.getPlayer().getUniqueId())) {
             runClickEvent(event);
             cooldowns.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
@@ -36,6 +37,8 @@ public class NpcClickListener implements Listener {
      * Finally, if their rank permits it, allows the player
      */
     private void runClickEvent(NpcClickEvent event) {
+        if(event.isCancelled()) return;
+
 //        UUID uuid = event.getPlayer().getUniqueId();
 //        for (Integer bankerId : RunicGuilds.GUILD_BANKERS) {
 //            // Ensure we are talking to a guild banker
