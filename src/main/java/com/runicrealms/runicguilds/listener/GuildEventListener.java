@@ -331,15 +331,30 @@ public class GuildEventListener implements Listener {
                     }
                     return guildName;
                 })
-                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data!")
+                .abortIfNull(TaskChainUtil.CONSOLE_LOG, null, "RunicGuilds failed to load guild data! (or player was not in guild...)")
                 .syncLast(guildName -> {
-                            // Update their 'guild' quick lookup tag in core
-                            CorePlayerData corePlayerData = (CorePlayerData) event.getCharacterSelectEvent().getSessionDataMongo();
-                            corePlayerData.setGuild(guildName);
-                            // Sync scoreboard, tab
-                            syncDisplays(event.getPlayer());
+                    // Update their 'guild' quick lookup tag in core
+                    CorePlayerData corePlayerData = (CorePlayerData) event.getCharacterSelectEvent().getSessionDataMongo();
+                    corePlayerData.setGuild(guildName);
+                    // Sync scoreboard, tab
+                    syncDisplays(event.getPlayer());
+
+                    GuildInfo guild = RunicGuilds.getDataAPI().getGuildInfo(event.getPlayer());
+
+                    if (guild == null) {
+                        throw new IllegalStateException("Player is in guild but guild data was not found in cache!");
+                    }
+
+                    for (UUID uuid : guild.getMembersUuids()) {
+                        Player player = Bukkit.getPlayer(uuid);
+
+                        if (player == null || !player.isOnline()) {
+                            continue;
                         }
-                )
+
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + player.getName() + " has entered the realm!"));
+                    }
+                })
                 .execute();
     }
 
