@@ -1,7 +1,7 @@
 name: RunicGuilds
 description: Runic Realms Guilds RunicGuilds, by Excel
 version: 1.0
-main: com.runicrealms.runicguilds.RunicGuilds
+main: com.runicrealms.plugin.runicguilds.RunicGuilds
 api-version: 1.13
 softdepend: [ PlaceholderAPI ]
 depend:
