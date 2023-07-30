@@ -39,9 +39,12 @@ public class OrderConfigLoader {
         return new WorkOrder(orderId, displayName, icon, items, exp);
     }
 
-    public WorkOrder chooseRandomOrder() {
+    public WorkOrder chooseRandomOrder(WorkOrder currentOrder) {
         // Load all orders
         Set<String> orderNames = config.getConfigurationSection("orders").getKeys(false);
+
+        // Remove current work order from the pool
+        if(currentOrder != null) orderNames.remove(currentOrder.getOrderId());
 
         // Choose a random order
         Random random = new Random();
