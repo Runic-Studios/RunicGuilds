@@ -187,7 +187,7 @@ public class GuildManager implements GuildsAPI, Listener {
                         UUID.randomUUID(),
                         name,
                         prefix,
-                        new MemberData(owner.getUniqueId(), owner.getName(), GuildRank.OWNER, 0)
+                        new MemberData(owner.getUniqueId(), owner.getName(), owner.getPlayerProfile().getTextures().getSkin(), GuildRank.OWNER, 0)
                 );
         guildData.addDocumentToMongo();
         // Cache latency-sensitive fields in-memory

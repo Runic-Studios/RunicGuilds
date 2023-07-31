@@ -13,17 +13,17 @@ import com.runicrealms.plugin.runicguilds.api.event.GiveGuildEXPEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildCreationEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildDisbandEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildInvitationAcceptedEvent;
+import com.runicrealms.plugin.runicguilds.api.event.GuildMemberDemotedEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildMemberKickedEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildMemberLeaveEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildMemberPromotedEvent;
+import com.runicrealms.plugin.runicguilds.api.event.GuildOwnershipTransferEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildScoreChangeEvent;
+import com.runicrealms.plugin.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.plugin.runicguilds.model.GuildData;
 import com.runicrealms.plugin.runicguilds.model.GuildDataField;
 import com.runicrealms.plugin.runicguilds.model.GuildInfo;
 import com.runicrealms.plugin.runicguilds.model.MemberData;
-import com.runicrealms.plugin.runicguilds.api.event.GuildMemberDemotedEvent;
-import com.runicrealms.plugin.runicguilds.api.event.GuildOwnershipTransferEvent;
-import com.runicrealms.plugin.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.plugin.runicguilds.util.GuildBankUtil;
 import com.runicrealms.plugin.runicguilds.util.GuildUtil;
 import com.runicrealms.plugin.runicguilds.util.TaskChainUtil;
@@ -317,6 +317,7 @@ public class GuildEventListener implements Listener {
                             GuildData guildData = RunicGuilds.getDataAPI().loadGuildData(guildInfo.getUUID());
                             MemberData memberData = guildData.getMemberDataMap().get(playerUuid);
                             memberData.setLastKnownName(event.getPlayer().getName());
+                            memberData.setLastKnownSkin(event.getPlayer().getPlayerProfile().getTextures().getSkin());
                             guildData.getMemberDataMap().put(playerUuid, memberData);
                             // Update last known name in mongo on a different TaskChain
                             RunicGuilds.getGuildWriteOperation().updateGuildData

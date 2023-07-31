@@ -75,7 +75,8 @@ public class GuildMembersUI implements InventoryHolder {
                                         guildMember.getUuid(),
                                         ChatColor.GOLD + guildMember.getLastKnownName(), // Last known name
                                         ChatColor.YELLOW + "Rank: " + guildMember.getRank() +
-                                                "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]"
+                                                "\n" + ChatColor.YELLOW + "Score: [" + guildMember.getScore() + "]",
+                                        guildMember.getLastKnownSkin()
                                 ));
                     }
                     player.openInventory(this.inventory);

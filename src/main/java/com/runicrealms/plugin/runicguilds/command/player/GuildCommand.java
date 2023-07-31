@@ -24,11 +24,11 @@ import com.runicrealms.plugin.runicguilds.api.event.GuildMemberKickedEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildMemberLeaveEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildMemberPromotedEvent;
 import com.runicrealms.plugin.runicguilds.api.event.GuildOwnershipTransferEvent;
+import com.runicrealms.plugin.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.plugin.runicguilds.guild.banner.GuildBannerUI;
 import com.runicrealms.plugin.runicguilds.model.GuildData;
 import com.runicrealms.plugin.runicguilds.model.GuildInfo;
 import com.runicrealms.plugin.runicguilds.model.MemberData;
-import com.runicrealms.plugin.runicguilds.command.GuildCommandMapManager;
 import com.runicrealms.plugin.runicguilds.ui.GuildInfoUI;
 import com.runicrealms.plugin.runicguilds.util.GuildBankUtil;
 import com.runicrealms.plugin.runicguilds.util.GuildUtil;
@@ -128,7 +128,7 @@ public class GuildCommand extends BaseCommand {
                         player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "You have reached your guild's maximum size."));
                     }
                     // Let's add a guild member!
-                    guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), player.getName(), GuildRank.RECRUIT, 0));
+                    guildData.getMemberDataMap().put(player.getUniqueId(), new MemberData(player.getUniqueId(), player.getName(), player.getPlayerProfile().getTextures().getSkin(), GuildRank.RECRUIT, 0));
                     // Save to MongoDB with TaskChain
                     RunicGuilds.getGuildWriteOperation().updateGuildData
                             (

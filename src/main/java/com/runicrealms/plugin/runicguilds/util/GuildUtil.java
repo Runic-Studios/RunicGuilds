@@ -9,13 +9,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -28,7 +32,7 @@ public class GuildUtil {
      * @param description of this itemStack
      * @return an ItemStack to display in the ui menu
      */
-    public static ItemStack guildMemberItem(UUID uuid, String name, String description) {
+    public static ItemStack guildMemberItem(@NotNull UUID uuid, @NotNull String name, @NotNull String description, @Nullable URL skin) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = item.getItemMeta();
         assert meta != null;
@@ -37,6 +41,10 @@ public class GuildUtil {
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
             skullMeta.setOwningPlayer(player);
+        } else if (skin != null) {
+            PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+            profile.getTextures().setSkin(skin);
+            skullMeta.setOwnerProfile(profile);
         }
 
         ArrayList<String> lore = new ArrayList<>();
@@ -52,6 +60,16 @@ public class GuildUtil {
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         item.setItemMeta(meta);
         return item;
+    }
+
+    /**
+     * @param uuid        of player the item represents
+     * @param name        of the player
+     * @param description of this itemStack
+     * @return an ItemStack to display in the ui menu
+     */
+    public static ItemStack guildMemberItem(@NotNull UUID uuid, @NotNull String name, @NotNull String description) {
+        return guildMemberItem(uuid, name, description, null);
     }
 
     /**
