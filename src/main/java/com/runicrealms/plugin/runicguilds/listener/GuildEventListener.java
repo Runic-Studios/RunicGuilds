@@ -353,7 +353,7 @@ public class GuildEventListener implements Listener {
                             continue;
                         }
 
-                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + player.getName() + " has entered the realm!"));
+                        player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + event.getPlayer().getName() + " has entered the realm!"));
                     }
                 })
                 .execute();
