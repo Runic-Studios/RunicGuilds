@@ -1,16 +1,11 @@
 package com.runicrealms.plugin.runicguilds.ui;
 
-import com.runicrealms.plugin.common.util.GUIUtil;
-import com.runicrealms.plugin.runicguilds.RunicGuilds;
-import com.runicrealms.plugin.runicguilds.model.GuildInfo;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
 
 public class GuildMembersUIListener implements Listener {
 
@@ -35,16 +30,14 @@ public class GuildMembersUIListener implements Listener {
         Player player = (Player) event.getWhoClicked();
         if (event.getCurrentItem() == null) return;
         if (guildMembersUI.getInventory().getItem(event.getRawSlot()) == null) return;
-        ItemStack item = event.getCurrentItem();
-        Material material = item.getType();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
         event.setCancelled(true);
-        if (!RunicGuilds.getGuildsAPI().isInGuild(player)) return;
-        GuildInfo guildInfo = RunicGuilds.getDataAPI().getGuildInfo(player);
-        if (material == GUIUtil.CLOSE_BUTTON.getType())
-            player.closeInventory();
-        else if (material == GUIUtil.BACK_BUTTON.getType())
-            event.getWhoClicked().openInventory(new GuildInfoUI(player, guildInfo).getInventory());
+
+        if (event.getSlot() == 0) {
+            guildMembersUI.setPage(guildMembersUI.getPage() - 1);
+        } else if (event.getSlot() == 8) {
+            guildMembersUI.setPage(guildMembersUI.getPage() + 1);
+        }
     }
 
 }
