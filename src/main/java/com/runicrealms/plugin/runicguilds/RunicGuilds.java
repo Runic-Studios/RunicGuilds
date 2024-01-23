@@ -32,7 +32,7 @@ import com.runicrealms.plugin.runicguilds.ui.GuildMembersUIListener;
 import com.runicrealms.plugin.runicguilds.util.GuildBankUtil;
 import com.runicrealms.plugin.runicguilds.util.PlaceholderAPI;
 import com.runicrealms.plugin.runicitems.RunicItemsAPI;
-import com.runicrealms.plugin.runicrestart.event.ServerShutdownEvent;
+import com.runicrealms.plugin.runicrestart.event.PreShutdownEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
@@ -176,7 +176,7 @@ public class RunicGuilds extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onShutdown(ServerShutdownEvent event) {
+    public void onShutdown(PreShutdownEvent event) {
         instance = null;
         dataAPI = null;
         guildsAPI = null;

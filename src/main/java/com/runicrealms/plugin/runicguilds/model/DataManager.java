@@ -3,7 +3,6 @@ package com.runicrealms.plugin.runicguilds.model;
 import co.aikar.taskchain.TaskChain;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.rdb.api.WriteCallback;
-import com.runicrealms.plugin.rdb.event.MongoSaveEvent;
 import com.runicrealms.plugin.runicguilds.RunicGuilds;
 import com.runicrealms.plugin.taskchain.TaskChainUtil;
 import com.runicrealms.plugin.runicguilds.api.DataAPI;
