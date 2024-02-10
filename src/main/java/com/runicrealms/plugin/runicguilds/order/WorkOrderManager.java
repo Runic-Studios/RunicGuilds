@@ -1,7 +1,8 @@
 package com.runicrealms.plugin.runicguilds.order;
 
-import com.runicrealms.plugin.npcs.api.NpcClickEvent;
 import com.runicrealms.plugin.common.api.guilds.GuildEXPSource;
+import com.runicrealms.plugin.common.util.ColorUtil;
+import com.runicrealms.plugin.npcs.api.NpcClickEvent;
 import com.runicrealms.plugin.rdb.RunicDatabase;
 import com.runicrealms.plugin.rdb.event.CharacterLoadedEvent;
 import com.runicrealms.plugin.runicguilds.RunicGuilds;
@@ -76,7 +77,7 @@ public class WorkOrderManager implements Listener {
 
     @EventHandler
     public void onNPCInteract(NpcClickEvent event) {
-        if(event.isCancelled()) return;
+        if (event.isCancelled()) return;
         if (!GUILD_FOREMAN_IDS.contains(event.getNpc().getId())) return;
         if (currentWorkOrder == null) {
             Bukkit.getLogger().warning("A player tried to access the guild foreman, but the current order is null.");
@@ -196,7 +197,7 @@ public class WorkOrderManager implements Listener {
                     try {
                         WorkOrder order = loader.loadOrder(currentWorkOrderName);
                         return order;
-                    } catch(IllegalArgumentException ex) {
+                    } catch (IllegalArgumentException ex) {
                         Bukkit.getLogger().info("Current Work Order does not exist or not found... resetting work order");
                     }
                 }
@@ -257,7 +258,7 @@ public class WorkOrderManager implements Listener {
                             guildInfo.getMembersUuids().forEach(uuid -> {
                                 Player player = Bukkit.getPlayer(uuid);
                                 if (player != null && player.isOnline()) {
-                                    player.sendMessage(GuildUtil.PREFIX + "Guild orders have reset!");
+                                    player.sendMessage(ColorUtil.format(GuildUtil.PREFIX + "Guild orders have reset!"));
                                 }
                             });
                         }
